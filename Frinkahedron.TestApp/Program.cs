@@ -71,7 +71,8 @@ void main()
         GraphicsDeviceOptions options = new GraphicsDeviceOptions
         {
             PreferStandardClipSpaceYDirection = true,
-            PreferDepthRangeZeroToOne = true
+            PreferDepthRangeZeroToOne = true,
+            SwapchainDepthFormat = PixelFormat.D32_Float_S8_UInt,
         };
         _graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, options);
         _camera = new Camera(new Vector3(0, 0, -2), new Vector3(0, 0, 1));
@@ -105,6 +106,7 @@ void main()
         _commandList.Begin();
         _commandList.SetFramebuffer(_graphicsDevice.SwapchainFramebuffer);
         _commandList.ClearColorTarget(0, RgbaFloat.Black);
+        _commandList.ClearDepthStencil(1f);
 
         _commandList.SetPipeline(_pipeline);
 
