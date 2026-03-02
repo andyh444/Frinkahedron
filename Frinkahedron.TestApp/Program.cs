@@ -1,4 +1,6 @@
 ﻿using Frinkahedron;
+using Frinkahedron.Core;
+using Frinkahedron.TestApp;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -11,8 +13,8 @@ internal class Program
 {
     private static GraphicsDevice? _graphicsDevice;
     private static CommandList _commandList;
-    private static DeviceBuffer _vertexBuffer;
-    private static DeviceBuffer _indexBuffer;
+    private static MeshInfo _meshInfo;
+    private static Matrix4x4 _meshTransform;
     private static Shader[] _shaders;
     private static Pipeline _pipeline;
 
@@ -23,7 +25,7 @@ internal class Program
     private const string VertexCode = @"
 #version 450
 
-layout(location = 0) in vec4 Position;
+layout(location = 0) in vec3 Position;
 layout(location = 1) in vec4 Color;
 
 layout(location = 0) out vec4 fsin_Color;
@@ -37,7 +39,7 @@ layout(set = 0, binding = 0) uniform Matrices
 
 void main()
 {
-    gl_Position = projection * view * model * Position;
+    gl_Position = projection * view * model * vec4(Position, 1);
     fsin_Color = Color;
 }";
 
@@ -72,13 +74,21 @@ void main()
             PreferDepthRangeZeroToOne = true
         };
         _graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, options);
-        _camera = new Camera(new Vector3(0, 0, -1), new Vector3(0, 0, 1));
+        _camera = new Camera(new Vector3(0, 0, -2), new Vector3(0, 0, 1));
         CreateResources();
 
+        float zAngle = 0;
+        float yAngle = 0;
+        float xAngle = 0;
         while (window.Exists)
         {
             _ = window.PumpEvents();
             Draw();
+
+            zAngle += 0.0002f;
+            yAngle += 0.0001f;
+            xAngle += 0.0003f;
+            _meshTransform = Matrix4x4.CreateRotationX(xAngle) * Matrix4x4.CreateRotationY(yAngle)  * Matrix4x4.CreateRotationZ(zAngle);
         }
     }
 
@@ -86,29 +96,21 @@ void main()
     {
         MatrixUniforms uniforms = new MatrixUniforms
         {
-            Model = Matrix4x4.Identity,
+            Model = _meshTransform,
             View = _camera.ViewMatrix,
             Projection = _camera.ProjectionMatrix
         };
         _graphicsDevice.UpdateBuffer(_uniformBuffer, 0, ref uniforms);
 
-
         _commandList.Begin();
         _commandList.SetFramebuffer(_graphicsDevice.SwapchainFramebuffer);
-        _commandList.ClearColorTarget(0, RgbaFloat.Red);
+        _commandList.ClearColorTarget(0, RgbaFloat.Black);
 
-        _commandList.SetVertexBuffer(0, _vertexBuffer);
-        _commandList.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
         _commandList.SetPipeline(_pipeline);
 
         _commandList.SetGraphicsResourceSet(0, _resourceSet);
 
-        _commandList.DrawIndexed(
-            indexCount: 4,
-            instanceCount: 1,
-            indexStart: 0,
-            vertexOffset: 0,
-            instanceStart: 0);
+        _meshInfo.Draw(_commandList);
 
         _commandList.End();
 
@@ -120,25 +122,9 @@ void main()
     {
         ResourceFactory factory = _graphicsDevice.ResourceFactory;
 
-        VertexPositionColor[] quadVertices =
-        {
-            new VertexPositionColor(new Vector4(-0.75f, 0.75f, 0, 1), RgbaFloat.Red),
-            new VertexPositionColor(new Vector4(0.75f, 0.75f, 0, 1), RgbaFloat.Green),
-            new VertexPositionColor(new Vector4(-0.75f, -0.75f, 0, 1), RgbaFloat.Blue),
-            new VertexPositionColor(new Vector4(0.75f, -0.75f, 0, 1), RgbaFloat.Yellow)
-        };
-
-        ushort[] quadIndices = { 0, 1, 2, 3 };
-
-        _vertexBuffer = factory.CreateBuffer(new BufferDescription(4 * VertexPositionColor.SizeInBytes, BufferUsage.VertexBuffer));
-        _indexBuffer = factory.CreateBuffer(new BufferDescription(4 * sizeof(ushort), BufferUsage.IndexBuffer));
-
-        _graphicsDevice.UpdateBuffer(_vertexBuffer, 0, quadVertices);
-        _graphicsDevice.UpdateBuffer(_indexBuffer, 0, quadIndices);
-
-        VertexLayoutDescription vertexLayout = new VertexLayoutDescription(
-            new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4),
-            new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4));
+        Mesh mesh = CreateCubeMesh();
+        _meshInfo = MeshInfo.Create(mesh, _graphicsDevice);
+        _meshTransform = Matrix4x4.Identity;
 
         ShaderDescription vertexShaderDesc = new ShaderDescription(
             ShaderStages.Vertex,
@@ -154,10 +140,10 @@ void main()
         GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
         pipelineDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
 
-        pipelineDescription.DepthStencilState = DepthStencilStateDescription.Disabled; /*new DepthStencilStateDescription(
+        pipelineDescription.DepthStencilState = new DepthStencilStateDescription(
             depthTestEnabled: true,
             depthWriteEnabled: true,
-            comparisonKind: ComparisonKind.LessEqual);*/
+            comparisonKind: ComparisonKind.LessEqual);
 
         pipelineDescription.RasterizerState = new RasterizerStateDescription(
             cullMode: FaceCullMode.None,
@@ -166,11 +152,11 @@ void main()
             depthClipEnabled: true,
             scissorTestEnabled: false);
 
-        pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
+        pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
         //pipelineDescription.ResourceLayouts = System.Array.Empty<ResourceLayout>();
 
         pipelineDescription.ShaderSet = new ShaderSetDescription(
-            vertexLayouts: new VertexLayoutDescription[] { vertexLayout },
+            vertexLayouts: new VertexLayoutDescription[] { MeshInfo.GetVertexLayoutDescription() },
             shaders: _shaders);
 
         pipelineDescription.Outputs = _graphicsDevice.SwapchainFramebuffer.OutputDescription;
@@ -189,25 +175,89 @@ void main()
 
         pipelineDescription.ResourceLayouts = new[] { _resourceLayout };
 
-
         _pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
-        
         _commandList = factory.CreateCommandList();
+    }
+
+    private static void DisposeResources()
+    {
+        _pipeline.Dispose();
+        foreach (var shader in _shaders)
+        {
+            shader.Dispose();
+        }
+        _commandList.Dispose();
+        _meshInfo.Dispose();
+        _graphicsDevice.Dispose();
+
+        _uniformBuffer.Dispose();
+        _resourceLayout.Dispose();
+        _resourceSet.Dispose();
+    }
+
+    private static Mesh CreateQuadMesh()
+    {
+        VertexPositionColor[] quadVertices =
+        {
+            new VertexPositionColor(new Vector3(-0.75f, 0.75f, 0), RgbaFloat.Red.ToVector4()),
+            new VertexPositionColor(new Vector3(0.75f, 0.75f, 0), RgbaFloat.Green.ToVector4()),
+            new VertexPositionColor(new Vector3(-0.75f, -0.75f, 0), RgbaFloat.Blue.ToVector4()),
+            new VertexPositionColor(new Vector3(0.75f, -0.75f, 0), RgbaFloat.Yellow.ToVector4())
+        };
+
+        ushort[] quadIndices = { 0, 1, 2, 3 };
+
+        return new Mesh(quadVertices, quadIndices);
+    }
+
+    private static Mesh CreateCubeMesh()
+    {
+        VertexPositionColor[] vertices =
+        {
+               new VertexPositionColor(new Vector3(-0.5f, 0.5f, 0.5f), RgbaFloat.Red.ToVector4()),
+               new VertexPositionColor(new Vector3(0.5f, 0.5f, 0.5f), RgbaFloat.Green.ToVector4()),
+               new VertexPositionColor(new Vector3(-0.5f, -0.5f, 0.5f), RgbaFloat.Blue.ToVector4()),
+               new VertexPositionColor(new Vector3(0.5f, -0.5f, 0.5f), RgbaFloat.Yellow.ToVector4()),
+
+               new VertexPositionColor(new Vector3(-0.5f, 0.5f, -0.5f), RgbaFloat.Green.ToVector4()),
+               new VertexPositionColor(new Vector3(0.5f, 0.5f, -0.5f), RgbaFloat.Blue.ToVector4()),
+               new VertexPositionColor(new Vector3(-0.5f, -0.5f, -0.5f), RgbaFloat.Yellow.ToVector4()),
+               new VertexPositionColor(new Vector3(0.5f, -0.5f, -0.5f), RgbaFloat.Red.ToVector4())
+           };
+
+        ushort[] indices =
+        {  
+               // Front face  
+               0, 1, 2,
+               2, 1, 3,  
+
+               // Back face  
+               4, 6, 5,
+               5, 6, 7,  
+
+               // Left face  
+               4, 0, 6,
+               6, 0, 2,  
+
+               // Right face  
+               1, 5, 3,
+               3, 5, 7,  
+
+               // Top face  
+               4, 5, 0,
+               0, 5, 1,  
+
+               // Bottom face  
+               2, 3, 6,
+               6, 3, 7
+           };
+
+        return new Mesh(vertices, indices);
     }
 }
 
-struct VertexPositionColor
-{
-    public Vector4 Position;
-    public RgbaFloat Color;
-    public VertexPositionColor(Vector4 position, RgbaFloat color)
-    {
-        Position = position;
-        Color = color;
-    }
-    public const uint SizeInBytes = 32;
-}
+
 
 struct MatrixUniforms
 {
