@@ -19,11 +19,11 @@ namespace Frinkahedron.Core
             Objects = objects;
         }
 
-        public void Update(float deltaTime)
+        public void Update(GameState gameState)
         {
             foreach (var obj in Objects)
             {
-                obj.Update(deltaTime);
+                obj.Update(gameState);
             }
         }
 

@@ -34,7 +34,8 @@ namespace Frinkahedron.TestApp
                 View = camera.ViewMatrix,
                 Projection = camera.ProjectionMatrix
             };
-            graphicsDevice.UpdateBuffer(matricesBuffer, 0, ref uniforms);
+            //graphicsDevice.UpdateBuffer(matricesBuffer, 0, ref uniforms);
+            commandList.UpdateBuffer(matricesBuffer, 0, ref uniforms);
             cubeInfo.Draw(commandList);
         }
     }

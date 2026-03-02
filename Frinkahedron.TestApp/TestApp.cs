@@ -11,6 +11,7 @@ using Frinkahedron.Core;
 using System.Runtime.CompilerServices;
 using Veldrid.SPIRV;
 using Vulkan.Xlib;
+using System.Diagnostics;
 
 namespace Frinkahedron.TestApp
 {
@@ -81,7 +82,7 @@ void main()
                 SwapchainDepthFormat = PixelFormat.D32_Float_S8_UInt,
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
-            _scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), [new GameObject()]);
+            _scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), [new GameObject(new Vector3(-1, 0, 0), new KeyboardCameraMoveBehaviour()), new GameObject(new Vector3(1, 0, 0))]);
             CreateResources();
         }
 
@@ -93,12 +94,30 @@ void main()
             float xAngle = 0;
             try
             {
+                var gameState = new GameState(0.01f, _scene);
+                Stopwatch sw = Stopwatch.StartNew();
                 while (_window.Exists)
                 {
-                    _ = _window.PumpEvents();
-                    _scene.Update(0.01f);
+                    var inputSnapshot = _window.PumpEvents();
+                    //gameState.KeysDown.Clear();
+                    foreach (var keyEvent in inputSnapshot.KeyEvents)
+                    {
+                        if (keyEvent.Down)
+                        {
+                            gameState.KeysDown.Add(keyEvent.Key.ToCoreKey());
+                        }
+                        else
+                        {
+                            gameState.KeysDown.Remove(keyEvent.Key.ToCoreKey());
+                        }
+                    }
+                    _scene.Update(gameState);
 
                     Draw();
+
+                    sw.Stop();
+                    gameState.DeltaTime = (float)sw.Elapsed.TotalSeconds;
+                    sw.Restart();
                 }
             }
             finally

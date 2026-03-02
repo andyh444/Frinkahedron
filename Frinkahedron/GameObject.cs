@@ -2,18 +2,31 @@
 
 namespace Frinkahedron.Core
 {
-    public sealed class GameObject
+    public sealed class GameObject(Vector3 position, Behaviour? behaviour = null)
     {
-        public Matrix4x4 Transform { get; private set; } = Matrix4x4.Identity;
+        public Vector3 Position { get; private set; } = position;
 
-        public void Update(float deltaTime)
+        public float RotateX { get; private set; }
+
+        public float RotateY { get; private set; }
+
+        public float RotateZ { get; private set; }
+
+        public Behaviour? Behaviour { get; } = behaviour;
+
+        public void Update(GameState gameState)
         {
-            Transform = Matrix4x4.CreateRotationX(0.01f * deltaTime) * Matrix4x4.CreateRotationY(0.04f * deltaTime) * Matrix4x4.CreateRotationZ(0.03f * deltaTime) * Transform;
+            RotateX += 0.1f * gameState.DeltaTime;
+            RotateY += 0.4f * gameState.DeltaTime;
+            RotateZ += 0.2f * gameState.DeltaTime;
+
+            Behaviour?.Update(gameState);
         }
 
         public void Draw(IRenderer renderer)
         {
-            renderer.DrawCuboid(Transform);
+            Matrix4x4 transform = Matrix4x4.CreateFromYawPitchRoll(RotateY, RotateX, RotateZ) * Matrix4x4.CreateTranslation(Position);
+            renderer.DrawCuboid(transform);
         }
     }
 }

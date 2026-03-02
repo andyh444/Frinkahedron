@@ -17,13 +17,35 @@ namespace Frinkahedron
             Position = initialPosition;
             LookDirection = initialDirection;
 
-            ProjectionMatrix = CreatePerspective(MathF.PI / 2, 1.777777f, 0.1f, 1000f);
+            ProjectionMatrix = CreatePerspective(MathF.PI / 4, 1.777777f, 0.1f, 1000f);
             ViewMatrix = CreateViewMatrix();
         }
 
         public void Translate(Vector3 translation)
         {
             Position += translation;
+            ViewMatrix = CreateViewMatrix();
+        }
+
+        public Vector3 GetRight()
+        {
+            return Vector3.Cross(LookDirection, Vector3.UnitY);
+        }
+
+        public void RotateYaw(float angle)
+        {
+            var rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle);
+            LookDirection = Vector3.Transform(LookDirection, rotation);
+            LookDirection = Vector3.Normalize(LookDirection);
+            ViewMatrix = CreateViewMatrix();
+        }
+
+        public void RotatePitch(float angle)
+        {
+            var right = Vector3.Normalize(Vector3.Cross(LookDirection, Vector3.UnitY));
+            var rotation = Quaternion.CreateFromAxisAngle(right, angle);
+            LookDirection = Vector3.Transform(LookDirection, rotation);
+            LookDirection = Vector3.Normalize(LookDirection);
             ViewMatrix = CreateViewMatrix();
         }
 
