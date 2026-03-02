@@ -28,7 +28,7 @@ namespace Frinkahedron.TestApp
         private ResourceLayout _resourceLayout;
         private ResourceSet _resourceSet;
 
-        private Camera _camera;
+        private Scene _scene;
 
         private const string VertexCode = @"
 #version 450
@@ -81,7 +81,7 @@ void main()
                 SwapchainDepthFormat = PixelFormat.D32_Float_S8_UInt,
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
-            _camera = new Camera(new Vector3(0, 0, -2), new Vector3(0, 0, 1));
+            _scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), [new GameObject()]);
             CreateResources();
         }
 
@@ -96,12 +96,9 @@ void main()
                 while (_window.Exists)
                 {
                     _ = _window.PumpEvents();
-                    Draw();
+                    _scene.Update(0.01f);
 
-                    zAngle += 0.0002f;
-                    yAngle += 0.0001f;
-                    xAngle += 0.0003f;
-                    _meshTransform = Matrix4x4.CreateRotationX(xAngle) * Matrix4x4.CreateRotationY(yAngle) * Matrix4x4.CreateRotationZ(zAngle);
+                    Draw();
                 }
             }
             finally
@@ -190,13 +187,13 @@ void main()
 
         private void Draw()
         {
-            MatrixUniforms uniforms = new MatrixUniforms
+            /*MatrixUniforms uniforms = new MatrixUniforms
             {
                 Model = _meshTransform,
                 View = _camera.ViewMatrix,
                 Projection = _camera.ProjectionMatrix
             };
-            _graphicsDevice.UpdateBuffer(_uniformBuffer, 0, ref uniforms);
+            _graphicsDevice.UpdateBuffer(_uniformBuffer, 0, ref uniforms);*/
 
             _commandList.Begin();
             _commandList.SetFramebuffer(_graphicsDevice.SwapchainFramebuffer);
@@ -207,7 +204,8 @@ void main()
 
             _commandList.SetGraphicsResourceSet(0, _resourceSet);
 
-            _meshInfo.Draw(_commandList);
+            VeldridRenderer renderer = new VeldridRenderer(_commandList, _meshInfo, _scene.Camera, _graphicsDevice, _uniformBuffer);
+            _scene.Draw(renderer);
 
             _commandList.End();
 
