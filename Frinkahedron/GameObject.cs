@@ -4,23 +4,19 @@ namespace Frinkahedron.Core
 {
     public sealed class GameObject(Vector3 position, Behaviour? behaviour = null)
     {
-        public Vector3 Position { get; private set; } = position;
+        public Vector3 Position { get; set; } = position;
 
-        public float RotateX { get; private set; }
+        public float RotateX { get; set; }
 
-        public float RotateY { get; private set; }
+        public float RotateY { get; set; }
 
-        public float RotateZ { get; private set; }
+        public float RotateZ { get; set; }
 
         public Behaviour? Behaviour { get; } = behaviour;
 
         public void Update(GameState gameState)
         {
-            RotateX += 0.1f * gameState.DeltaTime;
-            RotateY += 0.4f * gameState.DeltaTime;
-            RotateZ += 0.2f * gameState.DeltaTime;
-
-            Behaviour?.Update(gameState);
+            Behaviour?.Update(this, gameState);
         }
 
         public void Draw(IRenderer renderer)

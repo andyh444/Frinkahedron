@@ -4,14 +4,36 @@ namespace Frinkahedron.Core
 {
     public abstract class Behaviour
     {
-        public virtual void Update(GameState gameState)
+        public virtual void Update(GameObject self, GameState gameState)
         {
+        }
+    }
+
+    public class CompositeBehaviour(IReadOnlyList<Behaviour> behaviours) : Behaviour
+    {
+        public override void Update(GameObject self, GameState gameState)
+        {
+            base.Update(self, gameState);
+            foreach (var behaviour in behaviours)
+            {
+                behaviour.Update(self, gameState);
+            }
+        }
+    }
+
+    public class ContinuousRotationBehaviour(float xRot, float yRot, float zRot) : Behaviour
+    {
+        public override void Update(GameObject self, GameState gameState)
+        {
+            self.RotateX += xRot * gameState.DeltaTime;
+            self.RotateY += yRot * gameState.DeltaTime;
+            self.RotateZ += zRot * gameState.DeltaTime;
         }
     }
 
     public class KeyboardCameraMoveBehaviour : Behaviour
     {
-        public override void Update(GameState gameState)
+        public override void Update(GameObject self, GameState gameState)
         {
             Vector3 translation = new Vector3();
             float yawAngle = 0;

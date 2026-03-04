@@ -41,7 +41,11 @@ namespace Frinkahedron.TestApp
                 SyncToVerticalBlank = true
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
-            _scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), [new GameObject(new Vector3(-1, 0, 0), new KeyboardCameraMoveBehaviour()), new GameObject(new Vector3(1, 0, 0))]);
+            _scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1),
+                [
+                    new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new KeyboardCameraMoveBehaviour()])),
+                    new GameObject(new Vector3(1, 0, 0), new ContinuousRotationBehaviour(-0.5f, 0.1f, 0.3f))]
+                );
             _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice);
         }
 
