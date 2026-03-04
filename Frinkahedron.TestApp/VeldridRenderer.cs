@@ -9,24 +9,23 @@ using Veldrid;
 
 namespace Frinkahedron.TestApp
 {
-    public class VeldridRenderer : IRenderer
+    internal sealed class VeldridRenderer : IRenderer
     {
-        private CommandList commandList;
-        private GraphicsDevice graphicsDevice;
-        private DeviceBuffer matricesBuffer;
-        private MeshInfo cubeInfo;
+        private GraphicsResources graphicsResources;
         private Camera camera;
 
-        public VeldridRenderer(CommandList commandList, MeshInfo cubeInfo, Camera camera, GraphicsDevice graphicsDevice, DeviceBuffer matricesBuffer)
+        public VeldridRenderer(GraphicsResources graphicsResources, Camera camera)
         {
-            this.commandList = commandList;
-            this.cubeInfo = cubeInfo;
+            this.graphicsResources = graphicsResources;
             this.camera = camera;
-            this.graphicsDevice = graphicsDevice;
-            this.matricesBuffer = matricesBuffer;
         }
 
         public void DrawCuboid(Matrix4x4 transform)
+        {
+            DrawMesh(graphicsResources.CubeInfo, transform);
+        }
+
+        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform)
         {
             MatrixUniforms uniforms = new MatrixUniforms
             {
@@ -34,9 +33,8 @@ namespace Frinkahedron.TestApp
                 View = camera.ViewMatrix,
                 Projection = camera.ProjectionMatrix
             };
-            //graphicsDevice.UpdateBuffer(matricesBuffer, 0, ref uniforms);
-            commandList.UpdateBuffer(matricesBuffer, 0, ref uniforms);
-            cubeInfo.Draw(commandList);
+            graphicsResources.CommandList.UpdateBuffer(graphicsResources.MatricesBuffer, 0, ref uniforms);
+            meshInfo.Draw(graphicsResources.CommandList);
         }
     }
 }
