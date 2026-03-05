@@ -2,7 +2,7 @@
 {
     public sealed class GameState
     {
-        public HashSet<Key> KeysDown { get; }
+        public Input Input { get; }
 
         public float DeltaTime { get; set; }
 
@@ -11,7 +11,7 @@
         public GameState(float deltaTime, Scene scene)
         {
             DeltaTime = deltaTime;
-            KeysDown = [];
+            Input = new Input();
             Scene = scene;
         }
     }

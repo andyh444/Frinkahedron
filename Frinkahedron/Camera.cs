@@ -21,6 +21,13 @@ namespace Frinkahedron
             ViewMatrix = CreateViewMatrix();
         }
 
+        public void SetValues(Vector3 position, Vector3 direction)
+        {
+            Position = position;
+            LookDirection = Vector3.Normalize(direction);
+            ViewMatrix = CreateViewMatrix();
+        }
+
         public void Translate(Vector3 translation)
         {
             Position += translation;
@@ -42,8 +49,7 @@ namespace Frinkahedron
 
         public void RotatePitch(float angle)
         {
-            var right = Vector3.Normalize(Vector3.Cross(LookDirection, Vector3.UnitY));
-            var rotation = Quaternion.CreateFromAxisAngle(right, angle);
+            var rotation = Quaternion.CreateFromAxisAngle(GetRight(), angle);
             LookDirection = Vector3.Transform(LookDirection, rotation);
             LookDirection = Vector3.Normalize(LookDirection);
             ViewMatrix = CreateViewMatrix();

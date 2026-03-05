@@ -43,7 +43,7 @@ namespace Frinkahedron.TestApp
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
             _scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1),
                 [
-                    new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new KeyboardCameraMoveBehaviour()])),
+                    new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new OrbitalCameraMouseBehaviour()])),
                     new GameObject(new Vector3(1, 0, 0), new ContinuousRotationBehaviour(-0.5f, 0.1f, 0.3f))]
                 );
             _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice);
@@ -58,21 +58,10 @@ namespace Frinkahedron.TestApp
                 while (_window.Exists)
                 {
                     var inputSnapshot = _window.PumpEvents();
-                    //gameState.KeysDown.Clear();
-                    foreach (var keyEvent in inputSnapshot.KeyEvents)
-                    {
-                        if (keyEvent.Down)
-                        {
-                            gameState.KeysDown.Add(keyEvent.Key.ToCoreKey());
-                        }
-                        else
-                        {
-                            gameState.KeysDown.Remove(keyEvent.Key.ToCoreKey());
-                        }
-                    }
+                    UpdateInput(gameState.Input, inputSnapshot);
                     _scene.Update(gameState);
-
                     Draw();
+                    gameState.Input.Clear();
 
                     sw.Stop();
                     gameState.DeltaTime = (float)sw.Elapsed.TotalSeconds;
@@ -84,6 +73,42 @@ namespace Frinkahedron.TestApp
                 _graphicsDevice.Dispose();
                 _graphicsResources.Dispose();
             }
+        }
+
+        private void UpdateInput(Input input, InputSnapshot snapshot)
+        {
+            foreach (var keyEvent in snapshot.KeyEvents)
+            {
+                if (keyEvent.Down)
+                {
+                    input.NewKeyDown(keyEvent.Key.ToCoreKey());
+                }
+                else
+                {
+                    input.NewKeyUp(keyEvent.Key.ToCoreKey());
+                }
+            }
+
+            foreach (var mouseEvent in snapshot.MouseEvents)
+            {
+                Core.MouseButton mouseButton = mouseEvent.MouseButton switch
+                {
+                    Veldrid.MouseButton.Left => Core.MouseButton.Left,
+                    Veldrid.MouseButton.Middle => Core.MouseButton.Middle,
+                    Veldrid.MouseButton.Right => Core.MouseButton.Right,
+                    _ => Core.MouseButton.None
+                };
+                if (mouseEvent.Down)
+                {
+                    input.NewMouseButtonDown(mouseButton);
+                }
+                else
+                {
+                    input.NewMouseButtonUp(mouseButton);
+                }
+            }
+            input.SetScrollDelta((int)snapshot.WheelDelta);
+            input.SetMousePosition(snapshot.MousePosition);
         }
 
         private void Draw()
