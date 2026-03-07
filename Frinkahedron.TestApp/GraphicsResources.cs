@@ -9,31 +9,22 @@ namespace Frinkahedron.TestApp
 {
     internal sealed class GraphicsResources : IDisposable
     {
-        public CommandList CommandList { get; }
-        public MeshInfo CubeInfo { get; }
-        public Shader[] Shaders { get; }
-        public Pipeline Pipeline { get; }
-        public DeviceBuffer MatricesBuffer { get; }
-        public ResourceLayout ResourceLayout { get; }
-        public ResourceSet ResourceSet { get; }
-
-        private GraphicsResources(CommandList commandList, MeshInfo meshInfo, Shader[] shaders, Pipeline pipeline, DeviceBuffer uniformBuffer, ResourceLayout resourceLayout, ResourceSet resourceSet)
-        {
-            CommandList = commandList;
-            CubeInfo = meshInfo;
-            Shaders = shaders;
-            Pipeline = pipeline;
-            MatricesBuffer = uniformBuffer;
-            ResourceLayout = resourceLayout;
-            ResourceSet = resourceSet;
-        }
+        public required CommandList CommandList { get; init; }
+        public required MeshInfo CubeInfo { get; init; }
+        public required MeshInfo SphereInfo { get; init; }
+        public required Shader[] Shaders { get; init; }
+        public required Pipeline Pipeline { get; init; }
+        public required DeviceBuffer MatricesBuffer { get; init; }
+        public required ResourceLayout ResourceLayout { get; init; }
+        public required ResourceSet ResourceSet { get; init; }
 
         public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice)
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
 
-            Mesh mesh = CreateCubeMesh();
-            var meshInfo = MeshInfo.Create(mesh, graphicsDevice);
+            Mesh mesh = CreateUnitCubeMesh();
+            var cubeInfo = MeshInfo.Create(mesh, graphicsDevice);
+            var sphereInfo = MeshInfo.Create(CreateUnitUVSphere(24, 24, RgbaFloat.Red.ToVector4(), RgbaFloat.Blue.ToVector4()), graphicsDevice);
 
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
@@ -55,7 +46,7 @@ namespace Frinkahedron.TestApp
                 comparisonKind: ComparisonKind.LessEqual);
 
             pipelineDescription.RasterizerState = new RasterizerStateDescription(
-                cullMode: FaceCullMode.None,
+                cullMode: FaceCullMode.Back,
                 fillMode: PolygonFillMode.Solid,
                 frontFace: FrontFace.Clockwise,
                 depthClipEnabled: true,
@@ -88,7 +79,17 @@ namespace Frinkahedron.TestApp
 
             var commandList = factory.CreateCommandList();
 
-            return new GraphicsResources(commandList, meshInfo, shaders, pipeline, uniformBuffer, resourceLayout, resourceSet);
+            return new GraphicsResources
+            {
+                CommandList = commandList,
+                CubeInfo = cubeInfo,
+                SphereInfo = sphereInfo,
+                Shaders = shaders,
+                Pipeline = pipeline,
+                MatricesBuffer = uniformBuffer,
+                ResourceLayout = resourceLayout,
+                ResourceSet = resourceSet,
+            };
         }
 
         public void Dispose()
@@ -121,7 +122,7 @@ namespace Frinkahedron.TestApp
             return new Mesh(quadVertices, quadIndices);
         }
 
-        private static Mesh CreateCubeMesh()
+        private static Mesh CreateUnitCubeMesh()
         {
             VertexPositionColor[] vertices =
             {
@@ -164,6 +165,65 @@ namespace Frinkahedron.TestApp
            };
 
             return new Mesh(vertices, indices);
+        }
+
+        /// <summary>
+        /// Generates a UV sphere mesh.
+        /// </summary>
+        /// <param name="radius">Sphere radius</param>
+        /// <param name="longitudeSegments">Number of longitudinal slices</param>
+        /// <param name="latitudeSegments">Number of latitudinal slices</param>
+        /// <param name="color">Vertex color</param>
+        /// <param name="vertices">Output vertex array</param>
+        /// <param name="indices">Output triangle indices</param>
+        public static Mesh CreateUnitUVSphere(int longitudeSegments, int latitudeSegments, Vector4 topColor, Vector4 bottomColour)
+        {
+            var vertList = new List<VertexPositionColor>();
+            var indexList = new List<ushort>();
+            float radius = 0.5f;
+            // Generate vertices
+            for (int lat = 0; lat <= latitudeSegments; lat++)
+            {
+                float theta = lat * MathF.PI / latitudeSegments; // 0 to π
+                float sinTheta = MathF.Sin(theta);
+                float cosTheta = MathF.Cos(theta);
+
+                Vector4 colour = Vector4.Lerp(topColor, bottomColour, (float)lat / latitudeSegments);
+                for (int lon = 0; lon <= longitudeSegments; lon++)
+                {
+                    float phi = lon * 2f * MathF.PI / longitudeSegments; // 0 to 2π
+                    float sinPhi = MathF.Sin(phi);
+                    float cosPhi = MathF.Cos(phi);
+
+                    Vector3 pos = new Vector3(
+                        radius * sinTheta * cosPhi,
+                        radius * cosTheta,
+                        radius * sinTheta * sinPhi
+                    );
+
+                    vertList.Add(new VertexPositionColor(pos, colour));
+                }
+            }
+
+            // Generate indices
+            for (int lat = 0; lat < latitudeSegments; lat++)
+            {
+                for (int lon = 0; lon < longitudeSegments; lon++)
+                {
+                    ushort first = (ushort)((lat * (longitudeSegments + 1)) + lon);
+                    ushort second = (ushort)(first + longitudeSegments + 1);
+
+                    // Each quad is split into two triangles
+                    indexList.Add(first);
+                    indexList.Add(second);
+                    indexList.Add((ushort)(first + 1));
+
+                    indexList.Add(second);
+                    indexList.Add((ushort)(second + 1));
+                    indexList.Add((ushort)(first + 1));
+                }
+            }
+            return new Mesh(vertList.ToArray(), indexList.ToArray());
         }
     }
 }

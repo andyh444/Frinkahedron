@@ -25,6 +25,30 @@ namespace Frinkahedron.Core
             {
                 obj.Update(gameState);
             }
+
+            // resolve collisions
+            for (int i = 0; i < Objects.Count; i++)
+            {
+                var object1 = Objects[i];
+                if (object1.Collider is not null
+                    && object1.RigidBody is not null)
+                {
+                    for (int j = i + 1; j < Objects.Count; j++)
+                    {
+                        var object2 = Objects[j];
+                        if (object2.Collider is not null
+                            && object2.RigidBody is not null)
+                        {
+                            object1.RigidBody.ResolveCollision(
+                                object1.Position,
+                                object1.Collider,
+                                object2.RigidBody,
+                                object2.Position,
+                                object2.Collider);
+                        }
+                    }
+                }
+            }
         }
 
         public void Draw(IRenderer renderer)

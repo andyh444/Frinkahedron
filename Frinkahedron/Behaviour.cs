@@ -14,8 +14,8 @@ namespace Frinkahedron.Core
     {
         public float yaw = 0;
         public float pitch = 0;
-        public float distance = 5f;
-        public float sensitivity = 2f;
+        public float distance = 50f;
+        public float sensitivity = 1f;
         public float minPitch = -0.45f * MathF.PI;
         public float maxPitch = 0.45f * MathF.PI;
 
@@ -31,13 +31,13 @@ namespace Frinkahedron.Core
                 pitch = Math.Clamp(pitch, minPitch, maxPitch);
             }
             var scrollDelta = gameState.Input.GetMouseScrollDelta();
-            distance -= 50 * scrollDelta * gameState.DeltaTime;
-            distance = Math.Clamp(distance, 1, 10);
+            distance -= 250 * scrollDelta * gameState.DeltaTime;
+            distance = Math.Clamp(distance, 1, 100);
 
-            var rotation = Quaternion.CreateFromYawPitchRoll(yaw, pitch, 0f);
+            var rotation = Quaternion.CreateFromYawPitchRoll(-yaw, -pitch, 0f);
             Vector3 offset = Vector3.Transform(new Vector3(0, 0, -distance), rotation);
 
-            gameState.Scene.Camera.SetValues(self.Position + offset, -offset);
+            gameState.Scene.Camera.SetValues(self.Position.Centre + offset, -offset);
         }
     }
 
@@ -57,9 +57,9 @@ namespace Frinkahedron.Core
     {
         public override void Update(GameObject self, GameState gameState)
         {
-            self.RotateX += xRot * gameState.DeltaTime;
-            self.RotateY += yRot * gameState.DeltaTime;
-            self.RotateZ += zRot * gameState.DeltaTime;
+            float dt = gameState.DeltaTime;
+            var rot = Quaternion.CreateFromYawPitchRoll(dt * yRot, dt * xRot, dt * zRot);
+            self.Position.Orientation *= rot;
         }
     }
 

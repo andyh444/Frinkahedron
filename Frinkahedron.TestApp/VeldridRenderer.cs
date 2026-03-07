@@ -25,6 +25,11 @@ namespace Frinkahedron.TestApp
             DrawMesh(graphicsResources.CubeInfo, transform);
         }
 
+        public void DrawEllipsoid(Matrix4x4 transform)
+        {
+            DrawMesh(graphicsResources.SphereInfo, transform);
+        }
+
         private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform)
         {
             MatrixUniforms uniforms = new MatrixUniforms

@@ -10,6 +10,8 @@ using Frinkahedron.Core;
 using Vulkan.Xlib;
 using System.Diagnostics;
 using Vulkan;
+using Frinkahedron.Core.Colliders;
+using Frinkahedron.Core.Maths;
 
 namespace Frinkahedron.TestApp
 {
@@ -41,11 +43,27 @@ namespace Frinkahedron.TestApp
                 SyncToVerticalBlank = true
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
-            _scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1),
-                [
-                    new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new OrbitalCameraMouseBehaviour()])),
-                    new GameObject(new Vector3(1, 0, 0), new ContinuousRotationBehaviour(-0.5f, 0.1f, 0.3f))]
-                );
+
+            List<GameObject> gameObjects = new List<GameObject>();
+            gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
+                new OrbitalCameraMouseBehaviour(),
+                new BoxCollider(new Vector3(100, 10, 100)),
+                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Gravity = false}));
+
+            Random r = Random.Shared;
+            for (int i = 0; i < 100; i++)
+            {
+                gameObjects.Add(new GameObject(
+                    new Vector3(r.NextSingle(-20f, 20f), r.NextSingle(-5f, 5f), r.NextSingle(-0.01f, 0.01f)),
+                    null,
+                    new SphereCollider(r.NextSingle(0.5f, 1.5f)),
+                    new Core.Physics.RigidBody { Mass = 1f, Gravity = true, Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f)) }));
+            }
+
+            //gameObjects.Add(new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new OrbitalCameraMouseBehaviour()]), new BoxCollider(new Vector3(1, 1.25f, 1.5f))));
+            //gameObjects.Add(new GameObject(new Vector3(1, 0, 0), new ContinuousRotationBehaviour(-0.5f, 0.1f, 0.3f), new SphereCollider(0.5f)));
+
+            _scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), gameObjects);
             _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice);
         }
 
@@ -59,7 +77,11 @@ namespace Frinkahedron.TestApp
                 {
                     var inputSnapshot = _window.PumpEvents();
                     UpdateInput(gameState.Input, inputSnapshot);
-                    _scene.Update(gameState);
+                    gameState.DeltaTime /= 20;
+                    for (int i = 0; i < 20; i++)
+                    {
+                        _scene.Update(gameState);
+                    }
                     Draw();
                     gameState.Input.Clear();
 

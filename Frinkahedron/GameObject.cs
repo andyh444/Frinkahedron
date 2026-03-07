@@ -1,28 +1,28 @@
-﻿using System.Numerics;
+﻿using Frinkahedron.Core.Colliders;
+using Frinkahedron.Core.Physics;
+using System.Numerics;
 
 namespace Frinkahedron.Core
 {
-    public sealed class GameObject(Vector3 position, Behaviour? behaviour = null)
+    public sealed class GameObject(Vector3 position, Behaviour? behaviour = null, ICollider? collider = null, RigidBody? rigidBody = null)
     {
-        public Vector3 Position { get; set; } = position;
-
-        public float RotateX { get; set; }
-
-        public float RotateY { get; set; }
-
-        public float RotateZ { get; set; }
+        public Position Position { get; } = new Position(position, Quaternion.Identity);
 
         public Behaviour? Behaviour { get; } = behaviour;
+
+        public ICollider? Collider { get; } = collider;
+
+        public RigidBody? RigidBody { get; } = rigidBody;
 
         public void Update(GameState gameState)
         {
             Behaviour?.Update(this, gameState);
+            RigidBody?.IntegratePosition(gameState.DeltaTime, Position);
         }
 
         public void Draw(IRenderer renderer)
         {
-            Matrix4x4 transform = Matrix4x4.CreateFromYawPitchRoll(RotateY, RotateX, RotateZ) * Matrix4x4.CreateTranslation(Position);
-            renderer.DrawCuboid(transform);
+            Collider?.Draw(renderer, Position.ToMatrix());
         }
     }
 }
