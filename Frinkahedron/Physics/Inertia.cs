@@ -38,7 +38,16 @@ namespace Frinkahedron.Core.Physics
             return new Matrix3x3(
                 new Vector3(i, 0, 0),
                 new Vector3(0, i, 0),
-                new Vector3(0, 0, i);
+                new Vector3(0, 0, i));
+        }
+
+        public static Matrix3x3 CalculateInfiniteInertia()
+        {
+            float i = float.PositiveInfinity;
+            return new Matrix3x3(
+                new Vector3(i, 0, 0),
+                new Vector3(0, i, 0),
+                new Vector3(0, 0, i));
         }
     }
 }

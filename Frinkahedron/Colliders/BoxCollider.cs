@@ -17,6 +17,11 @@ namespace Frinkahedron.Core.Colliders
                     return Collisions.AABBSphereCollision(this, position.Centre, sphereCollider, otherPosition);
                 }
             }
+            if (other is BoxCollider boxCollider)
+            {
+                return Collisions.BoxBoxCollision(this, position, boxCollider, otherPosition);
+                //return Collisions.BoxBoxCollision(boxCollider, otherPosition, this, position);
+            }
             return CollisionManifold.NoCollision();
         }
 
