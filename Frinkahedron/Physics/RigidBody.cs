@@ -94,7 +94,7 @@ namespace Frinkahedron.Core.Physics
                 float speedAlongNormal = Vector3.Dot(rv, normal);
                 if (speedAlongNormal < 0)
                 {
-                    float e = 0.8f; // Coefficient of restitution (elasticity), adjust as needed
+                    float e = 0.1f; // Coefficient of restitution (elasticity), adjust as needed
                     float j = -(1 + e) * speedAlongNormal;
 
                     float denom = inverseMass + otherInverseMass;

@@ -19,8 +19,18 @@ namespace Frinkahedron.Core.Colliders
             }
             if (other is BoxCollider boxCollider)
             {
-                return Collisions.BoxBoxCollision(this, position, boxCollider, otherPosition);
-                //return Collisions.BoxBoxCollision(boxCollider, otherPosition, this, position);
+                if (otherPosition.Orientation.IsIdentity)
+                {
+                    return Collisions.BoxAABBCollision(this, position, boxCollider, otherPosition.Centre);
+                }
+                else if (position.Orientation.IsIdentity)
+                {
+                    return Collisions.BoxAABBCollision(boxCollider, otherPosition, this, position.Centre).Invert();
+                }
+                else
+                {
+                    //return Collisions.BoxBoxCollision(this, position, boxCollider, otherPosition);
+                }
             }
             return CollisionManifold.NoCollision();
         }

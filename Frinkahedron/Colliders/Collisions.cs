@@ -82,11 +82,44 @@ namespace Frinkahedron.Core.Colliders
             return SphereAABBCollision(collider2, position2, collider1, centre1).Invert();
         }
 
+        public static CollisionManifold BoxAABBCollision(BoxCollider boxCollider, Position boxPosition, BoxCollider aabbCollider, Vector3 aabbPosition)
+        {
+            Vector3 hd = boxCollider.Dimensions / 2;
+            Span<Vector3> boxCorners = stackalloc Vector3[]
+            {
+                new Vector3(hd.X, hd.Y, hd.Z),
+                new Vector3(-hd.X, hd.Y, hd.Z),
+                new Vector3(hd.X, hd.Y, -hd.Z),
+                new Vector3(-hd.X, hd.Y, -hd.Z),
+
+                new Vector3(hd.X, -hd.Y, hd.Z),
+                new Vector3(-hd.X, -hd.Y, hd.Z),
+                new Vector3(hd.X, -hd.Y, -hd.Z),
+                new Vector3(-hd.X, -hd.Y, -hd.Z),
+            };
+
+            float aabbTop = aabbCollider.Dimensions.Y / 2 + aabbPosition.Y;
+            Matrix4x4 transform = boxPosition.ToMatrix();
+
+            List<Vector3> points = new List<Vector3>();
+            float penetration = 0;
+            foreach (var corner in boxCorners)
+            {
+                Vector3 tc = Vector3.Transform(corner, transform);
+                if (tc.Y < aabbTop)
+                {
+                    points.Add(tc);
+                    penetration = Math.Max(penetration, aabbTop - tc.Y);
+                }
+            }
+            return new CollisionManifold(points.ToArray(), Vector3.UnitY, penetration);
+        }
+
         public static CollisionManifold BoxBoxCollision(
-    BoxCollider box1,
-    Position box1Position,
-    BoxCollider box2,
-    Position box2Position)
+            BoxCollider box1,
+            Position box1Position,
+            BoxCollider box2,
+            Position box2Position)
         {
             Vector3 half1 = box1.Dimensions * 0.5f;
             Vector3 half2 = box2.Dimensions * 0.5f;

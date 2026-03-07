@@ -13,8 +13,8 @@ namespace Frinkahedron.Core
     public class OrbitalCameraMouseBehaviour : Behaviour
     {
         public float yaw = 0;
-        public float pitch = 0;
-        public float distance = 50f;
+        public float pitch = -0.2f * MathF.PI;
+        public float distance = 150f;
         public float sensitivity = 1f;
         public float minPitch = -0.45f * MathF.PI;
         public float maxPitch = 0.45f * MathF.PI;
@@ -32,7 +32,7 @@ namespace Frinkahedron.Core
             }
             var scrollDelta = gameState.Input.GetMouseScrollDelta();
             distance -= 250 * scrollDelta * gameState.DeltaTime;
-            distance = Math.Clamp(distance, 1, 100);
+            distance = Math.Clamp(distance, 1, 500);
 
             var rotation = Quaternion.CreateFromYawPitchRoll(-yaw, -pitch, 0f);
             Vector3 offset = Vector3.Transform(new Vector3(0, 0, -distance), rotation);
