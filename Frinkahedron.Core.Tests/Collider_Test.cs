@@ -19,6 +19,7 @@ namespace Frinkahedron.Core.Tests
             if (testCase.CollisionExpected)
             {
                 Assert.That(manifold.Normal, Is.EqualTo(testCase.ExpectedNormal));
+                //Assert.That(manifold.Penetration, Is.EqualTo(testCase.ExpectedPenetration).Within(1e-3));
             }
 
             // now check the same but with the objects swapped. The result should be the same but with the normal pointing the other way
@@ -32,6 +33,7 @@ namespace Frinkahedron.Core.Tests
             if (testCase.CollisionExpected)
             {
                 Assert.That(reverseManifold.Normal, Is.EqualTo(-testCase.ExpectedNormal));
+                //Assert.That(reverseManifold.Penetration, Is.EqualTo(testCase.ExpectedPenetration).Within(1e-3));
             }
         }
 
@@ -39,10 +41,19 @@ namespace Frinkahedron.Core.Tests
         {
             var sphere1 = CreateSphere(new Vector3(0, 0, 0), 1.01f);
             var sphere2 = CreateSphere(new Vector3(2, 0, 0), 1.01f);
-            yield return new TestCase(sphere1, sphere2, true, new Vector3(-1, 0, 0), "Colliding spheres");
+            yield return new TestCase(sphere1, sphere2, true, new Vector3(-1, 0, 0), 0.02f, "Colliding spheres");
 
             var sphere3 = CreateSphere(new Vector3(3, 0, 0), 1.01f);
-            yield return new TestCase(sphere1, sphere3, false, default, "Non-Colliding spheres");
+            yield return new TestCase(sphere1, sphere3, false, default, default, "Non-Colliding spheres");
+
+            var aab = CreateAxisAlignedBox(new Vector3(0, -2, 0), new Vector3(20, 2, 20));
+            yield return new TestCase(sphere1, aab, true, new Vector3(0, 1, 0), 0.01f, "Colliding sphere-aab");
+
+            var box1 = CreateAxisAlignedBox(new Vector3(), new Vector3(1, 1, 2));
+            var box2 = CreateAxisAlignedBox(new Vector3(1f, 0, 0), new Vector3(1, 1, 1));
+            box2.Position.Orientation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathF.PI / 4);
+
+            yield return new TestCase(box1, box2, true, new Vector3(-1, 0, 0), 0.293f, "Colliding boxes");
         }
 
         private static TestObject CreateSphere(Vector3 centre, float radius)
@@ -61,7 +72,7 @@ namespace Frinkahedron.Core.Tests
 
         public record TestObject(Position Position, IShape Collider);
 
-        public class TestCase(TestObject collisionObjectA, TestObject collisionObjectB, bool collisionExpected, Vector3 expectedNormal, string testName)
+        public class TestCase(TestObject collisionObjectA, TestObject collisionObjectB, bool collisionExpected, Vector3 expectedNormal, float expectedPenetration, string testName)
         {
             public TestObject CollisionObjectA { get; } = collisionObjectA;
 
@@ -70,6 +81,8 @@ namespace Frinkahedron.Core.Tests
             public bool CollisionExpected { get; } = collisionExpected;
 
             public Vector3 ExpectedNormal { get; } = expectedNormal;
+
+            public float ExpectedPenetration { get; } = expectedPenetration;
 
             public override string ToString() => testName;
         }

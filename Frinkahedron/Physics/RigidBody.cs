@@ -81,11 +81,14 @@ namespace Frinkahedron.Core.Physics
                 return false;
             }
 
+            Vector3 normal = manifold.Normal;
+            float penetration = manifold.Penetration;
+            float inverseMassA = bodyA.InverseMass;
+            float inverseMassB = bodyB.InverseMass;
+
             foreach (var contactPoint in manifold.Points)
             {
-                Vector3 normal = manifold.Normal;
-                float penetration = manifold.Penetration;
-
+                
                 // contact offsets (vector from center to contact point)
                 Vector3 ra = contactPoint - positionA.Centre;
                 Vector3 rb = contactPoint - positionB.Centre;
@@ -95,13 +98,11 @@ namespace Frinkahedron.Core.Physics
                 Vector3 vb = bodyB.Velocity + Vector3.Cross(bodyB.AngularVelocity, rb);
                 Vector3 rv = va - vb;
 
-                float inverseMassA = bodyA.InverseMass;
-                float inverseMassB = bodyB.InverseMass;
-
+                
                 float speedAlongNormal = Vector3.Dot(rv, normal);
                 if (speedAlongNormal < 0)
                 {
-                    float e = 0.1f; // Coefficient of restitution (elasticity), adjust as needed
+                    float e = 0.0f; // Coefficient of restitution (elasticity), adjust as needed
                     float j = -(1 + e) * speedAlongNormal;
 
                     float denom = inverseMassA + inverseMassB;
@@ -156,17 +157,18 @@ namespace Frinkahedron.Core.Physics
                     }
                 }
 
-                float correctionMag = penetration * 1.6f / (inverseMassA + inverseMassB);
-                Vector3 correction = correctionMag * normal;
-
-                if (float.IsNaN(correction.X))
-                {
-                    Debugger.Break();
-                }
-
-                positionA.Centre += inverseMassA * correction;
-                positionB.Centre -= inverseMassB * correction;
             }
+
+            float correctionMag = penetration * 1.6f / (inverseMassA + inverseMassB);
+            Vector3 correction = correctionMag * normal;
+
+            if (float.IsNaN(correction.X))
+            {
+                Debugger.Break();
+            }
+
+            positionA.Centre += inverseMassA * correction;
+            positionB.Centre -= inverseMassB * correction;
             return true;
         }
 

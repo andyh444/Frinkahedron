@@ -18,20 +18,31 @@ namespace Frinkahedron.Core.Colliders
             return Dimensions.X * Dimensions.Y * Dimensions.Z;
         }
 
-        public IEnumerable<Vector3> GetCorners()
+        public IReadOnlyList<Vector3> GetCorners()
         {
-            Vector3 hd = Dimensions / 2;
-            return [
-                new Vector3(hd.X, hd.Y, hd.Z),
-                new Vector3(-hd.X, hd.Y, hd.Z),
-                new Vector3(hd.X, hd.Y, -hd.Z),
-                new Vector3(-hd.X, hd.Y, -hd.Z),
+            Span<Vector3> corners = stackalloc Vector3[8];
+            GetCorners(corners);
+            List<Vector3> cornersList = [.. corners];
+            return cornersList;
+        }
 
-                new Vector3(hd.X, -hd.Y, hd.Z),
-                new Vector3(-hd.X, -hd.Y, hd.Z),
-                new Vector3(hd.X, -hd.Y, -hd.Z),
-                new Vector3(-hd.X, -hd.Y, -hd.Z),
-            ];
+        public void GetCorners(Span<Vector3> cornersSpan)
+        {
+            if (cornersSpan.Length < 8)
+            {
+                throw new ArgumentException("Expected a span with at least length 8");
+            }
+            Vector3 hd = Dimensions / 2;
+
+            cornersSpan[0] = new Vector3(hd.X, hd.Y, hd.Z);
+            cornersSpan[1] = new Vector3(-hd.X, hd.Y, hd.Z);
+            cornersSpan[2] = new Vector3(hd.X, hd.Y, -hd.Z);
+            cornersSpan[3] = new Vector3(-hd.X, hd.Y, -hd.Z);
+
+            cornersSpan[4] = new Vector3(hd.X, -hd.Y, hd.Z);
+            cornersSpan[5] = new Vector3(-hd.X, -hd.Y, hd.Z);
+            cornersSpan[6] = new Vector3(hd.X, -hd.Y, -hd.Z);
+            cornersSpan[7] = new Vector3(-hd.X, -hd.Y, -hd.Z);
         }
 
         /*public CollisionManifold CheckForCollisions(Position position, ICollider other, Position otherPosition)

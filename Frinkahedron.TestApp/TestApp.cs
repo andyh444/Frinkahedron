@@ -55,10 +55,13 @@ namespace Frinkahedron.TestApp
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
 
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1; i++)
             {
-                float radius = r.NextSingle(1.5f, 2.5f);
-                var collider = new Sphere(radius);
+                //float radius = r.NextSingle(1.5f, 2.5f);
+                //var collider = new Sphere(radius);
+
+                Vector3 dimensions = new Vector3(r.NextSingle(1f, 3f), r.NextSingle(1f, 3f), r.NextSingle(1f, 3f));
+                var collider = new Box(dimensions);
 
                 float volume = collider.CalculateVolume();
                 float density = 1f;
@@ -67,7 +70,7 @@ namespace Frinkahedron.TestApp
                 var inertia = collider.CalculateFilledInertia(mass);
 
                 gameObjects.Add(new GameObject(
-                    new Vector3(r.NextSingle(-20f, 20f), r.NextSingle(5f, 10f), r.NextSingle(-20f, 20f)),
+                    new Vector3(r.NextSingle(-20f, 20f), r.NextSingle(5f, 10f), 0/*r.NextSingle(-20f, 20f)*/),
                     null,
                     collider,
                     new Core.Physics.RigidBody
@@ -75,13 +78,12 @@ namespace Frinkahedron.TestApp
                         Mass = mass,
                         Inertia = inertia,
                         Gravity = true,
-                        Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f))
+                        //Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f))
                     }));
 
                 gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI));
             }
 
-            
 
             //gameObjects.Add(new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new OrbitalCameraMouseBehaviour()]), new BoxCollider(new Vector3(1, 1.25f, 1.5f))));
             //gameObjects.Add(new GameObject(new Vector3(1, 0, 0), new ContinuousRotationBehaviour(-0.5f, 0.1f, 0.3f), new SphereCollider(0.5f)));
