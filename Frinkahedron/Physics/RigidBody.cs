@@ -2,6 +2,7 @@
 using Frinkahedron.Core.Maths;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -66,9 +67,15 @@ namespace Frinkahedron.Core.Physics
             }
         }
 
-        public bool ResolveCollision(Position thisPosition, ICollider thisCollider, RigidBody other, Position otherPosition, ICollider otherCollider)
+        public static bool ResolveCollision(
+            Position positionA,
+            IShape shapeA,
+            RigidBody bodyA,
+            Position positionB,
+            IShape shapeB,
+            RigidBody bodyB)
         {
-            var manifold = thisCollider.CheckForCollisions(thisPosition, otherCollider, otherPosition);
+            var manifold = CollisionPairTester.Test(positionA, shapeA, positionB, shapeB);
             if (manifold.Points.Length == 0)
             {
                 return false;
@@ -80,16 +87,16 @@ namespace Frinkahedron.Core.Physics
                 float penetration = manifold.Penetration;
 
                 // contact offsets (vector from center to contact point)
-                Vector3 ra = contactPoint - thisPosition.Centre;
-                Vector3 rb = contactPoint - otherPosition.Centre;
+                Vector3 ra = contactPoint - positionA.Centre;
+                Vector3 rb = contactPoint - positionB.Centre;
 
                 // relative velocity at contact
-                Vector3 va = Velocity + Vector3.Cross(AngularVelocity, ra);
-                Vector3 vb = other.Velocity + Vector3.Cross(other.AngularVelocity, rb);
+                Vector3 va = bodyA.Velocity + Vector3.Cross(bodyA.AngularVelocity, ra);
+                Vector3 vb = bodyB.Velocity + Vector3.Cross(bodyB.AngularVelocity, rb);
                 Vector3 rv = va - vb;
 
-                float inverseMass = this.InverseMass;
-                float otherInverseMass = other.InverseMass;
+                float inverseMassA = bodyA.InverseMass;
+                float inverseMassB = bodyB.InverseMass;
 
                 float speedAlongNormal = Vector3.Dot(rv, normal);
                 if (speedAlongNormal < 0)
@@ -97,24 +104,24 @@ namespace Frinkahedron.Core.Physics
                     float e = 0.1f; // Coefficient of restitution (elasticity), adjust as needed
                     float j = -(1 + e) * speedAlongNormal;
 
-                    float denom = inverseMass + otherInverseMass;
+                    float denom = inverseMassA + inverseMassB;
 
                     Vector3 cross = new Vector3();
-                    if (!HasInfiniteInertia)
+                    if (!bodyA.HasInfiniteInertia)
                     {
-                        cross += Vector3.Cross(InverseWorldInertia(thisPosition.Orientation) * Vector3.Cross(ra, normal), ra);
+                        cross += Vector3.Cross(bodyA.InverseWorldInertia(positionA.Orientation) * Vector3.Cross(ra, normal), ra);
                     }
-                    if (!other.HasInfiniteInertia)
+                    if (!bodyB.HasInfiniteInertia)
                     {
-                        cross += Vector3.Cross(other.InverseWorldInertia(otherPosition.Orientation) * Vector3.Cross(rb, normal), rb);
+                        cross += Vector3.Cross(bodyB.InverseWorldInertia(positionB.Orientation) * Vector3.Cross(rb, normal), rb);
                     }
                     denom += Vector3.Dot(normal, cross);
 
                     j /= denom;
                     Vector3 impulse = j * normal;
 
-                    ApplyImpulse(impulse, ra, thisPosition.Orientation);
-                    other.ApplyImpulse(-impulse, rb, otherPosition.Orientation);
+                    bodyA.ApplyImpulse(impulse, ra, positionA.Orientation);
+                    bodyB.ApplyImpulse(-impulse, rb, positionB.Orientation);
 
                     Vector3 tangent = rv - speedAlongNormal * normal;
                     float speedAlongTangent = tangent.Length();
@@ -123,16 +130,16 @@ namespace Frinkahedron.Core.Physics
                         tangent /= speedAlongTangent;
 
                         float jt = -Vector3.Dot(rv, tangent);
-                        float denomT = inverseMass + otherInverseMass;
+                        float denomT = inverseMassA + inverseMassB;
 
                         Vector3 crossT = new Vector3();
-                        if (!HasInfiniteInertia)
+                        if (!bodyA.HasInfiniteInertia)
                         {
-                            crossT += Vector3.Cross(InverseWorldInertia(thisPosition.Orientation) * Vector3.Cross(ra, tangent), ra);
+                            crossT += Vector3.Cross(bodyA.InverseWorldInertia(positionA.Orientation) * Vector3.Cross(ra, tangent), ra);
                         }
-                        if (!other.HasInfiniteInertia)
+                        if (!bodyB.HasInfiniteInertia)
                         {
-                            crossT += Vector3.Cross(other.InverseWorldInertia(otherPosition.Orientation) * Vector3.Cross(rb, tangent), rb);
+                            crossT += Vector3.Cross(bodyB.InverseWorldInertia(positionB.Orientation) * Vector3.Cross(rb, tangent), rb);
                         }
                         denomT += Vector3.Dot(tangent, crossT);
 
@@ -143,17 +150,22 @@ namespace Frinkahedron.Core.Physics
                         jt = Math.Clamp(jt, -maxFriction, maxFriction);
                         Vector3 frictionImpulse = jt * tangent;
 
-                        ApplyImpulse(frictionImpulse, ra, thisPosition.Orientation);
-                        other.ApplyImpulse(-frictionImpulse, rb, otherPosition.Orientation);
+                        bodyA.ApplyImpulse(frictionImpulse, ra, positionA.Orientation);
+                        bodyB.ApplyImpulse(-frictionImpulse, rb, positionB.Orientation);
 
                     }
                 }
 
-                float correctionMag = penetration * 1.6f / (inverseMass + otherInverseMass);
+                float correctionMag = penetration * 1.6f / (inverseMassA + inverseMassB);
                 Vector3 correction = correctionMag * normal;
 
-                thisPosition.Centre += inverseMass * correction;
-                otherPosition.Centre -= otherInverseMass * correction;
+                if (float.IsNaN(correction.X))
+                {
+                    Debugger.Break();
+                }
+
+                positionA.Centre += inverseMassA * correction;
+                positionB.Centre -= inverseMassB * correction;
             }
             return true;
         }

@@ -10,7 +10,7 @@ namespace Frinkahedron.Core.Colliders
 {
     public static class Collisions
     {
-        public static CollisionManifold SphereSphereCollision(SphereCollider collider1, Position position1, SphereCollider collider2, Position position2)
+        /*public static CollisionManifold SphereSphereCollision(SphereCollider collider1, Position position1, SphereCollider collider2, Position position2)
         {
             float centreDistanceSq = Vector3.DistanceSquared(position1.Centre, position2.Centre);
             float radiusSum = collider1.Radius + collider2.Radius;
@@ -24,9 +24,9 @@ namespace Frinkahedron.Core.Colliders
                 return new CollisionManifold([contactPoint], normal, penetration);
             }
             return CollisionManifold.NoCollision();
-        }
+        }*/
 
-        public static CollisionManifold SphereAABBCollision(SphereCollider collider1, Position position1, BoxCollider collider2, Vector3 centre2)
+        /*public static CollisionManifold SphereAABBCollision(SphereCollider collider1, Position position1, BoxCollider collider2, Vector3 centre2)
         {
             Vector3 centre1 = position1.Centre;
             float radius = collider1.Radius;
@@ -259,6 +259,6 @@ namespace Frinkahedron.Core.Colliders
                 1 => v.Y,
                 _ => v.Z
             };
-        }
+        }*/
     }
 }

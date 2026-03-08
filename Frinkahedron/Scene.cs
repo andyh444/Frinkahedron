@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Frinkahedron.Core.Physics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -39,12 +40,13 @@ namespace Frinkahedron.Core
                         if (object2.Collider is not null
                             && object2.RigidBody is not null)
                         {
-                            object1.RigidBody.ResolveCollision(
+                            RigidBody.ResolveCollision(
                                 object1.Position,
                                 object1.Collider,
-                                object2.RigidBody,
+                                object1.RigidBody,
                                 object2.Position,
-                                object2.Collider);
+                                object2.Collider,
+                                object2.RigidBody);
                         }
                     }
                 }

@@ -4,13 +4,13 @@ using System.Numerics;
 
 namespace Frinkahedron.Core
 {
-    public sealed class GameObject(Vector3 position, Behaviour? behaviour = null, ICollider? collider = null, RigidBody? rigidBody = null)
+    public sealed class GameObject(Vector3 position, Behaviour? behaviour = null, IShape? colliderShape = null, RigidBody? rigidBody = null)
     {
         public Position Position { get; } = new Position(position, Quaternion.Identity);
 
         public Behaviour? Behaviour { get; } = behaviour;
 
-        public ICollider? Collider { get; } = collider;
+        public IShape? Collider { get; } = colliderShape;
 
         public RigidBody? RigidBody { get; } = rigidBody;
 

@@ -51,25 +51,20 @@ namespace Frinkahedron.TestApp
 
             gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
                 new OrbitalCameraMouseBehaviour(),
-                new BoxCollider(new Vector3(100, 10, 100)),
+                new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
 
 
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 100; i++)
             {
-                Vector3 dimensions = new Vector3(r.NextSingle(0.5f, 2.5f), r.NextSingle(0.5f, 2.5f), r.NextSingle(0.5f, 2.5f));
-                float volume = dimensions.X * dimensions.Y * dimensions.Z;
-                var collider = new BoxCollider(dimensions);
+                float radius = r.NextSingle(1.5f, 2.5f);
+                var collider = new Sphere(radius);
 
-                /*float radius = r.NextSingle(1.5f, 2.5f);
-                float volume = (4f / 3f) * radius * radius * radius;
-                var collider = new SphereCollider(radius);*/
-
+                float volume = collider.CalculateVolume();
                 float density = 1f;
                 float mass = density * volume;
 
-                var inertia = Inertia.CalculateFilledCubeInertia(dimensions, mass);
-                //var inertia = Inertia.CalculateFilledSphereInertia(radius, mass);
+                var inertia = collider.CalculateFilledInertia(mass);
 
                 gameObjects.Add(new GameObject(
                     new Vector3(r.NextSingle(-20f, 20f), r.NextSingle(5f, 10f), r.NextSingle(-20f, 20f)),

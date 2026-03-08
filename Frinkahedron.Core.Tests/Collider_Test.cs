@@ -9,10 +9,11 @@ namespace Frinkahedron.Core.Tests
         [TestCaseSource(nameof(GetTestCases))]
         public void CheckForCollisions_Test(TestCase testCase)
         {
-            var manifold = testCase.CollisionObjectA.Collider.CheckForCollisions(
+            var manifold = CollisionPairTester.Test(
                 testCase.CollisionObjectA.Position,
-                testCase.CollisionObjectB.Collider,
-                testCase.CollisionObjectB.Position);
+                testCase.CollisionObjectA.Collider,
+                testCase.CollisionObjectB.Position,
+                testCase.CollisionObjectB.Collider);
 
             Assert.That(manifold.Points.Length > 0, Is.EqualTo(testCase.CollisionExpected));
             if (testCase.CollisionExpected)
@@ -21,10 +22,11 @@ namespace Frinkahedron.Core.Tests
             }
 
             // now check the same but with the objects swapped. The result should be the same but with the normal pointing the other way
-            var reverseManifold = testCase.CollisionObjectB.Collider.CheckForCollisions(
+            var reverseManifold = CollisionPairTester.Test(
                 testCase.CollisionObjectB.Position,
-                testCase.CollisionObjectA.Collider,
-                testCase.CollisionObjectA.Position);
+                testCase.CollisionObjectB.Collider,
+                testCase.CollisionObjectA.Position,
+                testCase.CollisionObjectA.Collider);
 
             Assert.That(reverseManifold.Points.Length > 0, Is.EqualTo(testCase.CollisionExpected));
             if (testCase.CollisionExpected)
@@ -46,18 +48,18 @@ namespace Frinkahedron.Core.Tests
         private static TestObject CreateSphere(Vector3 centre, float radius)
         {
             Position position = new Position(centre, Quaternion.Identity);
-            SphereCollider collider = new SphereCollider(radius);
+            Sphere collider = new Sphere(radius);
             return new TestObject(position, collider);
         }
 
         private static TestObject CreateAxisAlignedBox(Vector3 centre, Vector3 dimensions)
         {
             Position position = new Position(centre, Quaternion.Identity);
-            BoxCollider collider = new BoxCollider(dimensions);
+            Box collider = new Box(dimensions);
             return new TestObject(position, collider);
         }
 
-        public record TestObject(Position Position, ICollider Collider);
+        public record TestObject(Position Position, IShape Collider);
 
         public class TestCase(TestObject collisionObjectA, TestObject collisionObjectB, bool collisionExpected, Vector3 expectedNormal, string testName)
         {
