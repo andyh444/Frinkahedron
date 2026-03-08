@@ -12,6 +12,13 @@ namespace Frinkahedron.Core.Colliders
     {
         public void Draw(IRenderer renderer, Matrix4x4 position);
 
+        /// <summary>
+        /// Checks for collisions between this collider and the specified other one
+        /// </summary>
+        /// <param name="position">World position of the object this collider represents</param>
+        /// <param name="other">other collider</param>
+        /// <param name="otherPosition">World position of the object the other collider represents</param>
+        /// <returns>A CollisionManifold containing contact points (if any), a normal pointing from the other collider to this one, and the penetration of this collider into the other</returns>
         CollisionManifold CheckForCollisions(Position position, ICollider other, Position otherPosition);
     }
 

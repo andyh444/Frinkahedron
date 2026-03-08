@@ -88,10 +88,16 @@ namespace Frinkahedron.Core.Maths
 
         public static Matrix3x3 operator *(Matrix3x3 mat1, Matrix3x3 mat2)
         {
+            Vector3 r1 = mat1.Row1;
+            Vector3 r2 = mat1.Row2;
+            Vector3 r3 = mat1.Row3;
+            Vector3 c1 = mat2.Column1();
+            Vector3 c2 = mat2.Column2();
+            Vector3 c3 = mat2.Column3();
             return new Matrix3x3(
-                new Vector3(Vector3.Dot(mat1.Row1, mat2.Column1()), Vector3.Dot(mat1.Row1, mat2.Column2()), Vector3.Dot(mat1.Row1, mat2.Column3())),
-                new Vector3(Vector3.Dot(mat1.Row2, mat2.Column1()), Vector3.Dot(mat1.Row2, mat2.Column2()), Vector3.Dot(mat1.Row2, mat2.Column3())),
-                new Vector3(Vector3.Dot(mat1.Row3, mat2.Column1()), Vector3.Dot(mat1.Row3, mat2.Column2()), Vector3.Dot(mat1.Row3, mat2.Column3())));
+                new Vector3(Vector3.Dot(r1, c1), Vector3.Dot(r1, c2), Vector3.Dot(r1, c3)),
+                new Vector3(Vector3.Dot(r2, c1), Vector3.Dot(r2, c2), Vector3.Dot(r2, c3)),
+                new Vector3(Vector3.Dot(r3, c1), Vector3.Dot(r3, c2), Vector3.Dot(r3, c3)));
         }
 
         public static Vector3 operator *(Matrix3x3 mat, Vector3 vec)
