@@ -6,31 +6,39 @@ namespace Frinkahedron.Core.Colliders
     {
         public static CollisionManifold Test(Collidable<Sphere> shapeA, Collidable<Box> shapeB)
         {
-            if (shapeB.Position.Orientation.IsIdentity)
-            {
-                return SphereAABBCollision(shapeA, shapeB);
-            }
-            return CollisionManifold.NoCollision();
+            return SphereBoxCollision(shapeB, shapeA).Invert();
         }
 
-        public static CollisionManifold SphereAABBCollision(Collidable<Sphere> shapeA, Collidable<Box> shapeB)
+        public static CollisionManifold SphereBoxCollision(Collidable<Box> boxA, Collidable<Sphere> sphereB)
         {
-            Vector3 centre1 = shapeA.Position.Centre;
-            Vector3 centre2 = shapeB.Position.Centre;
-            float radius = shapeA.Shape.Radius;
+            // treat the box as being at the origin with no rotation
+
+            var transformA = boxA.Position.ToMatrix();
+            var transformB = Matrix4x4.CreateTranslation(sphereB.Position.Centre); // ignore orientation
+
+            _ = Matrix4x4.Invert(transformA, out var inverseA);
+            var transformBToA = transformB * inverseA;// * inverseA;
+
+            Vector3 sphereCentre = Vector3.Transform(sphereB.Position.Centre, inverseA);
+
+            Vector3 centreA = new Vector3();
+            Vector3 centreB = sphereCentre;
+            float radius = sphereB.Shape.Radius;
             float radiusSq = radius * radius;
-            Vector3 half = shapeB.Shape.Dimensions * 0.5f;
+            Vector3 half = boxA.Shape.Dimensions * 0.5f;
 
-            Vector3 min = centre2 - half;
-            Vector3 max = centre2 + half;
+            Vector3 min = -half;
+            Vector3 max = half;
 
-            Vector3 closestPoint = Vector3.Clamp(centre1, min, max);
+            Vector3 closestPoint = Vector3.Clamp(centreB, min, max);
 
-            Vector3 difference = centre1 - closestPoint;
+            Vector3 difference = centreB - closestPoint;
             float distanceSq = difference.LengthSquared();
 
             if (distanceSq > radiusSq)
+            {
                 return CollisionManifold.NoCollision();
+            }
 
             float distance = MathF.Sqrt(distanceSq);
 
@@ -45,7 +53,7 @@ namespace Frinkahedron.Core.Colliders
             else
             {
                 // Sphere center inside AABB – find nearest face
-                Vector3 local = centre1 - centre2;
+                Vector3 local = centreB - centreA;
 
                 float dx = half.X - MathF.Abs(local.X);
                 float dy = half.Y - MathF.Abs(local.Y);
@@ -59,10 +67,21 @@ namespace Frinkahedron.Core.Colliders
                     normal = new Vector3(0, 0, MathF.Sign(local.Z));
 
                 penetration = radius + MathF.Min(dx, MathF.Min(dy, dz));
-                closestPoint = centre1 - normal * radius;
+                closestPoint = centreB - normal * radius;
             }
 
-            return new CollisionManifold([closestPoint], -normal, penetration);
+            normal = Vector3.Transform(normal, boxA.Position.Orientation);
+            closestPoint = Vector3.Transform(closestPoint, transformA);
+
+            return new CollisionManifold([closestPoint], normal, penetration);
+        }
+    }
+
+    public struct BoxSphereTester : ICollisionPairTester<Box, Sphere>
+    {
+        public static CollisionManifold Test(Collidable<Box> shapeA, Collidable<Sphere> shapeB)
+        {
+            return SphereBoxTester.Test(shapeB, shapeA).Invert();
         }
     }
 }

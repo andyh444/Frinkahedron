@@ -63,32 +63,17 @@ namespace Frinkahedron.Core.Colliders
 
             var transformBToA = transformB * inverseA;
 
-            Span<Vector3> axesA = [
+            Span<Vector3> axesA = stackalloc Vector3[] {
                 Vector3.UnitX,
                 Vector3.UnitY,
                 Vector3.UnitZ,
-                ];
+            };
 
-            Span<Vector3> axesB = [
+            Span<Vector3> axesB = stackalloc Vector3[] {
                 Vector3.TransformNormal(Vector3.UnitX, transformBToA),
                 Vector3.TransformNormal(Vector3.UnitY, transformBToA),
                 Vector3.TransformNormal(Vector3.UnitZ, transformBToA),
-                ];
-
-            Span<Vector3> crossAxes = stackalloc Vector3[9];
-            int index = 0;
-            foreach (var axisA in axesA)
-            {
-                foreach (var axisB in axesB)
-                {
-                    var cross = Vector3.Cross(axisA, axisB);
-                    var lengthSq = cross.LengthSquared();
-                    if (lengthSq > 1e-6f)
-                    {
-                        crossAxes[index++] = cross / MathF.Sqrt(lengthSq);
-                    }
-                }
-            }
+            };
 
             Span<Vector3> cornersA = stackalloc Vector3[8];
             boxA.GetCorners(cornersA);
@@ -111,6 +96,21 @@ namespace Frinkahedron.Core.Colliders
             if (!TestAxes(cornersA, cornersB, axesB, ref bestNormal, ref bestPenetration))
             {
                 return CollisionManifold.NoCollision();
+            }
+            
+            Span<Vector3> crossAxes = stackalloc Vector3[9];
+            int index = 0;
+            foreach (var axisA in axesA)
+            {
+                foreach (var axisB in axesB)
+                {
+                    var cross = Vector3.Cross(axisA, axisB);
+                    var lengthSq = cross.LengthSquared();
+                    if (lengthSq > 1e-6f)
+                    {
+                        crossAxes[index++] = Vector3.Normalize(cross);// / MathF.Sqrt(lengthSq);
+                    }
+                }
             }
 
             if (!TestAxes(cornersA, cornersB, crossAxes[..index], ref bestNormal, ref bestPenetration))
@@ -143,14 +143,7 @@ namespace Frinkahedron.Core.Colliders
 
             var contactPoints = CalculateContactPoints2(boxA, positionA, axesA, boxB, positionB, axesB, bestNormal, bestPenetration);
 
-            var contactPoint = new Vector3();
-            foreach (var p in contactPoints)
-            {
-                contactPoint += p;
-            }
-            contactPoint /= contactPoints.Count;
-
-            return new CollisionManifold(contactPoints.ToArray(), bestNormal, bestPenetration);
+            return new CollisionManifold(contactPoints, bestNormal, bestPenetration);
         }
 
         private static List<Vector3> CalculateContactPoints(Vector3 boxADimensions, Span<Vector3> cornersB)
@@ -173,7 +166,7 @@ namespace Frinkahedron.Core.Colliders
             // need to consider other cases e.g. edge-face intersection, A corners inside B
         }
 
-        private static List<Vector3> CalculateContactPoints2(
+        private static Vector3[] CalculateContactPoints2(
             Box boxA,
             Position positionA,
             Span<Vector3> axesA,
@@ -204,12 +197,12 @@ namespace Frinkahedron.Core.Colliders
             }
             if (contacts.Count <= 4)
             {
-                return contacts.Select(x => x.Item1).ToList();
+                return contacts.Select(x => x.Item1).ToArray();
             }
             return PickFourPoints(contacts);
         }
 
-        private static List<Vector3> PickFourPoints(List<(Vector3 Position, float Depth)> candidates)
+        private static Vector3[] PickFourPoints(List<(Vector3 Position, float Depth)> candidates)
         {
             int deepest = 0;
             float maxDepth = candidates[0].Depth;
@@ -278,18 +271,19 @@ namespace Frinkahedron.Core.Colliders
                 }
             }
 
-            return new List<Vector3>
-            {
+            return
+            [
                 candidates[deepest].Position,
                 candidates[farthest].Position,
                 candidates[third].Position,
                 candidates[fourth].Position
-            };
+            ];
         }
 
         private static List<Vector3> ClipFaces(Face reference, Face incident)
         {
-            var polygon = new List<Vector3>(incident.GetVertices());
+            var polygon = incident.GetVertices();
+            List<Vector3> outputBuffer = new List<Vector3>(8);
 
             var t1 = reference.Tangent1;
             var t2 = reference.Tangent2;
@@ -298,7 +292,7 @@ namespace Frinkahedron.Core.Colliders
             var e2 = reference.HalfExtent2;
 
             // 4 edge planes of the reference face
-            var planes = new (Vector3 point, Vector3 normal)[]
+            Span<(Vector3 point, Vector3 normal)> planes = stackalloc (Vector3 point, Vector3 normal)[]
             {
                 (reference.Centre + t1 * e1,  t1),
                 (reference.Centre - t1 * e1, -t1),
@@ -308,8 +302,8 @@ namespace Frinkahedron.Core.Colliders
 
             foreach (var (point, normal) in planes)
             {
-                polygon = ClipPolygon(polygon, point, normal);
-
+                ClipPolygon(polygon, outputBuffer, point, normal);
+                (polygon, outputBuffer) = (outputBuffer, polygon);
                 if (polygon.Count == 0)
                     break;
             }
@@ -317,14 +311,13 @@ namespace Frinkahedron.Core.Colliders
             return polygon;
         }
 
-        static List<Vector3> ClipPolygon(List<Vector3> polygon, Vector3 planePoint, Vector3 planeNormal)
+        private static void ClipPolygon(List<Vector3> input, List<Vector3> output, Vector3 planePoint, Vector3 planeNormal)
         {
-            var result = new List<Vector3>();
-
-            for (int i = 0; i < polygon.Count; i++)
+            output.Clear();
+            for (int i = 0; i < input.Count; i++)
             {
-                var a = polygon[i];
-                var b = polygon[(i + 1) % polygon.Count];
+                var a = input[i];
+                var b = input[(i + 1) % input.Count];
 
                 float da = Vector3.Dot(a - planePoint, planeNormal);
                 float db = Vector3.Dot(b - planePoint, planeNormal);
@@ -334,22 +327,20 @@ namespace Frinkahedron.Core.Colliders
 
                 if (aInside && bInside)
                 {
-                    result.Add(b);
+                    output.Add(b);
                 }
                 else if (aInside && !bInside)
                 {
                     float t = da / (da - db);
-                    result.Add(a + t * (b - a));
+                    output.Add(a + t * (b - a));
                 }
                 else if (!aInside && bInside)
                 {
                     float t = da / (da - db);
-                    result.Add(a + t * (b - a));
-                    result.Add(b);
+                    output.Add(a + t * (b - a));
+                    output.Add(b);
                 }
             }
-
-            return result;
         }
 
         private readonly record struct Face(Vector3 Centre, Vector3 Tangent1, Vector3 Tangent2, float HalfExtent1, float HalfExtent2)
@@ -402,18 +393,17 @@ namespace Frinkahedron.Core.Colliders
                     halfDimensions.Y);
             }
 
-            public Vector3[] GetVertices()
+            public List<Vector3> GetVertices()
             {
                 var t1 = Tangent1 * HalfExtent1;
                 var t2 = Tangent2 * HalfExtent2;
 
-                return new[]
-                {
+                return [
                     Centre - t1 - t2,
                     Centre + t1 - t2,
                     Centre + t1 + t2,
                     Centre - t1 + t2
-                };
+                ];
             }
         }
 

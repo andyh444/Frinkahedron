@@ -75,6 +75,14 @@ namespace Frinkahedron.Core.Physics
             IShape shapeB,
             RigidBody bodyB)
         {
+            float inverseMassA = bodyA.InverseMass;
+            float inverseMassB = bodyB.InverseMass;
+
+            if (inverseMassA < 1e-3 && inverseMassB < 1e-3)
+            {
+                return false;
+            }
+
             var manifold = CollisionPairTester.Test(positionA, shapeA, positionB, shapeB);
             if (manifold.Points.Length == 0)
             {
@@ -83,9 +91,7 @@ namespace Frinkahedron.Core.Physics
 
             Vector3 normal = manifold.Normal;
             float penetration = manifold.Penetration;
-            float inverseMassA = bodyA.InverseMass;
-            float inverseMassB = bodyB.InverseMass;
-
+            
             foreach (var contactPoint in manifold.Points)
             {
                 
@@ -102,7 +108,7 @@ namespace Frinkahedron.Core.Physics
                 float speedAlongNormal = Vector3.Dot(rv, normal);
                 if (speedAlongNormal < 0)
                 {
-                    float e = 0.2f; // Coefficient of restitution (elasticity), adjust as needed
+                    float e = 0.1f; // Coefficient of restitution (elasticity), adjust as needed
                     float j = -(1 + e) * speedAlongNormal;
 
                     float denom = inverseMassA + inverseMassB;

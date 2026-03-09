@@ -54,25 +54,44 @@ namespace Frinkahedron.TestApp
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
 
+            gameObjects.Add(new GameObject(new Vector3(0, 10, 93),
+                null,
+                new Box(new Vector3(100, 10, 100)),
+                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
 
-            //gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 2 * MathF.PI + MathF.PI / 10, 0);
+            gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, -MathF.PI / 5, 0);
 
-            for (int i = 0; i < 50; i++)
+            gameObjects.Add(new GameObject(new Vector3(0, 10, -93),
+                null,
+                new Box(new Vector3(100, 10, 100)),
+                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
+
+            gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0);
+
+
+            for (int i = 0; i < 250; i++)
             {
-                //float radius = r.NextSingle(1.5f, 2.5f);
-                //var collider = new Sphere(radius);
-
-                Vector3 dimensions = new Vector3(r.NextSingle(1f, 3f), r.NextSingle(1f, 3f), r.NextSingle(1f, 9f));
-                var collider = new Box(dimensions);
-
+                IShape collider;
+                float density;
+                if (r.NextSingle() < 0.75f)
+                {
+                    float radius = r.NextSingle(1.5f, 2.5f);
+                    collider = new Sphere(radius);
+                    density = 10f;
+                }
+                else
+                {
+                    Vector3 dimensions = new Vector3(r.NextSingle(1f, 3f), r.NextSingle(1f, 3f), r.NextSingle(1f, 9f));
+                    collider = new Box(dimensions);
+                    density = 1f;
+                }
                 float volume = collider.CalculateVolume();
-                float density = 1f;
                 float mass = density * volume;
 
                 var inertia = collider.CalculateFilledInertia(mass);
 
                 gameObjects.Add(new GameObject(
-                    new Vector3(r.NextSingle(-20f, 20f), r.NextSingle(5f, 20f), 0/*r.NextSingle(-20f, 20f)*/),
+                    new Vector3(0, r.NextSingle(5f, 20f), r.NextSingle(-150f, 150f)),
                     null,
                     collider,
                     new Core.Physics.RigidBody
@@ -80,7 +99,7 @@ namespace Frinkahedron.TestApp
                         Mass = mass,
                         Inertia = inertia,
                         Gravity = true,
-                        //Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f))
+                        Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f))
                     }));
 
                 gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI));
@@ -106,8 +125,8 @@ namespace Frinkahedron.TestApp
                 {
                     var inputSnapshot = _window.PumpEvents();
                     UpdateInput(gameState.Input, inputSnapshot);
-                    gameState.DeltaTime /= 50;
-                    for (int i = 0; i < 50; i++)
+                    gameState.DeltaTime /= 20;
+                    for (int i = 0; i < 20; i++)
                     {
                         _scene.Update(gameState);
                     }
