@@ -86,6 +86,8 @@ namespace Frinkahedron.Core.Physics
             float inverseMassA = bodyA.InverseMass;
             float inverseMassB = bodyB.InverseMass;
 
+            List<(Vector3 impulse, Vector3 ra, Vector3 rb)> impulseList = new List<(Vector3 impulse, Vector3 ra, Vector3 rb)>();
+
             foreach (var contactPoint in manifold.Points)
             {
                 
@@ -119,10 +121,10 @@ namespace Frinkahedron.Core.Physics
                     denom += Vector3.Dot(normal, cross);
 
                     j /= denom;
+                    j /= manifold.Points.Length;
                     Vector3 impulse = j * normal;
 
-                    bodyA.ApplyImpulse(impulse, ra, positionA.Orientation);
-                    bodyB.ApplyImpulse(-impulse, rb, positionB.Orientation);
+                    impulseList.Add((impulse, ra, rb));
 
                     Vector3 tangent = rv - speedAlongNormal * normal;
                     float speedAlongTangent = tangent.Length();
@@ -145,18 +147,24 @@ namespace Frinkahedron.Core.Physics
                         denomT += Vector3.Dot(tangent, crossT);
 
                         jt /= denomT;
+                        jt /= manifold.Points.Length;
 
-                        float frictionCoefficient = 1.6f;// 0.8f;
+                        float frictionCoefficient = 0.8f;// 0.8f;
                         float maxFriction = j * frictionCoefficient;
                         jt = Math.Clamp(jt, -maxFriction, maxFriction);
                         Vector3 frictionImpulse = jt * tangent;
 
-                        bodyA.ApplyImpulse(frictionImpulse, ra, positionA.Orientation);
-                        bodyB.ApplyImpulse(-frictionImpulse, rb, positionB.Orientation);
-
+                        //bodyA.ApplyImpulse(frictionImpulse, ra, positionA.Orientation);
+                        //bodyB.ApplyImpulse(-frictionImpulse, rb, positionB.Orientation);
+                        impulseList.Add((frictionImpulse, ra, rb));
                     }
                 }
+            }
 
+            foreach ((var impulse, var ra, var rb) in impulseList)
+            {
+                bodyA.ApplyImpulse(impulse, ra, positionA.Orientation);
+                bodyB.ApplyImpulse(-impulse, rb, positionB.Orientation);
             }
 
             float correctionMag = penetration * 1.6f / (inverseMassA + inverseMassB);
