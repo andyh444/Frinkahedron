@@ -1,4 +1,5 @@
 ﻿using Frinkahedron.Core.Physics;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace Frinkahedron.Core.Colliders
@@ -7,17 +8,31 @@ namespace Frinkahedron.Core.Colliders
     {
         public static CollisionManifold Test(Collidable<Box> shapeA, Collidable<Box> shapeB)
         {
-            /*if (shapeB.Position.Orientation.IsIdentity)
+            // the most reliable way seems to be to do it in both orders and pick the best one
+            // TODO: Get rid of the need to do this
+            var manifold = BoxBoxCollision(shapeA.Shape, shapeA.Position, shapeB.Shape, shapeB.Position);
+            var manifoldReversed = BoxBoxCollision(shapeB.Shape, shapeB.Position, shapeA.Shape, shapeA.Position);
+
+            if (!manifold.CollisionFound && !manifoldReversed.CollisionFound)
             {
-                return BoxAABBCollision(shapeA.Shape, shapeA.Position, shapeB.Shape, shapeB.Position.Centre);
+                return CollisionManifold.NoCollision();
             }
 
-            else if (shapeA.Position.Orientation.IsIdentity)
+            if (manifold.CollisionFound && !manifoldReversed.CollisionFound)
             {
-                return BoxAABBCollision(shapeB.Shape, shapeB.Position, shapeA.Shape, shapeA.Position.Centre).Invert();
+                return manifold;
             }
-            return CollisionManifold.NoCollision();*/
-            return BoxBoxCollision(shapeA.Shape, shapeA.Position, shapeB.Shape, shapeB.Position);
+
+            if (!manifold.CollisionFound && manifoldReversed.CollisionFound)
+            {
+                return manifoldReversed.Invert();
+            }
+
+            if (manifold.Penetration < manifoldReversed.Penetration)
+            {
+                return manifold;
+            }
+            return manifoldReversed.Invert();
         }
 
         public static CollisionManifold BoxAABBCollision(Box boxCollider, Position boxPosition, Box aabbCollider, Vector3 aabbPosition)
@@ -182,6 +197,10 @@ namespace Frinkahedron.Core.Colliders
                 {
                     contacts.Add((p, depth));
                 }
+            }
+            if (contacts.Count == 0)
+            {
+                //Debugger.Break();
             }
             if (contacts.Count <= 4)
             {
@@ -412,7 +431,6 @@ namespace Frinkahedron.Core.Colliders
                 }
 
                 float overlap = MathF.Min(maxA, maxB) - MathF.Max(minA, minB);
-
                 if (overlap < bestPenetration)
                 {
                     bestPenetration = overlap;

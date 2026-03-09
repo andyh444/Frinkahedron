@@ -8,6 +8,8 @@ namespace Frinkahedron.Core.Colliders
         public Vector3 Normal { get; } = Normal;
         public float Penetration { get; } = Penetration;
 
+        public bool CollisionFound => Points.Length > 0;
+
         public static CollisionManifold NoCollision() => new CollisionManifold([], default, default);
 
         public CollisionManifold Invert() => new CollisionManifold(Points, -Normal, Penetration);

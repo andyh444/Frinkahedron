@@ -49,15 +49,20 @@ namespace Frinkahedron.TestApp
             
             Random r = Random.Shared;
 
-            
+            gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
+                new OrbitalCameraMouseBehaviour(),
+                new Box(new Vector3(100, 10, 100)),
+                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
+
+
             //gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 2 * MathF.PI + MathF.PI / 10, 0);
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 50; i++)
             {
                 //float radius = r.NextSingle(1.5f, 2.5f);
                 //var collider = new Sphere(radius);
 
-                Vector3 dimensions = new Vector3(r.NextSingle(1f, 3f), r.NextSingle(1f, 3f), r.NextSingle(1f, 3f));
+                Vector3 dimensions = new Vector3(r.NextSingle(1f, 3f), r.NextSingle(1f, 3f), r.NextSingle(1f, 9f));
                 var collider = new Box(dimensions);
 
                 float volume = collider.CalculateVolume();
@@ -67,7 +72,7 @@ namespace Frinkahedron.TestApp
                 var inertia = collider.CalculateFilledInertia(mass);
 
                 gameObjects.Add(new GameObject(
-                    new Vector3(r.NextSingle(-20f, 20f), r.NextSingle(5f, 10f), 0/*r.NextSingle(-20f, 20f)*/),
+                    new Vector3(r.NextSingle(-20f, 20f), r.NextSingle(5f, 20f), 0/*r.NextSingle(-20f, 20f)*/),
                     null,
                     collider,
                     new Core.Physics.RigidBody
@@ -81,11 +86,7 @@ namespace Frinkahedron.TestApp
                 gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI));
             }
 
-            gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
-                new OrbitalCameraMouseBehaviour(),
-                new Box(new Vector3(100, 10, 100)),
-                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
-
+            
 
 
             //gameObjects.Add(new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new OrbitalCameraMouseBehaviour()]), new BoxCollider(new Vector3(1, 1.25f, 1.5f))));

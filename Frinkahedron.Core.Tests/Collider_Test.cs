@@ -21,23 +21,24 @@ namespace Frinkahedron.Core.Tests
                 Assert.That(manifold.Normal, Is.EqualTo(testCase.ExpectedNormal));
                 //Assert.That(manifold.Penetration, Is.EqualTo(testCase.ExpectedPenetration).Within(1e-3));
             }
-
-            // now check the same but with the objects swapped. The result should be the same but with the normal pointing the other way
-            var reverseManifold = CollisionPairTester.Test(
-                testCase.CollisionObjectB.Position,
-                testCase.CollisionObjectB.Collider,
-                testCase.CollisionObjectA.Position,
-                testCase.CollisionObjectA.Collider);
-
-            Assert.That(reverseManifold.Points.Length > 0, Is.EqualTo(testCase.CollisionExpected));
-            if (testCase.CollisionExpected)
-            {
-                Assert.That(reverseManifold.Normal, Is.EqualTo(-testCase.ExpectedNormal));
-                //Assert.That(reverseManifold.Penetration, Is.EqualTo(testCase.ExpectedPenetration).Within(1e-3));
-            }
         }
 
         private static IEnumerable<TestCase> GetTestCases()
+        {
+            foreach (var testCase in GetForwardTestCases())
+            {
+                yield return testCase;
+                yield return new TestCase(
+                    testCase.CollisionObjectB,
+                    testCase.CollisionObjectA,
+                    testCase.CollisionExpected,
+                    -testCase.ExpectedNormal,
+                    testCase.ExpectedPenetration,
+                    testCase.ToString() + "-Reversed");
+            }
+        }
+
+        private static IEnumerable<TestCase> GetForwardTestCases()
         {
             var sphere1 = CreateSphere(new Vector3(0, 0, 0), 1.01f);
             var sphere2 = CreateSphere(new Vector3(2, 0, 0), 1.01f);
@@ -54,6 +55,13 @@ namespace Frinkahedron.Core.Tests
             box2.Position.Orientation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathF.PI / 4);
 
             yield return new TestCase(box1, box2, true, new Vector3(-1, 0, 0), 0.293f, "Colliding boxes");
+
+            // real world problematic case
+            var box3 = CreateAxisAlignedBox(new Vector3(-8.036688f, -13.5663185f, 0), new Vector3(2.4534235f, 1.1443835f, 2.5965152f));
+            box3.Position.Orientation = new Quaternion(0.10432941f, -0.6247331f, 0.7655363f, 0.113040484f);
+
+            var box4 = CreateAxisAlignedBox(new Vector3(0, -20, 0), new Vector3(100, 10, 100));
+            yield return new TestCase(box3, box4, true, new Vector3(0, 1, 0), 0.293f, "Colliding boxes 2");
         }
 
         private static TestObject CreateSphere(Vector3 centre, float radius)
