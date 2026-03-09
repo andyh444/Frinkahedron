@@ -135,7 +135,7 @@ namespace Frinkahedron.Core.Colliders
             }
             contactPoint /= contactPoints.Count;
 
-            return new CollisionManifold(contactPoints.ToArray(), bestNormal, 30 * bestPenetration);
+            return new CollisionManifold(contactPoints.ToArray(), bestNormal, bestPenetration);
         }
 
         private static List<Vector3> CalculateContactPoints(Vector3 boxADimensions, Span<Vector3> cornersB)
