@@ -54,7 +54,7 @@ namespace Frinkahedron.TestApp
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
 
-            gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 2 * MathF.PI + MathF.PI / 10, 0);
+            //gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 2 * MathF.PI + MathF.PI / 10, 0);
 
             for (int i = 0; i < 1; i++)
             {
@@ -105,8 +105,8 @@ namespace Frinkahedron.TestApp
                 {
                     var inputSnapshot = _window.PumpEvents();
                     UpdateInput(gameState.Input, inputSnapshot);
-                    gameState.DeltaTime /= 20;
-                    for (int i = 0; i < 20; i++)
+                    gameState.DeltaTime /= 50;
+                    for (int i = 0; i < 50; i++)
                     {
                         _scene.Update(gameState);
                     }
