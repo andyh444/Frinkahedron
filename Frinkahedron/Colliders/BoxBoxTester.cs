@@ -8,71 +8,28 @@ namespace Frinkahedron.Core.Colliders
     {
         public static CollisionManifold Test(Collidable<Box> shapeA, Collidable<Box> shapeB)
         {
-            // the most reliable way seems to be to do it in both orders and pick the best one
-            // TODO: Get rid of the need to do this
-            var manifold = BoxBoxCollision(shapeA.Shape, shapeA.Position, shapeB.Shape, shapeB.Position);
-            var manifoldReversed = BoxBoxCollision(shapeB.Shape, shapeB.Position, shapeA.Shape, shapeA.Position);
-
-            if (!manifold.CollisionFound && !manifoldReversed.CollisionFound)
-            {
-                return CollisionManifold.NoCollision();
-            }
-
-            if (manifold.CollisionFound && !manifoldReversed.CollisionFound)
-            {
-                return manifold;
-            }
-
-            if (!manifold.CollisionFound && manifoldReversed.CollisionFound)
-            {
-                return manifoldReversed.Invert();
-            }
-
-            if (manifold.Penetration < manifoldReversed.Penetration)
-            {
-                return manifold;
-            }
-            return manifoldReversed.Invert();
+            return BoxBoxCollision(shapeA.Shape, shapeA.Position, shapeB.Shape, shapeB.Position);
         }
 
-        public static CollisionManifold BoxAABBCollision(Box boxCollider, Position boxPosition, Box aabbCollider, Vector3 aabbPosition)
-        {
-            float aabbTop = aabbCollider.Dimensions.Y / 2 + aabbPosition.Y;
-            Matrix4x4 transform = boxPosition.ToMatrix();
-
-            List<Vector3> points = new List<Vector3>();
-            float penetration = 0;
-            foreach (var corner in boxCollider.GetCorners())
-            {
-                Vector3 tc = Vector3.Transform(corner, transform);
-                if (tc.Y < aabbTop)
-                {
-                    points.Add(tc);
-                    penetration = Math.Max(penetration, aabbTop - tc.Y);
-                }
-            }
-            return new CollisionManifold(points.ToArray(), Vector3.UnitY, penetration);
-        }
-
-        public static CollisionManifold BoxBoxCollision(Box boxA, Position positionA, Box boxB, Position positionB)
+        private static CollisionManifold BoxBoxCollision(
+            Box boxA,
+            Position positionA,
+            Box boxB,
+            Position positionB)
         {
             var transformA = positionA.ToMatrix();
             var transformB = positionB.ToMatrix();
 
-            _ = Matrix4x4.Invert(transformA, out var inverseA);
-
-            var transformBToA = transformB * inverseA;
-
             Span<Vector3> axesA = stackalloc Vector3[] {
-                Vector3.UnitX,
-                Vector3.UnitY,
-                Vector3.UnitZ,
+                Vector3.TransformNormal(Vector3.UnitX, transformA),
+                Vector3.TransformNormal(Vector3.UnitY, transformA),
+                Vector3.TransformNormal(Vector3.UnitZ, transformA),
             };
 
             Span<Vector3> axesB = stackalloc Vector3[] {
-                Vector3.TransformNormal(Vector3.UnitX, transformBToA),
-                Vector3.TransformNormal(Vector3.UnitY, transformBToA),
-                Vector3.TransformNormal(Vector3.UnitZ, transformBToA),
+                Vector3.TransformNormal(Vector3.UnitX, transformB),
+                Vector3.TransformNormal(Vector3.UnitY, transformB),
+                Vector3.TransformNormal(Vector3.UnitZ, transformB),
             };
 
             Span<Vector3> cornersA = stackalloc Vector3[8];
@@ -82,7 +39,8 @@ namespace Frinkahedron.Core.Colliders
             boxB.GetCorners(cornersB);
             for (int i = 0; i < cornersB.Length; i++)
             {
-                cornersB[i] = Vector3.Transform(cornersB[i], transformBToA);
+                cornersA[i] = Vector3.Transform(cornersA[i], transformA);
+                cornersB[i] = Vector3.Transform(cornersB[i], transformB);
             }
 
             Vector3 bestNormal = default;
@@ -108,7 +66,7 @@ namespace Frinkahedron.Core.Colliders
                     var lengthSq = cross.LengthSquared();
                     if (lengthSq > 1e-6f)
                     {
-                        crossAxes[index++] = Vector3.Normalize(cross);// / MathF.Sqrt(lengthSq);
+                        crossAxes[index++] = Vector3.Normalize(cross);
                     }
                 }
             }
@@ -118,9 +76,6 @@ namespace Frinkahedron.Core.Colliders
                 return CollisionManifold.NoCollision();
             }
 
-            // rotate normal back to world space
-            bestNormal = Vector3.Transform(bestNormal, positionA.Orientation);
-
             // normal needs to point from B to A
             Vector3 centerA = positionA.Centre;
             Vector3 centerB = positionB.Centre;
@@ -129,44 +84,17 @@ namespace Frinkahedron.Core.Colliders
                 bestNormal = -bestNormal;
             }
 
-            /*Vector3[] contactPoints = CalculateContactPoints(boxA.Dimensions, cornersB)
-                .Select(x => Vector3.Transform(x, transformA))
-                .ToArray();*/
-
-            axesA[0] = Vector3.TransformNormal(Vector3.UnitX, transformA);
-            axesA[1] = Vector3.TransformNormal(Vector3.UnitY, transformA);
-            axesA[2] = Vector3.TransformNormal(Vector3.UnitZ, transformA);
-
-            axesB[0] = Vector3.TransformNormal(Vector3.UnitX, transformB);
-            axesB[1] = Vector3.TransformNormal(Vector3.UnitY, transformB);
-            axesB[2] = Vector3.TransformNormal(Vector3.UnitZ, transformB);
-
-            var contactPoints = CalculateContactPoints2(boxA, positionA, axesA, boxB, positionB, axesB, bestNormal, bestPenetration);
-
+            var contactPoints = CalculateContactPoints(boxA, positionA, axesA, boxB, positionB, axesB, bestNormal, bestPenetration);
+            if (contactPoints.Length == 0)
+            {
+                // when it fails, doing the same thing in reverse often seems to just do the trick
+                // TODO: Get rid of the need for this
+                contactPoints = CalculateContactPoints(boxB, positionB, axesB, boxA, positionA, axesA, -bestNormal, bestPenetration);
+            }
             return new CollisionManifold(contactPoints, bestNormal, bestPenetration);
         }
 
-        private static List<Vector3> CalculateContactPoints(Vector3 boxADimensions, Span<Vector3> cornersB)
-        {
-            // simple case - one of B's corners is inside A
-            Vector3 halfA = boxADimensions / 2;
-            List<Vector3> contactPoints = new List<Vector3>();
-            foreach (var corner in cornersB)
-            {
-                if (MathF.Abs(corner.X) < halfA.X
-                    && MathF.Abs(corner.Y) < halfA.Y
-                    && MathF.Abs(corner.Z) < halfA.Z)
-                {
-                    contactPoints.Add(corner);
-                    //break;
-                }
-            }
-            return contactPoints;
-
-            // need to consider other cases e.g. edge-face intersection, A corners inside B
-        }
-
-        private static Vector3[] CalculateContactPoints2(
+        private static Vector3[] CalculateContactPoints(
             Box boxA,
             Position positionA,
             Span<Vector3> axesA,
