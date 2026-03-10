@@ -12,7 +12,7 @@ namespace Frinkahedron.Core.Colliders
     {
         public void Draw(IRenderer renderer, Matrix4x4 position);
 
-        public Matrix3x3 CalculateFilledInertia(float mass);
+        public DiagonalMatrix3x3 CalculateFilledInertia(float mass);
 
         public float CalculateVolume();
     }

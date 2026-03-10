@@ -18,7 +18,10 @@ namespace Frinkahedron.Core.Physics
 
         public required float Mass { get; init; }
 
-        public Matrix3x3 Inertia { get; set; }
+        /// <summary>
+        /// Inverse body inertia tensor
+        /// </summary>
+        public DiagonalMatrix3x3 InverseInertia { get; set; }
 
         public bool Gravity { get; set; }
 
@@ -36,20 +39,11 @@ namespace Frinkahedron.Core.Physics
 
         public Matrix3x3 InverseWorldInertia(Quaternion orientation)
         {
-            Matrix4x4 rot4 = Matrix4x4.CreateFromQuaternion(orientation);
-
-            Matrix3x3 R = new Matrix3x3(
-                new Vector3(rot4.M11, rot4.M12, rot4.M13),
-                new Vector3(rot4.M21, rot4.M22, rot4.M23),
-                new Vector3(rot4.M31, rot4.M32, rot4.M33));
-
+            Matrix3x3 R = Matrix3x3.CreateFromQuaternion(orientation);
             Matrix3x3 Rt = R.Transpose();
 
-            var worldInertia = R * Inertia * Rt;
-            return worldInertia.GetInverse();
+            return R * InverseInertia * Rt;
         }
-
-        public bool HasInfiniteInertia => float.IsPositiveInfinity(Inertia.Row1.X);
 
         public void IntegratePosition(float deltaTime, Position position)
         {
@@ -89,6 +83,9 @@ namespace Frinkahedron.Core.Physics
                 return false;
             }
 
+            var inverseInertiaA = bodyA.InverseWorldInertia(positionA.Orientation);
+            var inverseInertiaB = bodyB.InverseWorldInertia(positionB.Orientation);
+
             Vector3 normal = manifold.Normal;
             float penetration = manifold.Penetration;
             
@@ -111,25 +108,17 @@ namespace Frinkahedron.Core.Physics
                     float e = 0.1f; // Coefficient of restitution (elasticity), adjust as needed
                     float j = -(1 + e) * speedAlongNormal;
 
-                    float denom = inverseMassA + inverseMassB;
 
-                    Vector3 cross = new Vector3();
-                    if (!bodyA.HasInfiniteInertia)
-                    {
-                        cross += Vector3.Cross(bodyA.InverseWorldInertia(positionA.Orientation) * Vector3.Cross(ra, normal), ra);
-                    }
-                    if (!bodyB.HasInfiniteInertia)
-                    {
-                        cross += Vector3.Cross(bodyB.InverseWorldInertia(positionB.Orientation) * Vector3.Cross(rb, normal), rb);
-                    }
-                    denom += Vector3.Dot(normal, cross);
+                    Vector3 cross = Vector3.Cross(inverseInertiaA * Vector3.Cross(ra, normal), ra)
+                        + Vector3.Cross(inverseInertiaB * Vector3.Cross(rb, normal), rb);
+
+                    float denom = (inverseMassA + inverseMassB + Vector3.Dot(normal, cross)) * manifold.Points.Length;
 
                     j /= denom;
-                    j /= manifold.Points.Length;
                     Vector3 impulse = j * normal;
 
-                    bodyA.ApplyImpulse(impulse, ra, positionA.Orientation);
-                    bodyB.ApplyImpulse(-impulse, rb, positionB.Orientation);
+                    bodyA.ApplyImpulse(impulse, ra, inverseInertiaA);
+                    bodyB.ApplyImpulse(-impulse, rb, inverseInertiaB);
 
                     Vector3 tangent = rv - speedAlongNormal * normal;
                     float speedAlongTangent = tangent.Length();
@@ -138,29 +127,20 @@ namespace Frinkahedron.Core.Physics
                         tangent /= speedAlongTangent;
 
                         float jt = -Vector3.Dot(rv, tangent);
-                        float denomT = inverseMassA + inverseMassB;
 
-                        Vector3 crossT = new Vector3();
-                        if (!bodyA.HasInfiniteInertia)
-                        {
-                            crossT += Vector3.Cross(bodyA.InverseWorldInertia(positionA.Orientation) * Vector3.Cross(ra, tangent), ra);
-                        }
-                        if (!bodyB.HasInfiniteInertia)
-                        {
-                            crossT += Vector3.Cross(bodyB.InverseWorldInertia(positionB.Orientation) * Vector3.Cross(rb, tangent), rb);
-                        }
-                        denomT += Vector3.Dot(tangent, crossT);
+                        Vector3 crossT = Vector3.Cross(inverseInertiaA * Vector3.Cross(ra, tangent), ra)
+                            + Vector3.Cross(inverseInertiaB * Vector3.Cross(rb, tangent), rb);
 
+                        float denomT = (inverseMassA + inverseMassB + Vector3.Dot(tangent, crossT)) * manifold.Points.Length;
                         jt /= denomT;
-                        jt /= manifold.Points.Length;
 
                         float frictionCoefficient = 0.8f;// 0.8f;
                         float maxFriction = j * frictionCoefficient;
                         jt = Math.Clamp(jt, -maxFriction, maxFriction);
                         Vector3 frictionImpulse = jt * tangent;
 
-                        bodyA.ApplyImpulse(frictionImpulse, ra, positionA.Orientation);
-                        bodyB.ApplyImpulse(-frictionImpulse, rb, positionB.Orientation);
+                        bodyA.ApplyImpulse(frictionImpulse, ra, inverseInertiaA);
+                        bodyB.ApplyImpulse(-frictionImpulse, rb, inverseInertiaB);
                     }
                 }
             }
@@ -178,13 +158,10 @@ namespace Frinkahedron.Core.Physics
             return true;
         }
 
-        public void ApplyImpulse(Vector3 impulse, Vector3 contactVector, Quaternion orientation)
+        public void ApplyImpulse(Vector3 impulse, Vector3 contactVector, Matrix3x3 inverseWorldInertia)
         {
             Velocity += InverseMass * impulse;
-            if (!HasInfiniteInertia)
-            {
-                AngularVelocity += InverseWorldInertia(orientation) * Vector3.Cross(contactVector, impulse);
-            }
+            AngularVelocity += inverseWorldInertia * Vector3.Cross(contactVector, impulse);
         }
     }
 }

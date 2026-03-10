@@ -8,7 +8,7 @@ namespace Frinkahedron.Core.Colliders
     {
         public Vector3 Dimensions { get; } = dimensions;
 
-        public Matrix3x3 CalculateFilledInertia(float mass)
+        public DiagonalMatrix3x3 CalculateFilledInertia(float mass)
         {
             return Inertia.CalculateFilledCubeInertia(Dimensions, mass);
         }

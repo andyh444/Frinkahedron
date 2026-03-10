@@ -8,7 +8,7 @@ namespace Frinkahedron.Core.Colliders
     {
         public float Radius { get; } = radius;
 
-        public Matrix3x3 CalculateFilledInertia(float mass)
+        public DiagonalMatrix3x3 CalculateFilledInertia(float mass)
         {
             return Inertia.CalculateFilledSphereInertia(Radius, mass);
         }

@@ -10,7 +10,7 @@ namespace Frinkahedron.Core.Physics
 {
     public static class Inertia
     {
-        public static Matrix3x3 CalculateFilledCubeInertia(Vector3 dimensions, float mass)
+        public static DiagonalMatrix3x3 CalculateFilledCubeInertia(Vector3 dimensions, float mass)
         {
             const float TWELFTH = 1f / 12f;
 
@@ -26,28 +26,15 @@ namespace Frinkahedron.Core.Physics
             float iy = TWELFTH * m * (w2 + d2);
             float iz = TWELFTH * m * (w2 + h2);
 
-            return new Matrix3x3(
-                new Vector3(ix, 0, 0),
-                new Vector3(0, iy, 0),
-                new Vector3(0, 0, iz));
+            return new DiagonalMatrix3x3(
+                new Vector3(ix, iy, iz));
         }
 
-        public static Matrix3x3 CalculateFilledSphereInertia(float radius, float mass)
+        public static DiagonalMatrix3x3 CalculateFilledSphereInertia(float radius, float mass)
         {
             float i = (2f / 5f) * mass * radius * radius;
-            return new Matrix3x3(
-                new Vector3(i, 0, 0),
-                new Vector3(0, i, 0),
-                new Vector3(0, 0, i));
-        }
-
-        public static Matrix3x3 CalculateInfiniteInertia()
-        {
-            float i = float.PositiveInfinity;
-            return new Matrix3x3(
-                new Vector3(i, 0, 0),
-                new Vector3(0, i, 0),
-                new Vector3(0, 0, i));
+            return new DiagonalMatrix3x3(
+                new Vector3(i, i, i));
         }
     }
 }

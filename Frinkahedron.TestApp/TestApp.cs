@@ -52,19 +52,19 @@ namespace Frinkahedron.TestApp
             gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
                 new OrbitalCameraMouseBehaviour(),
                 new Box(new Vector3(100, 10, 100)),
-                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
+                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false }));
 
             gameObjects.Add(new GameObject(new Vector3(0, 10, 93),
                 null,
                 new Box(new Vector3(100, 10, 100)),
-                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
+                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false }));
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, -MathF.PI / 5, 0);
 
             gameObjects.Add(new GameObject(new Vector3(0, 10, -93),
                 null,
                 new Box(new Vector3(100, 10, 100)),
-                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, Inertia = Inertia.CalculateInfiniteInertia(), Gravity = false }));
+                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false }));
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0);
 
@@ -97,7 +97,7 @@ namespace Frinkahedron.TestApp
                     new Core.Physics.RigidBody
                     {
                         Mass = mass,
-                        Inertia = inertia,
+                        InverseInertia = inertia.GetInverse(),
                         Gravity = true,
                         Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f))
                     }));

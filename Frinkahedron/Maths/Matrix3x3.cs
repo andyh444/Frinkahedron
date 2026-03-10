@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,16 +25,44 @@ namespace Frinkahedron.Core.Maths
             Row3 = row3;
         }
 
-        private Vector3 Column1() => new Vector3(Row1.X, Row2.X, Row3.X);
-        private Vector3 Column2() => new Vector3(Row1.Y, Row2.Y, Row3.Y);
-        private Vector3 Column3() => new Vector3(Row1.Z, Row2.Z, Row3.Z);
-
         public static Matrix3x3 Identity()
         {
             return new Matrix3x3(Vector3.UnitX, Vector3.UnitY, Vector3.UnitZ);
         }
 
-        internal Matrix3x3 Transpose()
+        public static Matrix3x3 CreateFromQuaternion(Quaternion q)
+        {
+            float x = q.X;
+            float y = q.Y;
+            float z = q.Z;
+            float w = q.W;
+
+            float x2 = x + x;
+            float y2 = y + y;
+            float z2 = z + z;
+
+            float xx = x * x2;
+            float yy = y * y2;
+            float zz = z * z2;
+            float xy = x * y2;
+            float xz = x * z2;
+            float yz = y * z2;
+            float wx = w * x2;
+            float wy = w * y2;
+            float wz = w * z2;
+
+            return new Matrix3x3(
+                new Vector3(1f - (yy + zz), xy - wz, xz + wy),
+                new Vector3(xy + wz, 1f - (xx + zz), yz - wx),
+                new Vector3(xz - wy, yz + wx, 1f - (xx + yy))
+            );
+        }
+
+        private Vector3 Column1() => new Vector3(Row1.X, Row2.X, Row3.X);
+        private Vector3 Column2() => new Vector3(Row1.Y, Row2.Y, Row3.Y);
+        private Vector3 Column3() => new Vector3(Row1.Z, Row2.Z, Row3.Z);
+
+        public Matrix3x3 Transpose()
         {
             return new Matrix3x3(
                 Column1(),
@@ -100,20 +129,32 @@ namespace Frinkahedron.Core.Maths
                 new Vector3(Vector3.Dot(r3, c1), Vector3.Dot(r3, c2), Vector3.Dot(r3, c3)));
         }
 
+        public static Matrix3x3 operator *(Matrix3x3 mat1, DiagonalMatrix3x3 mat2)
+        {
+            Vector3 r1 = mat1.Row1;
+            Vector3 r2 = mat1.Row2;
+            Vector3 r3 = mat1.Row3;
+            Vector3 d1 = mat2.Diagonal;
+
+            return new Matrix3x3(
+                ElementwiseMultiply(r1, d1),
+                ElementwiseMultiply(r2, d1),
+                ElementwiseMultiply(r3, d1));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector3 ElementwiseMultiply(Vector3 a, Vector3 b)
+        {
+            return new Vector3(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
+        }
+
         public static Vector3 operator *(Matrix3x3 mat, Vector3 vec)
         {
-            var v = new Vector3(
+            return new Vector3(
                 Vector3.Dot(mat.Row1, vec),
                 Vector3.Dot(mat.Row2, vec),
                 Vector3.Dot(mat.Row3, vec)
             );
-
-            if (float.IsNaN(v.X))
-            {
-                Debugger.Break();
-            }
-
-            return v;
         }
     }
 }
