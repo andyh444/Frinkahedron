@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -85,19 +86,25 @@ namespace Frinkahedron.Core.Maths
             return p1 + d1 * s;
         }
 
-        public float DistanceToSquared(Vector3 point)
+        public Vector3 ClosestPointTo(Vector3 other)
         {
             Vector3 ab = Point2 - Point1;
             float abLenSq = Vector3.Dot(ab, ab);
 
             if (abLenSq == 0f)
-                return Vector3.DistanceSquared(point, Point1);
+            {
+                return Point1;
+            }
 
-            float t = Vector3.Dot(point - Point1, ab) / abLenSq;
+            float t = Vector3.Dot(other - Point1, ab) / abLenSq;
             t = Math.Clamp(t, 0f, 1f);
 
-            Vector3 closest = Point1 + ab * t;
-            return Vector3.DistanceSquared(point, closest);
+            return Point1 + ab * t;
+        }
+
+        public float DistanceToSquared(Vector3 point)
+        {
+            return Vector3.DistanceSquared(point, ClosestPointTo(point));
         }
     }
 }

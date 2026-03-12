@@ -69,7 +69,7 @@ namespace Frinkahedron.TestApp
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0);
             
 
-            for (int i = 0; i < 250; i++)
+            for (int i = 0; i < 150; i++)
             {
                 IShape collider;
                 float density;

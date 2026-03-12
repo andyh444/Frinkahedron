@@ -13,6 +13,8 @@ namespace Frinkahedron.Core.Colliders
     {
         public static CollisionManifold Test(Collidable<Capsule> shapeA, Collidable<Box> shapeB)
         {
+            // TODO: Not sure this works properly if, for example, the capsule is rolling off a big box at an angle
+
             var transformA = shapeA.Position.ToMatrix();
             var transformB = shapeB.Position.ToMatrix();
 

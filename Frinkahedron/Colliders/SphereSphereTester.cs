@@ -14,7 +14,7 @@ namespace Frinkahedron.Core.Colliders
                 float centreDistance = MathF.Sqrt(centreDistanceSq);
                 var normal = Vector3.Normalize(shapeA.Position.Centre - shapeB.Position.Centre);
                 var penetration = radiusSum - centreDistance;
-                var contactPoint = shapeA.Position.Centre - shapeB.Shape.Radius * normal; // TODO: Check this (should it be shapeA radius)
+                var contactPoint = shapeA.Position.Centre - shapeA.Shape.Radius * normal;
                 return new CollisionManifold([contactPoint], normal, penetration);
             }
             return CollisionManifold.NoCollision();
