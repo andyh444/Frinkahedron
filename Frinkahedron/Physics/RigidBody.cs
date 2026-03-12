@@ -10,6 +10,13 @@ using System.Threading.Tasks;
 
 namespace Frinkahedron.Core.Physics
 {
+    public readonly struct PhysicsMaterial(float elasticity, float frictionCoefficient)
+    {
+        public float Elasticity { get; } = elasticity;
+
+        public float FrictionCoefficient { get; } = frictionCoefficient;
+    }
+
     public sealed class RigidBody
     {
         public Vector3 Velocity { get; set; }
@@ -24,6 +31,8 @@ namespace Frinkahedron.Core.Physics
         public DiagonalMatrix3x3 InverseInertia { get; set; }
 
         public bool Gravity { get; set; }
+
+        public PhysicsMaterial Material { get; init; } = new PhysicsMaterial(0.6f, 0.8f);
 
         public float InverseMass
         {
@@ -105,7 +114,7 @@ namespace Frinkahedron.Core.Physics
                 float speedAlongNormal = Vector3.Dot(rv, normal);
                 if (speedAlongNormal < 0)
                 {
-                    float e = 0.1f; // Coefficient of restitution (elasticity), adjust as needed
+                    float e = MathF.Max(bodyA.Material.Elasticity, bodyB.Material.Elasticity);
                     float j = -(1 + e) * speedAlongNormal;
 
 
@@ -134,7 +143,7 @@ namespace Frinkahedron.Core.Physics
                         float denomT = (inverseMassA + inverseMassB + Vector3.Dot(tangent, crossT)) * manifold.Points.Length;
                         jt /= denomT;
 
-                        float frictionCoefficient = 0.8f;// 0.8f;
+                        float frictionCoefficient = MathF.Sqrt(bodyA.Material.FrictionCoefficient * bodyB.Material.FrictionCoefficient);
                         float maxFriction = j * frictionCoefficient;
                         jt = Math.Clamp(jt, -maxFriction, maxFriction);
                         Vector3 frictionImpulse = jt * tangent;

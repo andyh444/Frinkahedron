@@ -148,4 +148,32 @@ namespace Frinkahedron.Core
             }
         }
     }
+
+    public class SphereControlBehaviour : Behaviour
+    {
+        public override void Update(GameObject self, GameState gameState)
+        {
+            base.Update(self, gameState);
+            if (gameState.Input.IsKeyDown(Key.W))
+            {
+                Vector3 axis = gameState.Scene.Camera.GetRight();
+                self.RigidBody.ApplyTorque(-10000 * axis, gameState.DeltaTime, self.Position);
+            }
+            if (gameState.Input.IsKeyDown(Key.S))
+            {
+                Vector3 axis = gameState.Scene.Camera.GetRight();
+                self.RigidBody.ApplyTorque(10000 * axis, gameState.DeltaTime, self.Position);
+            }
+            if (gameState.Input.IsKeyDown(Key.A))
+            {
+                Vector3 axis = gameState.Scene.Camera.LookDirection;
+                self.RigidBody.ApplyTorque(-10000 * axis, gameState.DeltaTime, self.Position);
+            }
+            if (gameState.Input.IsKeyDown(Key.D))
+            {
+                Vector3 axis = gameState.Scene.Camera.LookDirection;
+                self.RigidBody.ApplyTorque(10000 * axis, gameState.DeltaTime, self.Position);
+            }
+        }
+    }
 }

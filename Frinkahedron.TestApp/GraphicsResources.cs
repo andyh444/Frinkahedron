@@ -26,7 +26,7 @@ namespace Frinkahedron.TestApp
             Mesh mesh = CreateUnitCubeMesh();
             var cubeInfo = MeshInfo.Create(mesh, graphicsDevice);
             var sphereInfo = MeshInfo.Create(CreateUnitUVSphere(24, 24, RgbaFloat.Red.ToVector4(), RgbaFloat.Blue.ToVector4()), graphicsDevice);
-            var cylinderInfo = MeshInfo.Create(CreateUnitCylinderMesh(24, RgbaFloat.Green.ToVector4(), RgbaFloat.Yellow.ToVector4()), graphicsDevice);
+            var cylinderInfo = MeshInfo.Create(CreateUnitCylinderMesh(24, new RgbaFloat(0.5f, 0, 0.5f, 1).ToVector4(), new RgbaFloat(0.5f, 0, 0.5f, 1).ToVector4()), graphicsDevice);
 
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,

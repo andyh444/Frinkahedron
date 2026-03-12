@@ -68,7 +68,7 @@ namespace Frinkahedron.TestApp
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0);
 
-            bool firstCapsule = true;
+            bool firstSphere = true;
             for (int i = 0; i < 150; i++)
             {
                 IShape collider;
@@ -79,6 +79,11 @@ namespace Frinkahedron.TestApp
                 {
                     float radius = r.NextSingle(1.5f, 2.5f);
                     collider = new Sphere(radius);
+                    if (firstSphere)
+                    {
+                        //behaviour = new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour { distance = 15f}]);
+                        firstSphere = false;
+                    }
                     density = 10f;
                 }
                 else if (rand > 0.25f)
@@ -86,13 +91,6 @@ namespace Frinkahedron.TestApp
                     float radius = r.NextSingle(1.5f, 2.5f);
                     float length = r.NextSingle(2.5f, 5.5f);
                     density = 1f;
-                    /*if (firstCapsule)
-                    {
-                        behaviour = new CompositeBehaviour([new OrbitalCameraMouseBehaviour { distance = 15f }, new CapsuleControlBehaviour()]);
-                        firstCapsule = false;
-                        radius = 1;
-                        length = 10;
-                    }*/
                     collider = new Capsule(length, radius);
                 }
                 else
