@@ -13,18 +13,14 @@ namespace Frinkahedron.Core.Colliders
     {
         public static CollisionManifold Test(Collidable<Capsule> shapeA, Collidable<Box> shapeB)
         {
-            // TODO: Not sure this works properly if, for example, the capsule is rolling off a big box at an angle
-
             var transformA = shapeA.Position.ToMatrix();
             var transformB = shapeB.Position.ToMatrix();
 
             _ = Matrix4x4.Invert(transformB, out var inverseB);
             var transformAtoB = transformA * inverseB;
 
-            //var transformAtoB = transformA * Matrix4x4.CreateTranslation(-shapeB.Position.Centre);
-
             LineSegment segment = LineSegment.Transform(shapeA.Shape.GetPointToPointSegment(), transformAtoB);
-            ClosestPoint(segment, shapeB.Shape, out var segPoint, out var boxPoint);
+            ClosestPtSegmentAABB(segment.Point1, segment.Point2, -shapeB.Shape.Dimensions / 2, shapeB.Shape.Dimensions / 2, out var segPoint, out var boxPoint);
             float distSq = Vector3.DistanceSquared(segPoint, boxPoint);
             Vector3 difference = segPoint - boxPoint;
 
@@ -62,60 +58,56 @@ namespace Frinkahedron.Core.Colliders
                     normal = new Vector3(0, 0, MathF.Sign(local.Z));
 
                 penetration = radius + MathF.Min(dx, MathF.Min(dy, dz));
-                boxPoint = segPoint - normal * radius;
+                boxPoint = segPoint - normal * MathF.Min(dx, MathF.Min(dy, dz));
             }
 
-            normal = Vector3.Transform(normal, shapeB.Position.Orientation);
+            normal = Vector3.Normalize(Vector3.TransformNormal(normal, transformB));
             boxPoint = Vector3.Transform(boxPoint, transformB);
 
             return new CollisionManifold([boxPoint], -normal, penetration);
         }
 
-        public static void ClosestPoint(
-            LineSegment segment,
-            Box box,
-            out Vector3 segPoint,
-            out Vector3 boxPoint)
+        static void ClosestPtSegmentAABB(
+        Vector3 p0,
+        Vector3 p1,
+        Vector3 min,
+        Vector3 max,
+        out Vector3 segPoint,
+        out Vector3 boxPoint)
         {
-            Vector3 p0 = segment.Point1;
-            Vector3 p1 = segment.Point2;
-            Vector3 boxMax = box.Dimensions / 2;
-            Vector3 boxMin = -boxMax;
-
             Vector3 d = p1 - p0;
             float t = 0f;
 
-            // initial closest point on segment
             segPoint = p0;
 
-            // iterate axes
-            for (int i = 0; i < 3; i++)
-            {
-                float segCoord = segPoint[i];
+            boxPoint = Vector3.Clamp(segPoint, min, max);
 
-                if (segCoord < boxMin[i])
+            Vector3 diff = segPoint - boxPoint;
+            float distSq = Vector3.Dot(diff, diff);
+
+            float bestDistSq = distSq;
+            float bestT = 0f;
+
+            const int STEPS = 8;
+
+            for (int i = 1; i <= STEPS; i++)
+            {
+                float testT = i / (float)STEPS;
+                Vector3 point = p0 + d * testT;
+
+                Vector3 clamped = Vector3.Clamp(point, min, max);
+
+                Vector3 delta = point - clamped;
+                float dsq = Vector3.Dot(delta, delta);
+
+                if (dsq < bestDistSq)
                 {
-                    float denom = d[i];
-                    if (MathF.Abs(denom) > 1e-6f)
-                    {
-                        float newT = (boxMin[i] - p0[i]) / denom;
-                        t = Math.Clamp(newT, 0f, 1f);
-                        segPoint = p0 + d * t;
-                    }
-                }
-                else if (segCoord > boxMax[i])
-                {
-                    float denom = d[i];
-                    if (MathF.Abs(denom) > 1e-6f)
-                    {
-                        float newT = (boxMax[i] - p0[i]) / denom;
-                        t = Math.Clamp(newT, 0f, 1f);
-                        segPoint = p0 + d * t;
-                    }
+                    bestDistSq = dsq;
+                    bestT = testT;
+                    segPoint = point;
+                    boxPoint = clamped;
                 }
             }
-
-            boxPoint = Vector3.Clamp(segPoint, boxMin, boxMax);
         }
     }
 

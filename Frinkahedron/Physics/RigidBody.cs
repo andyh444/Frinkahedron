@@ -158,10 +158,23 @@ namespace Frinkahedron.Core.Physics
             return true;
         }
 
-        public void ApplyImpulse(Vector3 impulse, Vector3 contactVector, Matrix3x3 inverseWorldInertia)
+        public void ApplyImpulse(Vector3 impulse, Vector3 contactVector, Position position)
+        {
+            var inverseWorldInertia = InverseWorldInertia(position.Orientation);
+            ApplyImpulse(impulse, contactVector, inverseWorldInertia);
+        }
+
+        private void ApplyImpulse(Vector3 impulse, Vector3 contactVector, Matrix3x3 inverseWorldInertia)
         {
             Velocity += InverseMass * impulse;
             AngularVelocity += inverseWorldInertia * Vector3.Cross(contactVector, impulse);
+        }
+
+        public void ApplyTorque(Vector3 torque, float dt, Position position)
+        {
+            var inverseWorldInertia = InverseWorldInertia(position.Orientation);
+            Vector3 angularAcceleration = inverseWorldInertia * torque;
+            AngularVelocity += angularAcceleration * dt;
         }
     }
 }

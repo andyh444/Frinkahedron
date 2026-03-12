@@ -120,4 +120,32 @@ namespace Frinkahedron.Core
             }
         }
     }
+
+    public class CapsuleControlBehaviour : Behaviour
+    {
+        public override void Update(GameObject self, GameState gameState)
+        {
+            base.Update(self, gameState);
+            if (gameState.Input.IsKeyDown(Key.W))
+            {
+                Vector3 capsuleAxis = Vector3.Transform(Vector3.UnitY, self.Position.Orientation);
+                self.RigidBody.ApplyTorque(1000 * capsuleAxis, gameState.DeltaTime, self.Position);
+            }
+            if (gameState.Input.IsKeyDown(Key.S))
+            {
+                Vector3 capsuleAxis = Vector3.Transform(Vector3.UnitY, self.Position.Orientation);
+                self.RigidBody.ApplyTorque(-1000 * capsuleAxis, gameState.DeltaTime, self.Position);
+            }
+            if (gameState.Input.IsKeyDown(Key.A))
+            {
+                Vector3 capsuleAxis = Vector3.UnitY;// Vector3.Transform(Vector3.UnitY, self.Position.Orientation);
+                self.RigidBody.ApplyTorque(-1000 * capsuleAxis, gameState.DeltaTime, self.Position);
+            }
+            if (gameState.Input.IsKeyDown(Key.D))
+            {
+                Vector3 capsuleAxis = Vector3.UnitY;// Vector3.Transform(Vector3.UnitY, self.Position.Orientation);
+                self.RigidBody.ApplyTorque(1000 * capsuleAxis, gameState.DeltaTime, self.Position);
+            }
+        }
+    }
 }
