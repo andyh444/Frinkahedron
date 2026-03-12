@@ -10,15 +10,24 @@ namespace Frinkahedron.Core.Colliders
             {
                 case (Sphere sphA, Sphere sphB):
                     return SphereSphereTester.Test(Collidable(positionA, sphA), Collidable(positionB, sphB));
-
                 case (Sphere sphA, Box boxB):
                     return SphereBoxTester.Test(Collidable(positionA, sphA), Collidable(positionB, boxB));
+                case (Sphere sphA, Capsule capB):
+                    return CollisionManifold.NoCollision();
 
                 case (Box boxA, Sphere sphB):
                     return BoxSphereTester.Test(Collidable(positionA, boxA), Collidable(positionB, sphB));
-
                 case (Box boxA, Box boxB):
                     return BoxBoxTester.Test(Collidable(positionA, boxA), Collidable(positionB, boxB));
+                case (Box boxA, Capsule capB):
+                    return BoxCapsuleTester.Test(Collidable(positionA, boxA), Collidable(positionB, capB));
+
+                case (Capsule capA, Sphere sphB):
+                    return CollisionManifold.NoCollision();
+                case (Capsule capA, Box boxB):
+                    return CapsuleBoxTester.Test(Collidable(positionA, capA), Collidable(positionB, boxB));
+                case (Capsule capA, Capsule capB):
+                    return CapsuleCapsuleTester.Test(Collidable(positionA, capA), Collidable(positionB, capB));
             }
 
             return CollisionManifold.NoCollision();

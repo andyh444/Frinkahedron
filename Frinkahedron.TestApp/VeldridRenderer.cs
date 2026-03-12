@@ -25,6 +25,11 @@ namespace Frinkahedron.TestApp
             DrawMesh(graphicsResources.CubeInfo, transform);
         }
 
+        public void DrawCylinder(Matrix4x4 transform)
+        {
+            DrawMesh(graphicsResources.CylinderInfo, transform);
+        }
+
         public void DrawEllipsoid(Matrix4x4 transform)
         {
             DrawMesh(graphicsResources.SphereInfo, transform);

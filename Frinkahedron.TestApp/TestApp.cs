@@ -67,17 +67,25 @@ namespace Frinkahedron.TestApp
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false }));
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0);
-
+            
 
             for (int i = 0; i < 250; i++)
             {
                 IShape collider;
                 float density;
-                if (r.NextSingle() < 0.75f)
+                var rand = r.NextSingle();
+                if (rand > 0.5f)
                 {
                     float radius = r.NextSingle(1.5f, 2.5f);
                     collider = new Sphere(radius);
                     density = 10f;
+                }
+                else if (rand > 0.25f)
+                {
+                    float radius = r.NextSingle(1.5f, 2.5f);
+                    float length = r.NextSingle(2.5f, 5.5f);
+                    collider = new Capsule(length, radius);
+                    density = 1f;
                 }
                 else
                 {

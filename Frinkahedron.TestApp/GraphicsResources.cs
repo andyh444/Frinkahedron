@@ -12,6 +12,7 @@ namespace Frinkahedron.TestApp
         public required CommandList CommandList { get; init; }
         public required MeshInfo CubeInfo { get; init; }
         public required MeshInfo SphereInfo { get; init; }
+        public required MeshInfo CylinderInfo { get; init; }
         public required Shader[] Shaders { get; init; }
         public required Pipeline Pipeline { get; init; }
         public required DeviceBuffer MatricesBuffer { get; init; }
@@ -25,6 +26,7 @@ namespace Frinkahedron.TestApp
             Mesh mesh = CreateUnitCubeMesh();
             var cubeInfo = MeshInfo.Create(mesh, graphicsDevice);
             var sphereInfo = MeshInfo.Create(CreateUnitUVSphere(24, 24, RgbaFloat.Red.ToVector4(), RgbaFloat.Blue.ToVector4()), graphicsDevice);
+            var cylinderInfo = MeshInfo.Create(CreateUnitCylinderMesh(24, RgbaFloat.Green.ToVector4(), RgbaFloat.Yellow.ToVector4()), graphicsDevice);
 
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
@@ -84,6 +86,7 @@ namespace Frinkahedron.TestApp
                 CommandList = commandList,
                 CubeInfo = cubeInfo,
                 SphereInfo = sphereInfo,
+                CylinderInfo = cylinderInfo,
                 Shaders = shaders,
                 Pipeline = pipeline,
                 MatricesBuffer = uniformBuffer,
@@ -165,6 +168,65 @@ namespace Frinkahedron.TestApp
            };
 
             return new Mesh(vertices, indices);
+        }
+
+        public static Mesh CreateUnitCylinderMesh(int segments, Vector4 topColour, Vector4 bottomColour)
+        {
+            var vertList = new List<VertexPositionColor>();
+            var indexList = new List<ushort>();
+
+            float halfHeight = 0.5f;
+            float radius = 0.5f;
+
+            // top circle
+            for (int i = 0; i < segments; i++)
+            {
+                float theta = i * 2 * MathF.PI / segments;
+                float sinTheta = MathF.Sin(theta);
+                float cosTheta = MathF.Cos(theta);
+
+                Vector3 position = new Vector3(
+                    radius * sinTheta,
+                    halfHeight,
+                    radius * cosTheta);
+
+                vertList.Add(new VertexPositionColor(position, topColour));
+            }
+
+            // bottom circle
+            for (int i = 0; i < segments; i++)
+            {
+                float theta = i * 2 * MathF.PI / segments;
+                float sinTheta = MathF.Sin(theta);
+                float cosTheta = MathF.Cos(theta);
+
+                Vector3 position = new Vector3(
+                    radius * sinTheta,
+                    -halfHeight,
+                    radius * cosTheta);
+
+                vertList.Add(new VertexPositionColor(position, bottomColour));
+            }
+
+            int bottomStart = segments;
+            for (int i = 0; i < segments; i++)
+            {
+                ushort topCurrent = (ushort) i;
+                ushort topNext = (ushort)((i + 1) % segments);
+                
+                ushort bottomCurrent = (ushort)(topCurrent + bottomStart);
+                ushort bottomNext = (ushort)(topNext + bottomStart);
+
+                indexList.Add(topCurrent);
+                indexList.Add(topNext);
+                indexList.Add(bottomCurrent);
+
+                indexList.Add(topNext);
+                indexList.Add(bottomNext);
+                indexList.Add(bottomCurrent);
+            }
+
+            return new Mesh(vertList.ToArray(), indexList.ToArray());
         }
 
         /// <summary>
