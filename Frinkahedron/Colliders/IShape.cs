@@ -16,5 +16,7 @@ namespace Frinkahedron.Core.Colliders
         public DiagonalMatrix3x3 CalculateFilledInertia(float mass);
 
         public float CalculateVolume();
+
+        public AxisAlignedBoundingBox CalculateAABB(Position position);
     }
 }

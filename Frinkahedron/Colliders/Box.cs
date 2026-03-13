@@ -78,6 +78,22 @@ namespace Frinkahedron.Core.Colliders
             renderer.DrawCuboid(scale * position);
         }
 
-        
+        public AxisAlignedBoundingBox CalculateAABB(Position position)
+        {
+            Span<Vector3> axes = stackalloc Vector3[] {
+                Vector3.Transform(Vector3.UnitX, position.Orientation),
+                Vector3.Transform(Vector3.UnitY, position.Orientation),
+                Vector3.Transform(Vector3.UnitZ, position.Orientation),
+            };
+
+            Vector3 halfExtent = Dimensions / 2;
+            BoxBoxTester.Project(position.Centre, halfExtent, axes, Vector3.UnitX, out float minX, out float maxX);
+            BoxBoxTester.Project(position.Centre, halfExtent, axes, Vector3.UnitY, out float minY, out float maxY);
+            BoxBoxTester.Project(position.Centre, halfExtent, axes, Vector3.UnitZ, out float minZ, out float maxZ);
+
+            return new AxisAlignedBoundingBox(
+                new Vector3(minX, minY, minZ),
+                new Vector3(maxX, maxY, maxZ));
+        }
     }
 }

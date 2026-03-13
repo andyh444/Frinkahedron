@@ -8,6 +8,13 @@ namespace Frinkahedron.Core.Colliders
     {
         public float Radius { get; } = radius;
 
+        public AxisAlignedBoundingBox CalculateAABB(Position position)
+        {
+            return new AxisAlignedBoundingBox(
+                position.Centre - new Vector3(Radius, Radius, Radius),
+                position.Centre + new Vector3(Radius, Radius, Radius));
+        }
+
         public DiagonalMatrix3x3 CalculateFilledInertia(float mass)
         {
             return Inertia.CalculateFilledSphereInertia(Radius, mass);

@@ -1,4 +1,5 @@
 ﻿using Frinkahedron.Core.Maths;
+using Frinkahedron.Core.Physics;
 using System.Numerics;
 
 namespace Frinkahedron.Core.Colliders
@@ -77,6 +78,11 @@ namespace Frinkahedron.Core.Colliders
 
             renderer.DrawEllipsoid(sphereScale * sphere1Translation * position);
             renderer.DrawEllipsoid(sphereScale * sphere2Translation * position);
+        }
+
+        public AxisAlignedBoundingBox CalculateAABB(Position position)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -76,8 +76,13 @@ namespace Frinkahedron.Core.Physics
             RigidBody bodyA,
             Position positionB,
             IShape shapeB,
-            RigidBody bodyB)
+            RigidBody bodyB,
+            ref TimeSpan collisionTime,
+            ref TimeSpan inverseInertiaTime,
+            ref TimeSpan resolutionTime)
         {
+            var start = Stopwatch.GetTimestamp();
+
             float inverseMassA = bodyA.InverseMass;
             float inverseMassB = bodyB.InverseMass;
 
@@ -92,12 +97,23 @@ namespace Frinkahedron.Core.Physics
                 return false;
             }
 
+            collisionTime += Stopwatch.GetElapsedTime(start);
+            start = Stopwatch.GetTimestamp();
+
+            float inverseMassSum = inverseMassA + inverseMassB;
             var inverseInertiaA = bodyA.InverseWorldInertia(positionA.Orientation);
             var inverseInertiaB = bodyB.InverseWorldInertia(positionB.Orientation);
 
+            inverseInertiaTime += Stopwatch.GetElapsedTime(start);
+            start = Stopwatch.GetTimestamp();
+
+
             Vector3 normal = manifold.Normal;
             float penetration = manifold.Penetration;
-            
+
+            float e = MathF.Max(bodyA.Material.Elasticity, bodyB.Material.Elasticity);
+            float frictionCoefficient = MathF.Sqrt(bodyA.Material.FrictionCoefficient * bodyB.Material.FrictionCoefficient);
+
             foreach (var contactPoint in manifold.Points)
             {
                 
@@ -114,14 +130,14 @@ namespace Frinkahedron.Core.Physics
                 float speedAlongNormal = Vector3.Dot(rv, normal);
                 if (speedAlongNormal < 0)
                 {
-                    float e = MathF.Max(bodyA.Material.Elasticity, bodyB.Material.Elasticity);
+                    
                     float j = -(1 + e) * speedAlongNormal;
 
 
                     Vector3 cross = Vector3.Cross(inverseInertiaA * Vector3.Cross(ra, normal), ra)
                         + Vector3.Cross(inverseInertiaB * Vector3.Cross(rb, normal), rb);
 
-                    float denom = (inverseMassA + inverseMassB + Vector3.Dot(normal, cross)) * manifold.Points.Length;
+                    float denom = (inverseMassSum + Vector3.Dot(normal, cross)) * manifold.Points.Length;
 
                     j /= denom;
                     Vector3 impulse = j * normal;
@@ -140,10 +156,9 @@ namespace Frinkahedron.Core.Physics
                         Vector3 crossT = Vector3.Cross(inverseInertiaA * Vector3.Cross(ra, tangent), ra)
                             + Vector3.Cross(inverseInertiaB * Vector3.Cross(rb, tangent), rb);
 
-                        float denomT = (inverseMassA + inverseMassB + Vector3.Dot(tangent, crossT)) * manifold.Points.Length;
+                        float denomT = (inverseMassSum + Vector3.Dot(tangent, crossT)) * manifold.Points.Length;
                         jt /= denomT;
 
-                        float frictionCoefficient = MathF.Sqrt(bodyA.Material.FrictionCoefficient * bodyB.Material.FrictionCoefficient);
                         float maxFriction = j * frictionCoefficient;
                         jt = Math.Clamp(jt, -maxFriction, maxFriction);
                         Vector3 frictionImpulse = jt * tangent;
@@ -164,6 +179,8 @@ namespace Frinkahedron.Core.Physics
 
             positionA.Centre += inverseMassA * correction;
             positionB.Centre -= inverseMassB * correction;
+
+            resolutionTime += Stopwatch.GetElapsedTime(start);
             return true;
         }
 

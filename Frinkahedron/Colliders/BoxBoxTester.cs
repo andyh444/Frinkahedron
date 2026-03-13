@@ -17,41 +17,28 @@ namespace Frinkahedron.Core.Colliders
             Box boxB,
             Position positionB)
         {
-            var transformA = positionA.ToMatrix();
-            var transformB = positionB.ToMatrix();
-
             Span<Vector3> axesA = stackalloc Vector3[] {
-                Vector3.TransformNormal(Vector3.UnitX, transformA),
-                Vector3.TransformNormal(Vector3.UnitY, transformA),
-                Vector3.TransformNormal(Vector3.UnitZ, transformA),
+                Vector3.Transform(Vector3.UnitX, positionA.Orientation),
+                Vector3.Transform(Vector3.UnitY, positionA.Orientation),
+                Vector3.Transform(Vector3.UnitZ, positionA.Orientation),
             };
 
             Span<Vector3> axesB = stackalloc Vector3[] {
-                Vector3.TransformNormal(Vector3.UnitX, transformB),
-                Vector3.TransformNormal(Vector3.UnitY, transformB),
-                Vector3.TransformNormal(Vector3.UnitZ, transformB),
+                Vector3.Transform(Vector3.UnitX, positionB.Orientation),
+                Vector3.Transform(Vector3.UnitY, positionB.Orientation),
+                Vector3.Transform(Vector3.UnitZ, positionB.Orientation),
             };
-
-            Span<Vector3> cornersA = stackalloc Vector3[8];
-            boxA.GetCorners(cornersA);
-            
-            Span<Vector3> cornersB = stackalloc Vector3[8];
-            boxB.GetCorners(cornersB);
-            for (int i = 0; i < cornersB.Length; i++)
-            {
-                cornersA[i] = Vector3.Transform(cornersA[i], transformA);
-                cornersB[i] = Vector3.Transform(cornersB[i], transformB);
-            }
 
             Vector3 bestNormal = default;
             float bestPenetration = float.MaxValue;
 
-            if (!TestAxes(cornersA, cornersB, axesA, ref bestNormal, ref bestPenetration))
+            if (!TestAxes(positionA.Centre, boxA.Dimensions / 2, axesA, positionB.Centre, boxB.Dimensions / 2, axesB, axesA, ref bestNormal, ref bestPenetration))
             {
                 return CollisionManifold.NoCollision();
             }
 
-            if (!TestAxes(cornersA, cornersB, axesB, ref bestNormal, ref bestPenetration))
+            //if (!TestAxes(cornersA, cornersB, axesB, ref bestNormal, ref bestPenetration))
+            if (!TestAxes(positionA.Centre, boxA.Dimensions / 2, axesA, positionB.Centre, boxB.Dimensions / 2, axesB, axesB, ref bestNormal, ref bestPenetration))
             {
                 return CollisionManifold.NoCollision();
             }
@@ -64,18 +51,18 @@ namespace Frinkahedron.Core.Colliders
                 {
                     var cross = Vector3.Cross(axisA, axisB);
                     var lengthSq = cross.LengthSquared();
-                    if (lengthSq > 1e-6f)
+                    if (lengthSq > 1e-9f)
                     {
                         crossAxes[index++] = Vector3.Normalize(cross);
                     }
                 }
             }
 
-            if (!TestAxes(cornersA, cornersB, crossAxes[..index], ref bestNormal, ref bestPenetration))
+            if (!TestAxes(positionA.Centre, boxA.Dimensions / 2, axesA, positionB.Centre, boxB.Dimensions / 2, axesB, crossAxes[..index], ref bestNormal, ref bestPenetration))
+            //if (!TestAxes(cornersA, cornersB, crossAxes[..index], ref bestNormal, ref bestPenetration))
             {
                 return CollisionManifold.NoCollision();
             }
-
             // normal needs to point from B to A
             Vector3 centerA = positionA.Centre;
             Vector3 centerB = positionB.Centre;
@@ -356,6 +343,55 @@ namespace Frinkahedron.Core.Colliders
                 }
             }
             return true;
+        }
+
+        private static bool TestAxes(Vector3 centreA, Vector3 halfExtentA, Span<Vector3> axesA, Vector3 centreB, Vector3 halfExtentB, Span<Vector3> axesB, Span<Vector3> testAxes, ref Vector3 bestNormal, ref float bestPenetration)
+        {
+            foreach (var axis in testAxes)
+            {
+                Project(centreA, halfExtentA, axesA, axis, out float minA, out float maxA);
+                Project(centreB, halfExtentB, axesB, axis, out float minB, out float maxB);
+
+                if (maxA < minB
+                    || maxB < minA)
+                {
+                    return false;
+                }
+
+                float overlap = MathF.Min(maxA, maxB) - MathF.Max(minA, minB);
+                if (overlap < bestPenetration)
+                {
+                    bestPenetration = overlap;
+                    bestNormal = axis;
+                }
+            }
+            return true;
+        }
+
+        public static void Project(
+            Vector3 position,
+            Vector3 halfExtent,
+            Span<Vector3> boxWorldAxes,
+            Vector3 axis,
+            out float min,
+            out float max)
+        {
+            // OBB local axes in world space
+            Vector3 u0 = boxWorldAxes[0];
+            Vector3 u1 = boxWorldAxes[1];
+            Vector3 u2 = boxWorldAxes[2];
+
+            // Project center onto axis
+            float centerProjection = Vector3.Dot(position, axis);
+
+            // Compute projection radius
+            float r =
+                halfExtent.X * MathF.Abs(Vector3.Dot(axis, u0)) +
+                halfExtent.Y * MathF.Abs(Vector3.Dot(axis, u1)) +
+                halfExtent.Z * MathF.Abs(Vector3.Dot(axis, u2));
+
+            min = centerProjection - r;
+            max = centerProjection + r;
         }
 
         private static void Project(
