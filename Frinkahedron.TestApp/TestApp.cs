@@ -26,6 +26,8 @@ namespace Frinkahedron.TestApp
 
         public TestApp()
         {
+            Warmup();
+
             WindowCreateInfo windowCI = new WindowCreateInfo()
             {
                 X = 100,
@@ -35,7 +37,7 @@ namespace Frinkahedron.TestApp
                 WindowTitle = "Frinkahedron Test App"
             };
             _window = VeldridStartup.CreateWindow(ref windowCI);
-
+            
             GraphicsDeviceOptions options = new GraphicsDeviceOptions
             {
                 PreferStandardClipSpaceYDirection = true,
@@ -44,9 +46,24 @@ namespace Frinkahedron.TestApp
                 SyncToVerticalBlank = true
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
+            _scene = CreateScene();
+            _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice);
+        }
 
+        private void Warmup()
+        {
+            Scene scene = CreateScene();
+            GameState gameState = new GameState(0.01f, scene);
+            for (int i = 0; i < 100; i++)
+            {
+                scene.Update(gameState);
+            }
+        }
+
+        private Scene CreateScene()
+        {
             List<GameObject> gameObjects = new List<GameObject>();
-            
+
             Random r = Random.Shared;
 
             gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
@@ -68,15 +85,15 @@ namespace Frinkahedron.TestApp
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0);
 
-            for (int k = -2; k <= 2; k++)
+            for (int k = -2; k <= 3; k++)
             {
                 for (int j = -5; j < 5; j++)
                 {
-                    for (int i = 0; i < 6; i++)
+                    for (int i = 0; i < 7; i++)
                     {
-                        Box box = new Box(new Vector3(1, 1, 1));
+                        Box box = new Box(new Vector3(1, 2, 1));
                         float mass = 1 * box.CalculateVolume();
-                        GameObject obj = new GameObject(new Vector3(k, -15 + i, j),
+                        GameObject obj = new GameObject(new Vector3(k * 1.01f, -14 + i * 2, j * 1.01f),
                             null,
                             box,
                             new RigidBody { Mass = mass, InverseInertia = box.CalculateFilledInertia(mass), Gravity = true, Material = new PhysicsMaterial(0.0f, 0.8f) });
@@ -90,7 +107,7 @@ namespace Frinkahedron.TestApp
             GameObject sphObj = new GameObject(new Vector3(-50, 0, 0),
                 null,
                 sph,
-                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass), Gravity = true, Velocity = new Vector3(10, 0, 0) });
+                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass), Gravity = true, Velocity = new Vector3(30, 0, 0) });
             gameObjects.Add(sphObj);
 
             /*bool firstSphere = true;
@@ -144,14 +161,13 @@ namespace Frinkahedron.TestApp
                 gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI));
             }*/
 
-            
+
 
 
             //gameObjects.Add(new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new OrbitalCameraMouseBehaviour()]), new BoxCollider(new Vector3(1, 1.25f, 1.5f))));
             //gameObjects.Add(new GameObject(new Vector3(1, 0, 0), new ContinuousRotationBehaviour(-0.5f, 0.1f, 0.3f), new SphereCollider(0.5f)));
 
-            _scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), gameObjects);
-            _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice);
+            return new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), gameObjects);
         }
 
         public void Run()

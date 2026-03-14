@@ -1,4 +1,5 @@
 ﻿using Frinkahedron.Core.Colliders;
+using Frinkahedron.Core.Maths;
 using Frinkahedron.Core.Physics;
 using System;
 using System.Collections.Concurrent;
@@ -37,42 +38,50 @@ namespace Frinkahedron.Core
             TimeSpan inverseInertiaTime = TimeSpan.Zero;
 
             start = Stopwatch.GetTimestamp();
-            ConcurrentBag<(GameObject, GameObject)> collisionPairs = new ConcurrentBag<(GameObject, GameObject)>();
-            List<(GameObject, AxisAlignedBoundingBox)> aabbs = new List<(GameObject, AxisAlignedBoundingBox)>(Objects.Count);
-            foreach (var obj in Objects)
+            WorldRigidBody[] worldRigidBodies = new WorldRigidBody[Objects.Count];
+            int index = 0;
+            for (int i = 0; i < Objects.Count; i++)
             {
+                GameObject obj = Objects[i];
                 if (obj.Collider is not null
                     && obj.RigidBody is not null)
                 {
-                    aabbs.Add((obj, obj.Collider.CalculateAABB(obj.Position)));
+                    worldRigidBodies[index++] = new WorldRigidBody(obj.Position, obj.RigidBody, obj.Collider);
                 }
             }
 
-            for (int i = 0; i < aabbs.Count; i++)
-            { 
-                for (int j = i + 1; j < aabbs.Count; j++)
+            TimeSpan calculateAABBTime = Stopwatch.GetElapsedTime(start);
+            start = Stopwatch.GetTimestamp();
+
+            ConcurrentBag<(int, int)> collisionPairs = new ConcurrentBag<(int, int)>();
+            //for (int i = 0; i < aabbs.Count; i++)
+            Parallel.For(0, worldRigidBodies.Length, i =>
+            {
+                ref var bodyA = ref worldRigidBodies[i];
+                for (int j = i + 1; j < worldRigidBodies.Length; j++)
                 {
-                    if (aabbs[i].Item2.IntersectsWith(aabbs[j].Item2))
+                    ref var bodyB = ref worldRigidBodies[j];
+                    if (bodyA.BoundingBox.IntersectsWith(bodyB.BoundingBox))
                     {
-                        collisionPairs.Add((aabbs[i].Item1, aabbs[j].Item1));
+                        //collisionPairs.Add((objA, inertiaA, objB, inertiaB));
+                        collisionPairs.Add((i, j));
                     }
                 }
-            }
+            });
 
             TimeSpan aabbTime = Stopwatch.GetElapsedTime(start);
 
-            foreach ((var object1, var object2) in collisionPairs)
+            foreach ((var indexA, var indexB) in collisionPairs)
             {
+                var object1 = worldRigidBodies[indexA];
+                var object2 = worldRigidBodies[indexB];
+
                 RigidBody.ResolveCollision(
-                    object1.Position,
-                    object1.Collider,
-                    object1.RigidBody,
-                    object2.Position,
-                    object2.Collider,
-                    object2.RigidBody,
+                    in object1,
+                    in object2,
                     ref collisionTime,
-                    ref resolutionTime,
-                    ref inverseInertiaTime);
+                    ref inverseInertiaTime,
+                    ref resolutionTime);
             }
 
             // resolve collisions
@@ -103,7 +112,7 @@ namespace Frinkahedron.Core
                 }
             }*/
 
-            Console.WriteLine($"Integration: {20 * integrationTime.TotalMilliseconds:#0.000} ms, AABB: {20 * aabbTime.TotalMilliseconds:#0.000} ms, Collision: {20 * collisionTime.TotalMilliseconds:#0.000} ms, Resolution: {20 * resolutionTime.TotalMilliseconds:#0.000} ms, Inertia: {20 * inverseInertiaTime.TotalMilliseconds:#0.000} ms");
+            Console.WriteLine($"Integration: {20 * integrationTime.TotalMilliseconds:#0.000} ms, Calculate AABB: {20 * calculateAABBTime.TotalMilliseconds:#0.000}, AABB Pairs: {20 * aabbTime.TotalMilliseconds:#0.000} ms, Collision: {20 * collisionTime.TotalMilliseconds:#0.000} ms, Resolution: {20 * resolutionTime.TotalMilliseconds:#0.000} ms, Inertia: {20 * inverseInertiaTime.TotalMilliseconds:#0.000} ms");
         }
 
         public void Draw(IRenderer renderer)

@@ -71,17 +71,20 @@ namespace Frinkahedron.Core.Physics
         }
 
         public static bool ResolveCollision(
-            Position positionA,
-            IShape shapeA,
-            RigidBody bodyA,
-            Position positionB,
-            IShape shapeB,
-            RigidBody bodyB,
+            in WorldRigidBody worldBodyA,
+            in WorldRigidBody worldBodyB,
             ref TimeSpan collisionTime,
             ref TimeSpan inverseInertiaTime,
             ref TimeSpan resolutionTime)
         {
             var start = Stopwatch.GetTimestamp();
+
+            var positionA = worldBodyA.Position;
+            var positionB = worldBodyB.Position;
+            var bodyA = worldBodyA.RigidBody;
+            var bodyB = worldBodyB.RigidBody;
+            var shapeA = worldBodyA.Collider;
+            var shapeB = worldBodyB.Collider;
 
             float inverseMassA = bodyA.InverseMass;
             float inverseMassB = bodyB.InverseMass;
@@ -101,8 +104,8 @@ namespace Frinkahedron.Core.Physics
             start = Stopwatch.GetTimestamp();
 
             float inverseMassSum = inverseMassA + inverseMassB;
-            var inverseInertiaA = bodyA.InverseWorldInertia(positionA.Orientation);
-            var inverseInertiaB = bodyB.InverseWorldInertia(positionB.Orientation);
+            var inverseInertiaA = worldBodyA.InverseWorldInertia;
+            var inverseInertiaB = worldBodyB.InverseWorldInertia;
 
             inverseInertiaTime += Stopwatch.GetElapsedTime(start);
             start = Stopwatch.GetTimestamp();
