@@ -241,19 +241,7 @@ namespace Frinkahedron.TestApp
 
         private void Draw()
         {
-            _graphicsResources.CommandList.Begin();
-            _graphicsResources.CommandList.SetFramebuffer(_graphicsDevice.SwapchainFramebuffer);
-            _graphicsResources.CommandList.ClearColorTarget(0, RgbaFloat.Black);
-            _graphicsResources.CommandList.ClearDepthStencil(1f);
-            _graphicsResources.CommandList.SetPipeline(_graphicsResources.Pipeline);
-            _graphicsResources.CommandList.SetGraphicsResourceSet(0, _graphicsResources.ResourceSet);
-
-            VeldridRenderer renderer = new VeldridRenderer(_graphicsResources, _scene.Camera);
-            _scene.Draw(renderer);
-
-            _graphicsResources.CommandList.End();
-
-            _graphicsDevice.SubmitCommands(_graphicsResources.CommandList);
+            _graphicsResources.MainRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
             _graphicsDevice.SwapBuffers();
         }
     }

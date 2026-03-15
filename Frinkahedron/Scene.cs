@@ -20,7 +20,7 @@ namespace Frinkahedron.Core
 
         public Scene(Vector3 initialCameraPosition, Vector3 initialCameraDirection, IReadOnlyList<GameObject> objects)
         {
-            Camera = new Camera(initialCameraPosition, initialCameraDirection);
+            Camera = Camera.CreatePerspectiveCamera(initialCameraPosition, initialCameraDirection);
             Objects = objects;
         }
 

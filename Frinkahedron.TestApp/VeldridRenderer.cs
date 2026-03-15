@@ -11,28 +11,32 @@ namespace Frinkahedron.TestApp
 {
     internal sealed class VeldridRenderer : IRenderer
     {
-        private GraphicsResources graphicsResources;
+        private readonly Primitives primitives;
+        private readonly DeviceBuffer matricesBuffer;
+        private readonly CommandList commandList;
         private Camera camera;
 
-        public VeldridRenderer(GraphicsResources graphicsResources, Camera camera)
+        public VeldridRenderer(Primitives primitives, DeviceBuffer matricesBuffer, CommandList commandList, Camera camera)
         {
-            this.graphicsResources = graphicsResources;
+            this.primitives = primitives;
+            this.matricesBuffer = matricesBuffer;
+            this.commandList = commandList;
             this.camera = camera;
         }
 
         public void DrawCuboid(Matrix4x4 transform)
         {
-            DrawMesh(graphicsResources.CubeInfo, transform);
+            DrawMesh(primitives.CubeInfo, transform);
         }
 
         public void DrawCylinder(Matrix4x4 transform)
         {
-            DrawMesh(graphicsResources.CylinderInfo, transform);
+            DrawMesh(primitives.CylinderInfo, transform);
         }
 
         public void DrawEllipsoid(Matrix4x4 transform)
         {
-            DrawMesh(graphicsResources.SphereInfo, transform);
+            DrawMesh(primitives.SphereInfo, transform);
         }
 
         private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform)
@@ -43,8 +47,8 @@ namespace Frinkahedron.TestApp
                 View = camera.ViewMatrix,
                 Projection = camera.ProjectionMatrix
             };
-            graphicsResources.CommandList.UpdateBuffer(graphicsResources.MatricesBuffer, 0, ref uniforms);
-            meshInfo.Draw(graphicsResources.CommandList);
+            commandList.UpdateBuffer(matricesBuffer, 0, ref uniforms);
+            meshInfo.Draw(commandList);
         }
     }
 }
