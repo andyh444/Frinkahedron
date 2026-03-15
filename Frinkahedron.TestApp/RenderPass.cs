@@ -27,11 +27,11 @@ namespace Frinkahedron.TestApp
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
-                Encoding.UTF8.GetBytes(Frinkahedron.TestApp.Shaders.ColouredVertexShader),
+                Encoding.UTF8.GetBytes(Frinkahedron.TestApp.Shaders.PositionColourVertexShader),
                 "main");
             ShaderDescription fragmentShaderDesc = new ShaderDescription(
                 ShaderStages.Fragment,
-                Encoding.UTF8.GetBytes(Frinkahedron.TestApp.Shaders.SimpleFragmentShader),
+                Encoding.UTF8.GetBytes(Frinkahedron.TestApp.Shaders.ColourInFragmentShader),
                 "main");
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
 
