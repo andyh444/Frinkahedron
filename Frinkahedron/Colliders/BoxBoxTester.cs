@@ -91,43 +91,61 @@ namespace Frinkahedron.Core.Colliders
             Vector3 normal,
             float penetration)
         {
+            const float DEPTH_THRESHOLD = 1e-3f;
+
             Face faceA = Face.GetFace(positionA.Centre, axesA, boxA.Dimensions / 2, -normal); // note, this was originally +normal and faceB was -normal
             Face faceB = Face.GetFace(positionB.Centre, axesB, boxB.Dimensions / 2, normal);
 
             var intersection = ClipFaces(faceA, faceB);
 
-            var contacts = new List<(Vector3, float)>();
-            foreach (var p in intersection)
-            {
-                float depth = Vector3.Dot(faceA.Centre - p, normal);
+            Span<float> depths = stackalloc float[intersection.Count];
+            int contactCount = 0;
 
-                if (depth <= 1e-3f) // this was swapped when the normals were the other way around
+            for (int i = 0; i < intersection.Count; i++)
+            {
+                Vector3 p = intersection[i];
+                float depth = Vector3.Dot(faceA.Centre - p, normal);
+                depths[i] = depth;
+
+                if (depth <= DEPTH_THRESHOLD) // this was swapped when the normals were the other way around
                 {
-                    contacts.Add((p, depth));
+                    contactCount++;
+                    //contacts.Add((p, depth));
                 }
             }
-            if (contacts.Count == 0)
+            if (contactCount == 0)
             {
                 //Debugger.Break();
             }
-            if (contacts.Count <= 4)
+            if (contactCount <= 4)
             {
-                return contacts.Select(x => x.Item1).ToArray();
+                Vector3[] contacts = new Vector3[contactCount];
+                int index = 0;
+                for (int i = 0; i < intersection.Count; i++)
+                {
+                    if (depths[i] <= DEPTH_THRESHOLD)
+                    {
+                        contacts[index++] = intersection[i];
+                    }
+                }
+                return contacts;
             }
-            return PickFourPoints(contacts);
+            return PickFourPoints(intersection, depths);
         }
 
-        private static Vector3[] PickFourPoints(List<(Vector3 Position, float Depth)> candidates)
+        private static Vector3[] PickFourPoints(List<Vector3> candidates, Span<float> depths)
         {
+            const float DEPTH_THRESHOLD = 1e-3f;
+
             int deepest = 0;
-            float maxDepth = candidates[0].Depth;
+            float maxDepth = depths[0];
 
             for (int i = 1; i < candidates.Count; i++)
             {
-                if (candidates[i].Depth > maxDepth)
+                if (depths[i] > maxDepth)
                 {
                     deepest = i;
-                    maxDepth = candidates[i].Depth;
+                    maxDepth = depths[i];
                 }
             }
 
@@ -136,9 +154,14 @@ namespace Frinkahedron.Core.Colliders
 
             for (int i = 0; i < candidates.Count; i++)
             {
+                if (depths[i] < DEPTH_THRESHOLD)
+                {
+                    continue;
+                }
+
                 float d = Vector3.DistanceSquared(
-                    candidates[i].Position,
-                    candidates[deepest].Position);
+                    candidates[i],
+                    candidates[deepest]);
 
                 if (d > maxDist)
                 {
@@ -150,12 +173,16 @@ namespace Frinkahedron.Core.Colliders
             int third = deepest;
             float maxLineDist = 0f;
 
-            Vector3 a = candidates[deepest].Position;
-            Vector3 b = candidates[farthest].Position;
+            Vector3 a = candidates[deepest];
+            Vector3 b = candidates[farthest];
 
             for (int i = 0; i < candidates.Count; i++)
             {
-                Vector3 p = candidates[i].Position;
+                if (depths[i] < DEPTH_THRESHOLD)
+                {
+                    continue;
+                }
+                Vector3 p = candidates[i];
 
                 float dist = Vector3.Cross(p - a, b - a).LengthSquared();
 
@@ -169,13 +196,17 @@ namespace Frinkahedron.Core.Colliders
             int fourth = deepest;
             float maxPlaneDist = 0f;
 
-            Vector3 c = candidates[third].Position;
+            Vector3 c = candidates[third];
 
             Vector3 normal = Vector3.Cross(b - a, c - a);
 
             for (int i = 0; i < candidates.Count; i++)
             {
-                Vector3 p = candidates[i].Position;
+                if (depths[i] < DEPTH_THRESHOLD)
+                {
+                    continue;
+                }
+                Vector3 p = candidates[i];
 
                 float dist = MathF.Abs(Vector3.Dot(p - a, normal));
 
@@ -188,10 +219,10 @@ namespace Frinkahedron.Core.Colliders
 
             return
             [
-                candidates[deepest].Position,
-                candidates[farthest].Position,
-                candidates[third].Position,
-                candidates[fourth].Position
+                candidates[deepest],
+                candidates[farthest],
+                candidates[third],
+                candidates[fourth]
             ];
         }
 
@@ -270,13 +301,17 @@ namespace Frinkahedron.Core.Colliders
                 Vector3 axisY = axes[1];
                 Vector3 axisZ = axes[2];
 
-                float dx = MathF.Abs(Vector3.Dot(normal, axisX));
-                float dy = MathF.Abs(Vector3.Dot(normal, axisY));
-                float dz = MathF.Abs(Vector3.Dot(normal, axisZ));
+                var nax = Vector3.Dot(normal, axisX);
+                var nay = Vector3.Dot(normal, axisY);
+                var naz = Vector3.Dot(normal, axisZ);
+
+                float dx = MathF.Abs(nax);
+                float dy = MathF.Abs(nay);
+                float dz = MathF.Abs(naz);
 
                 if (dx > dy && dx > dz)
                 {
-                    var faceNormal = Vector3.Dot(normal, axisX) > 0 ? axisX : -axisX;
+                    var faceNormal = nax > 0 ? axisX : -axisX;
 
                     return new Face(
                         boxCenter + faceNormal * halfDimensions.X,
@@ -288,7 +323,7 @@ namespace Frinkahedron.Core.Colliders
 
                 if (dy > dz)
                 {
-                    var faceNormal = Vector3.Dot(normal, axisY) > 0 ? axisY : -axisY;
+                    var faceNormal = nay > 0 ? axisY : -axisY;
 
                     return new Face(
                         boxCenter + faceNormal * halfDimensions.Y,
@@ -298,7 +333,7 @@ namespace Frinkahedron.Core.Colliders
                         halfDimensions.Z);
                 }
 
-                var faceNormalZ = Vector3.Dot(normal, axisZ) > 0 ? axisZ : -axisZ;
+                var faceNormalZ = naz > 0 ? axisZ : -axisZ;
 
                 return new Face(
                     boxCenter + faceNormalZ * halfDimensions.Z,
@@ -320,29 +355,6 @@ namespace Frinkahedron.Core.Colliders
                     Centre - t1 + t2
                 ];
             }
-        }
-
-        private static bool TestAxes(Span<Vector3> polyA, Span<Vector3> polyB, Span<Vector3> axes, ref Vector3 bestNormal, ref float bestPenetration)
-        {
-            foreach (var axis in axes)
-            {
-                Project(polyA, axis, out float minA, out float maxA);
-                Project(polyB, axis, out float minB, out float maxB);
-
-                if (maxA < minB
-                    || maxB < minA)
-                {
-                    return false;
-                }
-
-                float overlap = MathF.Min(maxA, maxB) - MathF.Max(minA, minB);
-                if (overlap < bestPenetration)
-                {
-                    bestPenetration = overlap;
-                    bestNormal = axis;
-                }
-            }
-            return true;
         }
 
         private static bool TestAxes(Vector3 centreA, Vector3 halfExtentA, Span<Vector3> axesA, Vector3 centreB, Vector3 halfExtentB, Span<Vector3> axesB, Span<Vector3> testAxes, ref Vector3 bestNormal, ref float bestPenetration)

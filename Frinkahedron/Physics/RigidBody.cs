@@ -172,7 +172,7 @@ namespace Frinkahedron.Core.Physics
                 }
             }
 
-            float correctionMag = penetration * 1.6f / (inverseMassA + inverseMassB);
+            float correctionMag = penetration * 0.6f / (inverseMassA + inverseMassB);
             Vector3 correction = correctionMag * normal;
 
             if (float.IsNaN(correction.X))

@@ -85,11 +85,11 @@ namespace Frinkahedron.TestApp
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0);
 
-            for (int k = -2; k <= 3; k++)
+            for (int k = -1; k <= 2; k++)
             {
-                for (int j = -5; j < 5; j++)
+                for (int j = -4; j < 4; j++)
                 {
-                    for (int i = 0; i < 7; i++)
+                    for (int i = 0; i < 9; i++)
                     {
                         Box box = new Box(new Vector3(1, 2, 1));
                         float mass = 1 * box.CalculateVolume();
@@ -107,7 +107,7 @@ namespace Frinkahedron.TestApp
             GameObject sphObj = new GameObject(new Vector3(-50, 0, 0),
                 null,
                 sph,
-                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass), Gravity = true, Velocity = new Vector3(30, 0, 0) });
+                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass), Gravity = true, Velocity = new Vector3(10, 0, 0) });
             gameObjects.Add(sphObj);
 
             /*bool firstSphere = true;
@@ -185,7 +185,10 @@ namespace Frinkahedron.TestApp
                     {
                         _scene.Update(gameState);
                     }
+                    var start = Stopwatch.GetTimestamp();
                     Draw();
+                    Console.WriteLine($"Draw took {Stopwatch.GetElapsedTime(start).TotalMilliseconds:#0.000} ms");
+
                     gameState.Input.Clear();
 
                     sw.Stop();
