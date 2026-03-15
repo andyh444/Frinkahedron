@@ -12,13 +12,29 @@ namespace Frinkahedron
 
         public Matrix4x4 ProjectionMatrix { get; private set; }
 
-        public Camera(Vector3 initialPosition, Vector3 initialDirection)
+        private Camera(Vector3 initialPosition, Vector3 initialDirection, Matrix4x4 projectionMatrix)
         {
             Position = initialPosition;
             LookDirection = initialDirection;
 
-            ProjectionMatrix = CreatePerspective(MathF.PI / 4, 1.777777f, 0.1f, 1000f);
+            ProjectionMatrix = projectionMatrix;
             ViewMatrix = CreateViewMatrix();
+        }
+
+        public static Camera CreatePerspectiveCamera(Vector3 initialPosition, Vector3 initialDirection)
+        {
+            return new Camera(
+                initialPosition,
+                initialDirection,
+                CreatePerspective(MathF.PI / 4, 1.777777f, 0.1f, 1000f));
+        }
+
+        public static Camera CreateOrthoCamera(Vector3 initialPosition, Vector3 initialDirection)
+        {
+            return new Camera(
+                initialPosition,
+                initialDirection,
+                CreateOrtho(true, -100, 100, -100, 100, 0.1f, 1000f));
         }
 
         public void SetValues(Vector3 position, Vector3 direction)
@@ -96,6 +112,34 @@ namespace Frinkahedron
             result.M43 = near * negFarRange;
 
             return result;
+        }
+
+        private static Matrix4x4 CreateOrtho(
+            bool useReverseDepth,
+            float left, float right,
+            float bottom, float top,
+            float near, float far)
+        {
+            Matrix4x4 ortho;
+            if (useReverseDepth)
+            {
+                ortho = Matrix4x4.CreateOrthographicOffCenter(left, right, bottom, top, far, near);
+            }
+            else
+            {
+                ortho = Matrix4x4.CreateOrthographicOffCenter(left, right, bottom, top, near, far);
+            }
+            bool isClipSpaceYInverted = true;
+            if (isClipSpaceYInverted)
+            {
+                ortho *= new Matrix4x4(
+                    1, 0, 0, 0,
+                    0, -1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1);
+            }
+
+            return ortho;
         }
     }
 }
