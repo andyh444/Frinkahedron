@@ -13,6 +13,8 @@ namespace Frinkahedron.TestApp
         
         public required Primitives Primitives { get; init; }
 
+        public required AssetManager AssetManager { get; init; }
+
         public required MainRenderPass MainRenderPass { get; init; }
 
         public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice)
@@ -22,6 +24,7 @@ namespace Frinkahedron.TestApp
             {
                 CommandList = factory.CreateCommandList(),
                 Primitives = Primitives.Create(graphicsDevice),
+                AssetManager = AssetManager.LoadAssets(factory, graphicsDevice, "Textures"),
                 MainRenderPass = MainRenderPass.Create(factory, graphicsDevice)
             };
         }

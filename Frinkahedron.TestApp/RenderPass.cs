@@ -22,7 +22,6 @@ namespace Frinkahedron.TestApp
         public required DeviceBuffer MatricesBuffer { get; init; }
         public required ResourceLayout ResourceLayout { get; init; }
         public required ResourceSet ResourceSet { get; init; }
-        public required TextureInfo MainTexture { get; init; }
 
         public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice)
         {
@@ -47,8 +46,6 @@ namespace Frinkahedron.TestApp
             // Create resource set for the uniform buffer
             var resourceSet = factory.CreateResourceSet(new ResourceSetDescription(resourceLayout, uniformBuffer));
 
-            var mainTexture = TextureInfo.Create(factory, graphicsDevice);
-
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
             pipelineDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
 
@@ -72,7 +69,7 @@ namespace Frinkahedron.TestApp
                 shaders: shaders);
 
             pipelineDescription.Outputs = graphicsDevice.SwapchainFramebuffer.OutputDescription;
-            pipelineDescription.ResourceLayouts = new[] { resourceLayout, mainTexture.ResourceLayout };
+            pipelineDescription.ResourceLayouts = new[] { resourceLayout, TextureInfo.GetResourceLayout(factory) };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
             return new MainRenderPass
@@ -81,8 +78,7 @@ namespace Frinkahedron.TestApp
                 Pipeline = pipeline,
                 MatricesBuffer = uniformBuffer,
                 ResourceLayout = resourceLayout,
-                ResourceSet = resourceSet,
-                MainTexture = TextureInfo.Create(factory, graphicsDevice)
+                ResourceSet = resourceSet
             };
         }
 
@@ -106,83 +102,13 @@ namespace Frinkahedron.TestApp
             commandList.ClearDepthStencil(1f);
             commandList.SetPipeline(Pipeline);
             commandList.SetGraphicsResourceSet(0, ResourceSet);
-            commandList.SetGraphicsResourceSet(1, MainTexture.ResourceSet);
 
-            VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, MatricesBuffer, commandList, scene.Camera);
+            VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, MatricesBuffer, commandList, graphicsResources.AssetManager, scene.Camera);
             scene.Draw(renderer);
 
             commandList.End();
 
             graphicsDevice.SubmitCommands(commandList);
-        }
-    }
-
-    public class TextureInfo : IDisposable
-    {
-        public required Texture Texture { get; init; }
-        public required TextureView TextureView { get; init; }
-        public required Sampler Sampler { get; init; }
-        public required ResourceSet ResourceSet { get; init; }
-        public required ResourceLayout ResourceLayout { get; init; }
-
-        public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice)
-        {
-            Texture texture = factory.CreateTexture(
-                TextureDescription.Texture2D(
-                width: 64,
-                height: 64,
-                mipLevels: 1,
-                arrayLayers: 1,
-                PixelFormat.R8_G8_B8_A8_UNorm,
-                TextureUsage.Sampled));
-
-            TextureView textureView = factory.CreateTextureView(texture);
-
-            Span<int> pixels = new int[texture.Width * texture.Height];
-            for (int y = 0; y < texture.Height; y++)
-            {
-                for (int x =  0; x < texture.Height; x++)
-                {
-                    byte intensity8 = (byte)(x * 255 / texture.Width);
-                    byte r = (byte)Random.Shared.Next(0, 255); //intensity8;
-                    byte g = (byte)Random.Shared.Next(0, 255); //intensity8;
-                    byte b = (byte)Random.Shared.Next(0, 255); //intensity8;
-                    byte alpha = 255;
-                    int index = y * (int)texture.Width + x;
-                    pixels[index] = alpha << 24 | b << 16 | g << 8 | r;
-                }
-            }
-            graphicsDevice.UpdateTexture(texture, pixels, 0, 0, 0, texture.Width, texture.Height, texture.Depth, 0, 0);
-
-            Sampler sampler = graphicsDevice.Aniso4xSampler;
-
-            var textureLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("Texture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                new ResourceLayoutElementDescription("TextureSampler", ResourceKind.Sampler, ShaderStages.Fragment)));
-
-            ResourceSet textureSet = factory.CreateResourceSet(
-                new ResourceSetDescription(
-                    textureLayout,
-                    textureView,
-                    sampler));
-
-            return new TextureInfo
-            {
-                Texture = texture,
-                TextureView = textureView,
-                Sampler = sampler,
-                ResourceSet = textureSet,
-                ResourceLayout = textureLayout
-            };
-        }
-
-        public void Dispose()
-        {
-            Texture.Dispose();
-            TextureView.Dispose();
-            Sampler.Dispose();
-            ResourceSet.Dispose();
-            ResourceLayout.Dispose();
         }
     }
 }

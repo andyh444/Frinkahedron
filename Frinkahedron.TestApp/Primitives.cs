@@ -90,13 +90,13 @@ namespace Frinkahedron.TestApp
 
             ushort[] indices =
             {
-        0,1,2,  2,1,3,        // Front
-        4,5,6,  6,5,7,        // Back
-        8,9,10, 10,9,11,      // Left
-        12,13,14, 14,13,15,   // Right
-        16,17,18, 18,17,19,   // Top
-        20,21,22, 22,21,23    // Bottom
-    };
+                0,1,2,  2,1,3,        // Front
+                4,5,6,  6,5,7,        // Back
+                8,9,10, 10,9,11,      // Left
+                12,13,14, 14,13,15,   // Right
+                16,17,18, 18,17,19,   // Top
+                20,21,22, 22,21,23    // Bottom
+            };
 
             return new Mesh(vertices, indices);
         }
@@ -194,7 +194,7 @@ namespace Frinkahedron.TestApp
                         radius * sinTheta * sinPhi
                     );
 
-                    vertList.Add(new VertexPositionUv(pos, new Vector2(theta / MathF.PI, phi / (2f * MathF.PI))));
+                    vertList.Add(new VertexPositionUv(pos, new Vector2(phi / (2f * MathF.PI), theta / MathF.PI)));
                 }
             }
 

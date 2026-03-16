@@ -107,7 +107,7 @@ namespace Frinkahedron.TestApp
             GameObject sphObj = new GameObject(new Vector3(-50, 0, 0),
                 null,
                 sph,
-                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass), Gravity = true, Velocity = new Vector3(10, 0, 0) });
+                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass), Gravity = true, Velocity = new Vector3(20, 0, 0) });
             gameObjects.Add(sphObj);
 
             /*bool firstSphere = true;
