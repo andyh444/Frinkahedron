@@ -49,44 +49,44 @@ namespace Frinkahedron.TestApp
 
         private static Mesh CreateUnitCubeMesh()
         {
-            VertexPositionUv[] vertices =
+            Vertex[] vertices =
             {
-        // Front
-        new VertexPositionUv(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0, 0)),
-        new VertexPositionUv(new Vector3( 0.5f,  0.5f,  0.5f), new Vector2(1, 0)),
-        new VertexPositionUv(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0, 1)),
-        new VertexPositionUv(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(1, 1)),
+                // Front
+                new Vertex(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 0)),
+                new Vertex(new Vector3( 0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 0)),
+                new Vertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 1)),
+                new Vertex(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 1)),
 
-        // Back
-        new VertexPositionUv(new Vector3( 0.5f,  0.5f, -0.5f), new Vector2(0, 0)),
-        new VertexPositionUv(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(1, 0)),
-        new VertexPositionUv(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
-        new VertexPositionUv(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+                // Back
+                new Vertex(new Vector3( 0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 0)),
+                new Vertex(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 0)),
+                new Vertex(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 1)),
+                new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 1)),
 
-        // Left
-        new VertexPositionUv(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(0, 0)),
-        new VertexPositionUv(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(1, 0)),
-        new VertexPositionUv(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
-        new VertexPositionUv(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(1, 1)),
+                // Left
+                new Vertex(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 0)),
+                new Vertex(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 0)),
+                new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 1)),
+                new Vertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 1)),
 
-        // Right
-        new VertexPositionUv(new Vector3(0.5f,  0.5f,  0.5f), new Vector2(0, 0)),
-        new VertexPositionUv(new Vector3(0.5f,  0.5f, -0.5f), new Vector2(1, 0)),
-        new VertexPositionUv(new Vector3(0.5f, -0.5f,  0.5f), new Vector2(0, 1)),
-        new VertexPositionUv(new Vector3(0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+                // Right
+                new Vertex(new Vector3(0.5f,  0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 0)),
+                new Vertex(new Vector3(0.5f,  0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 0)),
+                new Vertex(new Vector3(0.5f, -0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 1)),
+                new Vertex(new Vector3(0.5f, -0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 1)),
 
-        // Top
-        new VertexPositionUv(new Vector3(-0.5f, 0.5f, -0.5f), new Vector2(0, 0)),
-        new VertexPositionUv(new Vector3( 0.5f, 0.5f, -0.5f), new Vector2(1, 0)),
-        new VertexPositionUv(new Vector3(-0.5f, 0.5f,  0.5f), new Vector2(0, 1)),
-        new VertexPositionUv(new Vector3( 0.5f, 0.5f,  0.5f), new Vector2(1, 1)),
+                // Top
+                new Vertex(new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(0, 0)),
+                new Vertex(new Vector3( 0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(1, 0)),
+                new Vertex(new Vector3(-0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(0, 1)),
+                new Vertex(new Vector3( 0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(1, 1)),
 
-        // Bottom
-        new VertexPositionUv(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0, 0)),
-        new VertexPositionUv(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(1, 0)),
-        new VertexPositionUv(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
-        new VertexPositionUv(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
-    };
+                // Bottom
+                new Vertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(0, 0)),
+                new Vertex(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(1, 0)),
+                new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(0, 1)),
+                new Vertex(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(1, 1)),
+            };
 
             ushort[] indices =
             {
@@ -103,7 +103,7 @@ namespace Frinkahedron.TestApp
 
         public static Mesh CreateUnitCylinderMesh(int segments, Vector4 topColour, Vector4 bottomColour)
         {
-            var vertList = new List<VertexPositionUv>();
+            var vertList = new List<Vertex>();
             var indexList = new List<ushort>();
 
             float halfHeight = 0.5f;
@@ -121,7 +121,9 @@ namespace Frinkahedron.TestApp
                     halfHeight,
                     radius * cosTheta);
 
-                vertList.Add(new VertexPositionUv(position, new Vector2((float)i / segments, 0)));
+                Vector3 normal = new Vector3(sinTheta, 0, cosTheta);
+
+                vertList.Add(new Vertex(position, normal, new Vector2((float)i / segments, 0)));
             }
 
             // bottom circle
@@ -136,7 +138,9 @@ namespace Frinkahedron.TestApp
                     -halfHeight,
                     radius * cosTheta);
 
-                vertList.Add(new VertexPositionUv(position, new Vector2((float)i / segments, 1)));
+                Vector3 normal = new Vector3(sinTheta, 0, cosTheta);
+
+                vertList.Add(new Vertex(position, normal, new Vector2((float)i / segments, 1)));
             }
 
             int bottomStart = segments;
@@ -171,7 +175,7 @@ namespace Frinkahedron.TestApp
         /// <param name="indices">Output triangle indices</param>
         public static Mesh CreateUnitUVSphere(int longitudeSegments, int latitudeSegments, Vector4 topColor, Vector4 bottomColour)
         {
-            var vertList = new List<VertexPositionUv>();
+            var vertList = new List<Vertex>();
             var indexList = new List<ushort>();
             float radius = 0.5f;
             // Generate vertices
@@ -188,13 +192,10 @@ namespace Frinkahedron.TestApp
                     float sinPhi = MathF.Sin(phi);
                     float cosPhi = MathF.Cos(phi);
 
-                    Vector3 pos = new Vector3(
-                        radius * sinTheta * cosPhi,
-                        radius * cosTheta,
-                        radius * sinTheta * sinPhi
-                    );
+                    Vector3 normal = new Vector3(sinTheta * cosPhi, cosTheta, sinTheta * sinPhi);
+                    Vector3 pos = radius * normal;
 
-                    vertList.Add(new VertexPositionUv(pos, new Vector2(phi / (2f * MathF.PI), theta / MathF.PI)));
+                    vertList.Add(new Vertex(pos, normal, new Vector2(phi / (2f * MathF.PI), theta / MathF.PI)));
                 }
             }
 

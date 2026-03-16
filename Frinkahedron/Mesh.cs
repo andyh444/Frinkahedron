@@ -7,25 +7,27 @@ using System.Threading.Tasks;
 
 namespace Frinkahedron.Core
 {
-    public struct VertexPositionUv
+    public struct Vertex
     {
         public Vector3 Position;
+        public Vector3 Normal;
         public Vector2 TexCoord;
-        public VertexPositionUv(Vector3 position, Vector2 texCoord)
+        public Vertex(Vector3 position, Vector3 normal, Vector2 texCoord)
         {
             Position = position;
+            Normal = Vector3.Normalize(normal);
             TexCoord = texCoord;
         }
-        public static uint SizeInBytes => sizeof(float) * 5;
+        public static uint SizeInBytes => sizeof(float) * 8;
     }
 
     public sealed class Mesh
     {
-        public VertexPositionUv[] Vertices { get; }
+        public Vertex[] Vertices { get; }
 
         public ushort[] Indices { get; }
 
-        public Mesh(VertexPositionUv[] vertices, ushort[] indices)
+        public Mesh(Vertex[] vertices, ushort[] indices)
         {
             Vertices = vertices;
             Indices = indices;
