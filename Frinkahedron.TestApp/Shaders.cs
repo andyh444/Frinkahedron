@@ -47,7 +47,7 @@ layout(set = 0, binding = 0) uniform Matrices
 void main()
 {
     gl_Position = projection * view * model * vec4(Position, 1);
-    fsin_texCoord = color;
+    fsin_texCoord = texCoord;
 }";
 
         public const string ColourInFragmentShader = @"
@@ -67,11 +67,12 @@ void main()
 layout(location = 0) in vec2 fsin_texCoord;
 layout(location = 0) out vec4 fsout_Color;
 
-layout(set = 0, binding = 0) uniform sampler2D Texture;
+layout(set = 1, binding = 0) uniform texture2D Texture;
+layout(set = 1, binding = 1) uniform sampler TextureSampler;
 
 void main()
 {
-    fsout_Color = texture(Texture, fsin_texCoord);
+    fsout_Color = texture(sampler2D(Texture, TextureSampler), fsin_texCoord);
 }";
     }
 }

@@ -32,69 +32,78 @@ namespace Frinkahedron.TestApp
             CylinderInfo.Dispose();
         }
 
-        private static Mesh CreateQuadMesh()
+        /*private static Mesh CreateQuadMesh()
         {
-            VertexPositionColor[] quadVertices =
+            VertexPositionUv[] quadVertices =
             {
-            new VertexPositionColor(new Vector3(-0.75f, 0.75f, 0), RgbaFloat.Red.ToVector4()),
-            new VertexPositionColor(new Vector3(0.75f, 0.75f, 0), RgbaFloat.Green.ToVector4()),
-            new VertexPositionColor(new Vector3(-0.75f, -0.75f, 0), RgbaFloat.Blue.ToVector4()),
-            new VertexPositionColor(new Vector3(0.75f, -0.75f, 0), RgbaFloat.Yellow.ToVector4())
+            new VertexPositionUv(new Vector3(-0.75f, 0.75f, 0), RgbaFloat.Red.ToVector4()),
+            new VertexPositionUv(new Vector3(0.75f, 0.75f, 0), RgbaFloat.Green.ToVector4()),
+            new VertexPositionUv(new Vector3(-0.75f, -0.75f, 0), RgbaFloat.Blue.ToVector4()),
+            new VertexPositionUv(new Vector3(0.75f, -0.75f, 0), RgbaFloat.Yellow.ToVector4())
         };
 
             ushort[] quadIndices = { 0, 1, 2, 3 };
 
             return new Mesh(quadVertices, quadIndices);
-        }
+        }*/
 
         private static Mesh CreateUnitCubeMesh()
         {
-            VertexPositionColor[] vertices =
+            VertexPositionUv[] vertices =
             {
-               new VertexPositionColor(new Vector3(-0.5f, 0.5f, 0.5f), RgbaFloat.Red.ToVector4()),
-               new VertexPositionColor(new Vector3(0.5f, 0.5f, 0.5f), RgbaFloat.Green.ToVector4()),
-               new VertexPositionColor(new Vector3(-0.5f, -0.5f, 0.5f), RgbaFloat.Blue.ToVector4()),
-               new VertexPositionColor(new Vector3(0.5f, -0.5f, 0.5f), RgbaFloat.Yellow.ToVector4()),
+        // Front
+        new VertexPositionUv(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0, 0)),
+        new VertexPositionUv(new Vector3( 0.5f,  0.5f,  0.5f), new Vector2(1, 0)),
+        new VertexPositionUv(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0, 1)),
+        new VertexPositionUv(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(1, 1)),
 
-               new VertexPositionColor(new Vector3(-0.5f, 0.5f, -0.5f), RgbaFloat.Green.ToVector4()),
-               new VertexPositionColor(new Vector3(0.5f, 0.5f, -0.5f), RgbaFloat.Blue.ToVector4()),
-               new VertexPositionColor(new Vector3(-0.5f, -0.5f, -0.5f), RgbaFloat.Yellow.ToVector4()),
-               new VertexPositionColor(new Vector3(0.5f, -0.5f, -0.5f), RgbaFloat.Red.ToVector4())
-           };
+        // Back
+        new VertexPositionUv(new Vector3( 0.5f,  0.5f, -0.5f), new Vector2(0, 0)),
+        new VertexPositionUv(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(1, 0)),
+        new VertexPositionUv(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
+        new VertexPositionUv(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+
+        // Left
+        new VertexPositionUv(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(0, 0)),
+        new VertexPositionUv(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(1, 0)),
+        new VertexPositionUv(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
+        new VertexPositionUv(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(1, 1)),
+
+        // Right
+        new VertexPositionUv(new Vector3(0.5f,  0.5f,  0.5f), new Vector2(0, 0)),
+        new VertexPositionUv(new Vector3(0.5f,  0.5f, -0.5f), new Vector2(1, 0)),
+        new VertexPositionUv(new Vector3(0.5f, -0.5f,  0.5f), new Vector2(0, 1)),
+        new VertexPositionUv(new Vector3(0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+
+        // Top
+        new VertexPositionUv(new Vector3(-0.5f, 0.5f, -0.5f), new Vector2(0, 0)),
+        new VertexPositionUv(new Vector3( 0.5f, 0.5f, -0.5f), new Vector2(1, 0)),
+        new VertexPositionUv(new Vector3(-0.5f, 0.5f,  0.5f), new Vector2(0, 1)),
+        new VertexPositionUv(new Vector3( 0.5f, 0.5f,  0.5f), new Vector2(1, 1)),
+
+        // Bottom
+        new VertexPositionUv(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0, 0)),
+        new VertexPositionUv(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(1, 0)),
+        new VertexPositionUv(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
+        new VertexPositionUv(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+    };
 
             ushort[] indices =
-            {  
-               // Front face  
-               0, 1, 2,
-               2, 1, 3,  
-
-               // Back face  
-               4, 6, 5,
-               5, 6, 7,  
-
-               // Left face  
-               4, 0, 6,
-               6, 0, 2,  
-
-               // Right face  
-               1, 5, 3,
-               3, 5, 7,  
-
-               // Top face  
-               4, 5, 0,
-               0, 5, 1,  
-
-               // Bottom face  
-               2, 3, 6,
-               6, 3, 7
-           };
+            {
+        0,1,2,  2,1,3,        // Front
+        4,5,6,  6,5,7,        // Back
+        8,9,10, 10,9,11,      // Left
+        12,13,14, 14,13,15,   // Right
+        16,17,18, 18,17,19,   // Top
+        20,21,22, 22,21,23    // Bottom
+    };
 
             return new Mesh(vertices, indices);
         }
 
         public static Mesh CreateUnitCylinderMesh(int segments, Vector4 topColour, Vector4 bottomColour)
         {
-            var vertList = new List<VertexPositionColor>();
+            var vertList = new List<VertexPositionUv>();
             var indexList = new List<ushort>();
 
             float halfHeight = 0.5f;
@@ -112,7 +121,7 @@ namespace Frinkahedron.TestApp
                     halfHeight,
                     radius * cosTheta);
 
-                vertList.Add(new VertexPositionColor(position, topColour));
+                vertList.Add(new VertexPositionUv(position, new Vector2((float)i / segments, 0)));
             }
 
             // bottom circle
@@ -127,7 +136,7 @@ namespace Frinkahedron.TestApp
                     -halfHeight,
                     radius * cosTheta);
 
-                vertList.Add(new VertexPositionColor(position, bottomColour));
+                vertList.Add(new VertexPositionUv(position, new Vector2((float)i / segments, 1)));
             }
 
             int bottomStart = segments;
@@ -162,7 +171,7 @@ namespace Frinkahedron.TestApp
         /// <param name="indices">Output triangle indices</param>
         public static Mesh CreateUnitUVSphere(int longitudeSegments, int latitudeSegments, Vector4 topColor, Vector4 bottomColour)
         {
-            var vertList = new List<VertexPositionColor>();
+            var vertList = new List<VertexPositionUv>();
             var indexList = new List<ushort>();
             float radius = 0.5f;
             // Generate vertices
@@ -185,7 +194,7 @@ namespace Frinkahedron.TestApp
                         radius * sinTheta * sinPhi
                     );
 
-                    vertList.Add(new VertexPositionColor(pos, colour));
+                    vertList.Add(new VertexPositionUv(pos, new Vector2(theta / MathF.PI, phi / (2f * MathF.PI))));
                 }
             }
 

@@ -89,7 +89,7 @@ namespace Frinkahedron.TestApp
             {
                 for (int j = -4; j < 4; j++)
                 {
-                    for (int i = 0; i < 9; i++)
+                    for (int i = 0; i < 7; i++)
                     {
                         Box box = new Box(new Vector3(1, 2, 1));
                         float mass = 1 * box.CalculateVolume();
