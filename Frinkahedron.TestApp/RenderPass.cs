@@ -23,15 +23,15 @@ namespace Frinkahedron.TestApp
         public required ResourceLayout ResourceLayout { get; init; }
         public required ResourceSet ResourceSet { get; init; }
 
-        public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice)
+        public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
-                Encoding.UTF8.GetBytes(Frinkahedron.TestApp.Shaders.PositionNormalUvVertexShader),
+                assetManager.GetShaderCode("MainRenderPass.vert"),
                 "main");
             ShaderDescription fragmentShaderDesc = new ShaderDescription(
                 ShaderStages.Fragment,
-                Encoding.UTF8.GetBytes(Frinkahedron.TestApp.Shaders.TextureNormalFragmentShader),
+                assetManager.GetShaderCode("MainRenderPass.frag"),
                 "main");
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
 

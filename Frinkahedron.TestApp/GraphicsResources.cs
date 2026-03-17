@@ -20,12 +20,13 @@ namespace Frinkahedron.TestApp
         public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice)
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
+            AssetManager assetManager = AssetManager.LoadAssets(factory, graphicsDevice, "Assets");
             return new GraphicsResources
             {
                 CommandList = factory.CreateCommandList(),
                 Primitives = Primitives.Create(graphicsDevice),
-                AssetManager = AssetManager.LoadAssets(factory, graphicsDevice, "Textures"),
-                MainRenderPass = MainRenderPass.Create(factory, graphicsDevice)
+                AssetManager = assetManager,
+                MainRenderPass = MainRenderPass.Create(factory, graphicsDevice, assetManager)
             };
         }
 
