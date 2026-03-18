@@ -20,12 +20,8 @@ namespace Frinkahedron.TestApp
     {
         public required Shader[] Shaders { get; init; }
         public required Pipeline Pipeline { get; init; }
-        public required DeviceBuffer MatricesBuffer { get; init; }
-        public required ResourceLayout MatricesResourceLayout { get; init; }
-        public required ResourceSet MatricesResourceSet { get; init; }
-        public required DeviceBuffer PointLightsBuffer { get; init; }
-        public required ResourceLayout PointLightsResourceLayout { get; init; }
-        public required ResourceSet PointLightsResourceSet { get; init; }
+        public required UniformBufferInfo MatricesBufferInfo { get; init; }
+        public required UniformBufferInfo PointLightsBufferInfo { get; init; }
 
         public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager)
         {
@@ -40,19 +36,8 @@ namespace Frinkahedron.TestApp
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
 
             // Create uniform buffer
-            var uniformBuffer = factory.CreateBuffer(new BufferDescription(
-                (uint)Unsafe.SizeOf<MatrixUniforms>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            // Create resource layout for the uniform buffer
-            var resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("Matrices", ResourceKind.UniformBuffer, ShaderStages.Vertex)));
-            // Create resource set for the uniform buffer
-            var resourceSet = factory.CreateResourceSet(new ResourceSetDescription(resourceLayout, uniformBuffer));
-
-            var pointLightsResourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
-                new ResourceLayoutElementDescription("PointLights", ResourceKind.UniformBuffer, ShaderStages.Fragment)));
-            var pointLightsUniformBuffer = factory.CreateBuffer(new BufferDescription(
-                (uint)Unsafe.SizeOf<PointLightsInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
-            var pointLightsResourceSet = factory.CreateResourceSet(new ResourceSetDescription(pointLightsResourceLayout, pointLightsUniformBuffer));
+            var matricesBufferInfo = UniformBufferInfo.Create<MatrixUniforms>(factory, "Matrices", ShaderStages.Vertex);
+            var pointLightsBufferInfo = UniformBufferInfo.Create<PointLightsInfo>(factory, "PointLights", ShaderStages.Fragment);
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
             pipelineDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
@@ -77,19 +62,20 @@ namespace Frinkahedron.TestApp
                 shaders: shaders);
 
             pipelineDescription.Outputs = graphicsDevice.SwapchainFramebuffer.OutputDescription;
-            pipelineDescription.ResourceLayouts = new[] { resourceLayout, TextureInfo.GetResourceLayout(factory), pointLightsResourceLayout };
+            pipelineDescription.ResourceLayouts = new[]
+            {
+                matricesBufferInfo.ResourceLayout,
+                TextureInfo.GetResourceLayout(factory),
+                pointLightsBufferInfo.ResourceLayout
+            };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
             return new MainRenderPass
             {
                 Shaders = shaders,
                 Pipeline = pipeline,
-                MatricesBuffer = uniformBuffer,
-                MatricesResourceLayout = resourceLayout,
-                MatricesResourceSet = resourceSet,
-                PointLightsBuffer = pointLightsUniformBuffer,
-                PointLightsResourceLayout = pointLightsResourceLayout,
-                PointLightsResourceSet = pointLightsResourceSet,
+                MatricesBufferInfo = matricesBufferInfo,
+                PointLightsBufferInfo = pointLightsBufferInfo,
             };
         }
 
@@ -100,9 +86,8 @@ namespace Frinkahedron.TestApp
                 shader.Dispose();
             }
             Pipeline.Dispose();
-            MatricesBuffer.Dispose();
-            MatricesResourceLayout.Dispose();
-            MatricesResourceSet.Dispose();
+            MatricesBufferInfo.Dispose();
+            PointLightsBufferInfo.Dispose();
         }
 
         public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene)
@@ -112,20 +97,21 @@ namespace Frinkahedron.TestApp
             commandList.ClearColorTarget(0, RgbaFloat.Black);
             commandList.ClearDepthStencil(1f);
             commandList.SetPipeline(Pipeline);
-            commandList.SetGraphicsResourceSet(0, MatricesResourceSet);
-            commandList.SetGraphicsResourceSet(2, PointLightsResourceSet);
+            commandList.SetGraphicsResourceSet(0, MatricesBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(2, PointLightsBufferInfo.ResourceSet);
 
+            // TODO: light info should come from scene
             PointLightsInfo pointLightInfo = new PointLightsInfo
             {
-                NumActiveLights = 1,
+                NumActiveLights = 3,
                 PointLights0 = new PointLightInfo { Colour = new Vector3(1, 0, 0), Position = new Vector3(0, 0, -75), Range = 200f },
                 PointLights1 = new PointLightInfo { Colour = new Vector3(1, 1, 1), Position = new Vector3(0, 0, 0), Range = 100f },
                 PointLights2 = new PointLightInfo { Colour = new Vector3(0, 1, 0), Position = new Vector3(0, 0, 75), Range = 300f }
             };
 
-            commandList.UpdateBuffer(PointLightsBuffer, 0, ref pointLightInfo);
+            commandList.UpdateBuffer(PointLightsBufferInfo.DeviceBuffer, 0, ref pointLightInfo);
 
-            VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, MatricesBuffer, commandList, graphicsResources.AssetManager, scene.Camera);
+            VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, MatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, scene.Camera);
             scene.Draw(renderer);
 
             commandList.End();
