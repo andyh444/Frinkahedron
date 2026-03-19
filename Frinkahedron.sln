@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frinkahedron.TestApp", "Fri
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frinkahedron.Core.Tests", "Frinkahedron.Core.Tests\Frinkahedron.Core.Tests.csproj", "{E3AFEE88-23B9-4C0F-82B5-D4376AF6FC26}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frinkahedron.Benchmarks", "Frinkahedron.Benchmarks\Frinkahedron.Benchmarks.csproj", "{607FA559-14A9-4B33-B464-1E4D6A35BD73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{E3AFEE88-23B9-4C0F-82B5-D4376AF6FC26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3AFEE88-23B9-4C0F-82B5-D4376AF6FC26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3AFEE88-23B9-4C0F-82B5-D4376AF6FC26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{607FA559-14A9-4B33-B464-1E4D6A35BD73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{607FA559-14A9-4B33-B464-1E4D6A35BD73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{607FA559-14A9-4B33-B464-1E4D6A35BD73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{607FA559-14A9-4B33-B464-1E4D6A35BD73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
