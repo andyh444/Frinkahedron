@@ -82,7 +82,20 @@ namespace Frinkahedron.Core.Colliders
 
         public AxisAlignedBoundingBox CalculateAABB(Position position)
         {
-            throw new NotImplementedException();
+            Vector3 point1 = position.ToWorld(new Vector3(0, 0.5f * PointToPointLength, 0));
+            Vector3 point2 = position.ToWorld(new Vector3(0, -0.5f * PointToPointLength, 0));
+
+            Vector3 min =
+                Vector3.Min(
+                    point1 - new Vector3(Radius, Radius, Radius),
+                    point2 - new Vector3(Radius, Radius, Radius));
+
+            Vector3 max =
+                Vector3.Max(
+                    point1 + new Vector3(Radius, Radius, Radius),
+                    point2 + new Vector3(Radius, Radius, Radius));
+
+            return new AxisAlignedBoundingBox(min, max);
         }
     }
 }

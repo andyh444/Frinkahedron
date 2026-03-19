@@ -10,9 +10,11 @@ namespace Frinkahedron.Core.Colliders
 
         public AxisAlignedBoundingBox CalculateAABB(Position position)
         {
+            float radiusPlus = 1.1f * Radius;
+
             return new AxisAlignedBoundingBox(
-                position.Centre - new Vector3(Radius, Radius, Radius),
-                position.Centre + new Vector3(Radius, Radius, Radius));
+                position.Centre - new Vector3(radiusPlus, radiusPlus, radiusPlus),
+                position.Centre + new Vector3(radiusPlus, radiusPlus, radiusPlus));
         }
 
         public DiagonalMatrix3x3 CalculateFilledInertia(float mass)
