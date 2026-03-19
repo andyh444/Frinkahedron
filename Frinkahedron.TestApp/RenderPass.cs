@@ -22,6 +22,7 @@ namespace Frinkahedron.TestApp
         public required Pipeline Pipeline { get; init; }
         public required UniformBufferInfo MatricesBufferInfo { get; init; }
         public required UniformBufferInfo PointLightsBufferInfo { get; init; }
+        public required UniformBufferInfo CameraBufferInfo { get; init; }
 
         public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager)
         {
@@ -38,6 +39,7 @@ namespace Frinkahedron.TestApp
             // Create uniform buffer
             var matricesBufferInfo = UniformBufferInfo.Create<MatrixUniforms>(factory, "Matrices", ShaderStages.Vertex);
             var pointLightsBufferInfo = UniformBufferInfo.Create<PointLightsInfo>(factory, "PointLights", ShaderStages.Fragment);
+            var cameraBufferInfo = UniformBufferInfo.Create<CameraInfo>(factory, "Camera", ShaderStages.Fragment);
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
             pipelineDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
@@ -76,6 +78,7 @@ namespace Frinkahedron.TestApp
                 Pipeline = pipeline,
                 MatricesBufferInfo = matricesBufferInfo,
                 PointLightsBufferInfo = pointLightsBufferInfo,
+                CameraBufferInfo = cameraBufferInfo,
             };
         }
 
@@ -104,12 +107,19 @@ namespace Frinkahedron.TestApp
             PointLightsInfo pointLightInfo = new PointLightsInfo
             {
                 NumActiveLights = 3,
-                PointLights0 = new PointLightInfo { Colour = new Vector3(1, 0, 0), Position = new Vector3(0, 0, -75), Range = 200f },
-                PointLights1 = new PointLightInfo { Colour = new Vector3(1, 1, 1), Position = new Vector3(0, 0, 0), Range = 100f },
+                PointLights0 = new PointLightInfo { Colour = new Vector3(1, 1, 1), Position = new Vector3(0, 0, 0), Range = 100f },
+                PointLights1 = new PointLightInfo { Colour = new Vector3(1, 0, 0), Position = new Vector3(0, 0, -75), Range = 200f },
                 PointLights2 = new PointLightInfo { Colour = new Vector3(0, 1, 0), Position = new Vector3(0, 0, 75), Range = 300f }
             };
 
+            CameraInfo cameraInfo = new CameraInfo
+            {
+                WorldPosition = scene.Camera.Position,
+                LookDirection = scene.Camera.LookDirection,
+            };
+
             commandList.UpdateBuffer(PointLightsBufferInfo.DeviceBuffer, 0, ref pointLightInfo);
+            commandList.UpdateBuffer(CameraBufferInfo.DeviceBuffer, 0, ref cameraInfo);
 
             VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, MatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, scene.Camera);
             scene.Draw(renderer);

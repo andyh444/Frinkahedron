@@ -30,3 +30,11 @@ struct PointLightsInfo
     public float _padding1;
     public float _padding2;
 };
+
+struct CameraInfo
+{
+    public Vector3 WorldPosition;
+    public float _padding1;
+    public Vector3 LookDirection;
+    public float _padding2;
+};

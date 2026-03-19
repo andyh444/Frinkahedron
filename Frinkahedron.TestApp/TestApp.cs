@@ -127,7 +127,7 @@ namespace Frinkahedron.TestApp
             gameObjects.Add(sphObj);*/
 
             bool firstSphere = true;
-            for (int i = 0; i < 650; i++)
+            for (int i = 0; i < 10; i++)
             {
                 IShape collider;
                 float density;
