@@ -67,7 +67,7 @@ namespace Frinkahedron.TestApp
             Random r = Random.Shared;
 
             gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
-                null,//new OrbitalCameraMouseBehaviour(),
+                new OrbitalCameraMouseBehaviour(),
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
 
@@ -101,7 +101,7 @@ namespace Frinkahedron.TestApp
 
 
 
-            /*for (int k = -1; k <= 2; k++)
+            for (int k = -1; k <= 2; k++)
             {
                 for (int j = -4; j < 4; j++)
                 {
@@ -124,9 +124,9 @@ namespace Frinkahedron.TestApp
                 null,
                 sph,
                 new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass), Gravity = true, Velocity = new Vector3(20, 0, 0) });
-            gameObjects.Add(sphObj);*/
+            gameObjects.Add(sphObj);
 
-            bool firstSphere = true;
+            /*bool firstSphere = true;
             for (int i = 0; i < 10; i++)
             {
                 IShape collider;
@@ -176,7 +176,7 @@ namespace Frinkahedron.TestApp
                     }));
 
                 gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI));
-            }
+            }*/
 
 
 

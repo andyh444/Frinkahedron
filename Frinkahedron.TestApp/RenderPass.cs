@@ -68,7 +68,8 @@ namespace Frinkahedron.TestApp
             {
                 matricesBufferInfo.ResourceLayout,
                 TextureInfo.GetResourceLayout(factory),
-                pointLightsBufferInfo.ResourceLayout
+                pointLightsBufferInfo.ResourceLayout,
+                cameraBufferInfo.ResourceLayout,
             };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
@@ -102,6 +103,7 @@ namespace Frinkahedron.TestApp
             commandList.SetPipeline(Pipeline);
             commandList.SetGraphicsResourceSet(0, MatricesBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(2, PointLightsBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(3, CameraBufferInfo.ResourceSet);
 
             // TODO: light info should come from scene
             PointLightsInfo pointLightInfo = new PointLightsInfo
