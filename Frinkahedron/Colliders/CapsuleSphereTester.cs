@@ -12,7 +12,7 @@ namespace Frinkahedron.Core.Colliders
     {
         public static CollisionManifold Test(Collidable<Capsule> shapeA, Collidable<Sphere> shapeB)
         {
-            var seg = LineSegment.Transform(shapeA.Shape.GetPointToPointSegment(), shapeA.Position.ToMatrix());
+            var seg = LineSegment.Transform(shapeA.Shape.GetPointToPointSegment(), shapeA.Position);
 
             float centreDistanceSq = seg.DistanceToSquared(shapeB.Position.Centre);
             float radiusSum = shapeA.Shape.Radius + shapeB.Shape.Radius;

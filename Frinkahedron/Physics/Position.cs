@@ -23,5 +23,15 @@ namespace Frinkahedron.Core.Physics
         {
             return Matrix4x4.CreateFromQuaternion(Orientation) * Matrix4x4.CreateTranslation(Centre);
         }
+
+        public Vector3 ToWorld(Vector3 local)
+        {
+            return Vector3.Transform(local, Orientation) + Centre;
+        }
+
+        public Vector3 ToLocal(Vector3 world)
+        {
+            return Vector3.Transform(world - Centre, Quaternion.Conjugate(Orientation));
+        }
     }
 }

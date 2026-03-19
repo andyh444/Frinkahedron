@@ -67,7 +67,7 @@ namespace Frinkahedron.TestApp
             Random r = Random.Shared;
 
             gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
-                new OrbitalCameraMouseBehaviour(),
+                null,//new OrbitalCameraMouseBehaviour(),
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
 
@@ -85,7 +85,23 @@ namespace Frinkahedron.TestApp
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0);
 
-            for (int k = -1; k <= 2; k++)
+            gameObjects.Add(new GameObject(new Vector3(-93, 10, 0),
+                null,
+                new Box(new Vector3(100, 10, 100)),
+                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
+
+            gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 0, -MathF.PI / 5);
+
+            gameObjects.Add(new GameObject(new Vector3(93, 10, 0),
+                null,
+                new Box(new Vector3(100, 10, 100)),
+                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
+
+            gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 0, MathF.PI / 5);
+
+
+
+            /*for (int k = -1; k <= 2; k++)
             {
                 for (int j = -4; j < 4; j++)
                 {
@@ -108,27 +124,28 @@ namespace Frinkahedron.TestApp
                 null,
                 sph,
                 new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass), Gravity = true, Velocity = new Vector3(20, 0, 0) });
-            gameObjects.Add(sphObj);
+            gameObjects.Add(sphObj);*/
 
-            /*bool firstSphere = true;
-            for (int i = 0; i < 150; i++)
+            bool firstSphere = true;
+            for (int i = 0; i < 650; i++)
             {
                 IShape collider;
                 float density;
                 var rand = r.NextSingle();
                 Behaviour? behaviour = null;
-                if (rand > 0.5f)
+                if (rand > 0.7f)
                 {
                     float radius = r.NextSingle(1.5f, 2.5f);
                     collider = new Sphere(radius);
+                    density = 10f;
                     if (firstSphere)
                     {
-                        //behaviour = new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour { distance = 15f}]);
+                        behaviour = new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour { distance = 15f}]);
                         firstSphere = false;
+                        density = 50f;
                     }
-                    density = 10f;
                 }
-                else if (rand > 0.25f)
+                else if (rand > 0.45f)
                 {
                     float radius = r.NextSingle(1.5f, 2.5f);
                     float length = r.NextSingle(2.5f, 5.5f);
@@ -147,7 +164,7 @@ namespace Frinkahedron.TestApp
                 var inertia = collider.CalculateFilledInertia(mass);
 
                 gameObjects.Add(new GameObject(
-                    new Vector3(0, r.NextSingle(5f, 20f), r.NextSingle(-150f, 150f)),
+                    new Vector3(0, r.NextSingle(50f, 65f), r.NextSingle(-130f, 130f)),
                     behaviour,
                     collider,
                     new Core.Physics.RigidBody
@@ -159,7 +176,7 @@ namespace Frinkahedron.TestApp
                     }));
 
                 gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI));
-            }*/
+            }
 
 
 

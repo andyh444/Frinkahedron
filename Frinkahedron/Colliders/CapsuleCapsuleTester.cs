@@ -12,11 +12,8 @@ namespace Frinkahedron.Core.Colliders
     {
         public static CollisionManifold Test(Collidable<Capsule> shapeA, Collidable<Capsule> shapeB)
         {
-            Matrix4x4 transformA = shapeA.Position.ToMatrix();
-            Matrix4x4 transformB = shapeB.Position.ToMatrix();
-
-            LineSegment segA = LineSegment.Transform(shapeA.Shape.GetPointToPointSegment(), transformA);
-            LineSegment segB = LineSegment.Transform(shapeB.Shape.GetPointToPointSegment(), transformB);
+            LineSegment segA = LineSegment.Transform(shapeA.Shape.GetPointToPointSegment(), shapeA.Position);
+            LineSegment segB = LineSegment.Transform(shapeB.Shape.GetPointToPointSegment(), shapeB.Position);
 
             Vector3 closestPointA = segA.ClosestPointTo(segB);
             Vector3 closestPointB = segB.ClosestPointTo(segA);

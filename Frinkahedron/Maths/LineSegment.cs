@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Frinkahedron.Core.Physics;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -18,6 +19,13 @@ namespace Frinkahedron.Core.Maths
             return new LineSegment(
                 Vector3.Transform(segment.Point1, transform),
                 Vector3.Transform(segment.Point2, transform));
+        }
+
+        public static LineSegment Transform(LineSegment segment, Position position)
+        {
+            return new LineSegment(
+                position.ToWorld(segment.Point1),
+                position.ToWorld(segment.Point2));
         }
 
         public Vector3 ClosestPointTo(LineSegment other)

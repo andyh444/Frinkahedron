@@ -13,13 +13,13 @@ namespace Frinkahedron.Core.Colliders
         {
             // treat the box as being at the origin with no rotation
 
-            var transformA = boxA.Position.ToMatrix();
+            /*var transformA = boxA.Position.ToMatrix();
             var transformB = Matrix4x4.CreateTranslation(sphereB.Position.Centre); // ignore orientation
 
             _ = Matrix4x4.Invert(transformA, out var inverseA);
             var transformBToA = transformB * inverseA;// * inverseA;
-
-            Vector3 sphereCentre = Vector3.Transform(sphereB.Position.Centre, inverseA);
+            */
+            Vector3 sphereCentre = boxA.Position.ToLocal(sphereB.Position.Centre);
 
             Vector3 centreA = new Vector3();
             Vector3 centreB = sphereCentre;
@@ -71,7 +71,7 @@ namespace Frinkahedron.Core.Colliders
             }
 
             normal = Vector3.Transform(normal, boxA.Position.Orientation);
-            closestPoint = Vector3.Transform(closestPoint, transformA);
+            closestPoint = boxA.Position.ToWorld(closestPoint);
 
             return new CollisionManifold([closestPoint], normal, penetration);
         }
