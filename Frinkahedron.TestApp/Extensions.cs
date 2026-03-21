@@ -9,6 +9,8 @@ using Vulkan.Xlib;
 
 namespace Frinkahedron.TestApp
 {
+
+
     internal static class Extensions
     {
         public static Vector4 ToVector4(this RgbaFloat colour)

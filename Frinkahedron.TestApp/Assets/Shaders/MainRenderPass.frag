@@ -30,7 +30,7 @@ struct DirectionalLightInfo
     vec3 Direction;
     float _pad3;
     vec3 Colour;
-    float Intensity;
+    float _pad4;
 };
 
 struct CameraInfo

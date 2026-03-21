@@ -28,7 +28,7 @@ struct DirectionalLightInfo
     public Vector3 Direction;
     public float _pad3;
     public Vector3 Colour;
-    public float Intensity;
+    public float _pad4;
 };
 
 struct PointLightsInfo

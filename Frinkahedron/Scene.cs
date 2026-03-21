@@ -12,16 +12,20 @@ using System.Threading.Tasks;
 
 namespace Frinkahedron.Core
 {
+
     public sealed class Scene
     {
         public Camera Camera { get; }
 
         public IReadOnlyList<GameObject> Objects { get; }
 
+        public SceneLights SceneLights { get; }
+
         public Scene(Vector3 initialCameraPosition, Vector3 initialCameraDirection, IReadOnlyList<GameObject> objects)
         {
             Camera = Camera.CreatePerspectiveCamera(initialCameraPosition, initialCameraDirection);
             Objects = objects;
+            SceneLights = new SceneLights();
         }
 
         public void Update(GameState gameState)

@@ -184,7 +184,14 @@ namespace Frinkahedron.TestApp
             //gameObjects.Add(new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new OrbitalCameraMouseBehaviour()]), new BoxCollider(new Vector3(1, 1.25f, 1.5f))));
             //gameObjects.Add(new GameObject(new Vector3(1, 0, 0), new ContinuousRotationBehaviour(-0.5f, 0.1f, 0.3f), new SphereCollider(0.5f)));
 
-            return new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), gameObjects);
+            var scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), gameObjects);
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
+
+            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-1, -1, 0)), new Vector3(1));
+
+            return scene;
         }
 
         public void Run()

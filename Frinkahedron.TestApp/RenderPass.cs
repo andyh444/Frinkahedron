@@ -105,27 +105,10 @@ namespace Frinkahedron.TestApp
             commandList.SetGraphicsResourceSet(2, LightsBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(3, CameraBufferInfo.ResourceSet);
 
-            // TODO: light info should come from scene
-            PointLightsInfo pointLightInfo = new PointLightsInfo
-            {
-                NumActiveLights = 0,
-                PointLights0 = new PointLightInfo { Colour = new Vector3(1, 1, 1), Position = new Vector3(0, 0, 0), Range = 100f },
-                PointLights1 = new PointLightInfo { Colour = new Vector3(1, 0, 0), Position = new Vector3(0, 0, -75), Range = 200f },
-                PointLights2 = new PointLightInfo { Colour = new Vector3(0, 1, 0), Position = new Vector3(0, 0, 75), Range = 300f }
-            };
+            PointLightsInfo pointLightInfo = scene.GetPointLights();
+            CameraInfo cameraInfo = scene.GetCameraInfo();
+            DirectionalLightInfo directionalLight = scene.GetDirectionalLight();
 
-            CameraInfo cameraInfo = new CameraInfo
-            {
-                WorldPosition = scene.Camera.Position,
-                LookDirection = scene.Camera.LookDirection,
-            };
-
-            DirectionalLightInfo directionalLight = new DirectionalLightInfo()
-            {
-                Enabled = 1,
-                Colour = new Vector3(1, 1, 1),
-                Direction = Vector3.Normalize(new Vector3(-1, -1, 0))
-            };
             commandList.UpdateBuffer(LightsBufferInfo.PointLightsBuffer, 0, ref pointLightInfo);
             commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);
             commandList.UpdateBuffer(CameraBufferInfo.DeviceBuffer, 0, ref cameraInfo);
