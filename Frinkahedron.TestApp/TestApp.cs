@@ -265,8 +265,12 @@ namespace Frinkahedron.TestApp
 
         private void Draw()
         {
+            _graphicsResources.CommandList.Begin();
+            _graphicsResources.ShadowRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
             _graphicsResources.MainRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
             _graphicsDevice.SwapBuffers();
+            _graphicsResources.CommandList.End();
+            _graphicsDevice.SubmitCommands(_graphicsResources.CommandList);
         }
     }
 }

@@ -16,14 +16,16 @@ namespace Frinkahedron.TestApp
         private readonly CommandList commandList;
         private readonly AssetManager assets;
         private Camera camera;
+        private readonly bool texturesEnabled;
 
-        public VeldridRenderer(Primitives primitives, DeviceBuffer matricesBuffer, CommandList commandList, AssetManager assets, Camera camera)
+        public VeldridRenderer(Primitives primitives, DeviceBuffer matricesBuffer, CommandList commandList, AssetManager assets, Camera camera, bool texturesEnabled)
         {
             this.primitives = primitives;
             this.matricesBuffer = matricesBuffer;
             this.commandList = commandList;
             this.assets = assets;
             this.camera = camera;
+            this.texturesEnabled = texturesEnabled;
         }
 
         public void DrawCuboid(Matrix4x4 transform)
@@ -49,7 +51,10 @@ namespace Frinkahedron.TestApp
                 View = camera.ViewMatrix,
                 Projection = camera.ProjectionMatrix
             };
-            commandList.SetGraphicsResourceSet(1, assets.GetTextureResourceSet(textureID));
+            if (texturesEnabled)
+            {
+                commandList.SetGraphicsResourceSet(1, assets.GetTextureResourceSet(textureID));
+            }
             commandList.UpdateBuffer(matricesBuffer, 0, ref uniforms);
             meshInfo.Draw(commandList);
         }

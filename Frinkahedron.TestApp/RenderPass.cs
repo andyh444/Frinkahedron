@@ -16,7 +16,119 @@ namespace Frinkahedron.TestApp
         public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene);
     }
 
-    internal class MainRenderPass : IRenderPass
+    internal sealed class DirectionalShadowRenderPass : IRenderPass
+    {
+        public required Shader[] Shaders { get; init; }
+        public required Pipeline Pipeline { get; init; }
+        public required UniformBufferInfo MatricesBufferInfo { get; init; }
+        public required Framebuffer Framebuffer { get; init; }
+        public required TextureInfo DepthTexture { get; init; }
+
+        public static DirectionalShadowRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager)
+        {
+            ShaderDescription vertexShaderDesc = new ShaderDescription(
+                ShaderStages.Vertex,
+                assetManager.GetShaderCode("ShadowPass.vert"),
+                "main");
+            ShaderDescription fragmentShaderDesc = new ShaderDescription(
+                ShaderStages.Fragment,
+                assetManager.GetShaderCode("ShadowPass.frag"),
+                "main");
+            var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
+
+            var matricesBufferInfo = UniformBufferInfo.Create<MatrixUniforms>(factory, "Matrices", ShaderStages.Vertex);
+
+            TextureDescription depthDescription = TextureDescription.Texture2D(
+                1024,
+                1024,
+                1,
+                1,
+                PixelFormat.R32_Float,
+                TextureUsage.DepthStencil | TextureUsage.Sampled);
+            var depthTexture = TextureInfo.Create(factory, graphicsDevice, depthDescription);
+            var frameBuffer = factory.CreateFramebuffer(
+                new FramebufferDescription(
+                    depthTarget: new FramebufferAttachmentDescription(depthTexture.Texture, 0),
+                    colorTargets: []
+                ));
+
+            
+            GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
+            pipelineDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
+
+            pipelineDescription.DepthStencilState = new DepthStencilStateDescription(
+                depthTestEnabled: true,
+                depthWriteEnabled: true,
+                comparisonKind: ComparisonKind.LessEqual);
+
+            pipelineDescription.RasterizerState = new RasterizerStateDescription(
+                cullMode: FaceCullMode.Back,
+                fillMode: PolygonFillMode.Solid,
+                frontFace: FrontFace.Clockwise,
+                depthClipEnabled: true,
+                scissorTestEnabled: false);
+
+            pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
+
+            pipelineDescription.ShaderSet = new ShaderSetDescription(
+                vertexLayouts: new VertexLayoutDescription[] { MeshInfo.GetVertexLayoutDescription() },
+                shaders: shaders);
+
+            pipelineDescription.Outputs = frameBuffer.OutputDescription;
+            pipelineDescription.ResourceLayouts = new[]
+            {
+                matricesBufferInfo.ResourceLayout
+            };
+            var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
+
+            return new DirectionalShadowRenderPass
+            {
+                DepthTexture = depthTexture,
+                Framebuffer = frameBuffer,
+                MatricesBufferInfo = matricesBufferInfo,
+                Pipeline = pipeline,
+                Shaders = shaders
+            };
+        }
+
+        public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene)
+        {
+            if (scene.SceneLights.DirectionalLight is null)
+            {
+                return;
+            }
+
+            Camera lightCamera = scene.SceneLights.DirectionalLight.Value.GetDirectionalLightCamera();
+
+            commandList.SetFramebuffer(Framebuffer);
+
+            commandList.ClearDepthStencil(1f);
+            commandList.SetPipeline(Pipeline);
+            commandList.SetGraphicsResourceSet(0, MatricesBufferInfo.ResourceSet);
+
+            VeldridRenderer renderer = new VeldridRenderer(
+                graphicsResources.Primitives,
+                MatricesBufferInfo.DeviceBuffer,
+                commandList,
+                graphicsResources.AssetManager,
+                lightCamera,
+                false);
+            scene.Draw(renderer);
+        }
+
+        public void Dispose()
+        {
+            foreach (var shader in Shaders)
+            {
+                shader.Dispose();
+            }
+            Pipeline.Dispose();
+            MatricesBufferInfo.Dispose();
+        }
+    }
+
+    // TODO: Get the shadow map and light viewprojection into main render shaders
+    internal sealed class MainRenderPass : IRenderPass
     {
         public required Shader[] Shaders { get; init; }
         public required Pipeline Pipeline { get; init; }
@@ -92,11 +204,12 @@ namespace Frinkahedron.TestApp
             Pipeline.Dispose();
             MatricesBufferInfo.Dispose();
             LightsBufferInfo.Dispose();
+            CameraBufferInfo.Dispose();
         }
 
         public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene)
         {
-            commandList.Begin();
+            
             commandList.SetFramebuffer(graphicsDevice.SwapchainFramebuffer);
             commandList.ClearColorTarget(0, RgbaFloat.Black);
             commandList.ClearDepthStencil(1f);
@@ -113,12 +226,8 @@ namespace Frinkahedron.TestApp
             commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);
             commandList.UpdateBuffer(CameraBufferInfo.DeviceBuffer, 0, ref cameraInfo);
 
-            VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, MatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, scene.Camera);
+            VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, MatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, scene.Camera, true);
             scene.Draw(renderer);
-
-            commandList.End();
-
-            graphicsDevice.SubmitCommands(commandList);
         }
     }
 }
