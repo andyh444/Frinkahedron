@@ -11,6 +11,29 @@ namespace Frinkahedron.TestApp
         public required ResourceSet ResourceSet { get; init; }
         public required ResourceLayout ResourceLayout { get; init; }
 
+        public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice, TextureDescription textureDescription)
+        {
+            Texture texture = factory.CreateTexture(textureDescription);
+            TextureView textureView = factory.CreateTextureView(texture);
+            Sampler sampler = graphicsDevice.Aniso4xSampler;
+            var textureLayout = GetResourceLayout(factory);
+
+            ResourceSet textureSet = factory.CreateResourceSet(
+                new ResourceSetDescription(
+                    textureLayout,
+                    textureView,
+                    sampler));
+
+            return new TextureInfo
+            {
+                Texture = texture,
+                TextureView = textureView,
+                Sampler = sampler,
+                ResourceSet = textureSet,
+                ResourceLayout = textureLayout
+            };
+        }
+
         public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice, string filePath)
         {
             var ist = new ImageSharpTexture(filePath);

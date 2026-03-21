@@ -56,5 +56,10 @@ namespace Frinkahedron.TestApp
                 LookDirection = scene.Camera.LookDirection,
             };
         }
+
+        public static Camera GetDirectionalLightCamera(this DirectionalLight light)
+        {
+            return Camera.CreateOrthoCamera(new Vector3(), light.Direction);
+        }
     }
 }
