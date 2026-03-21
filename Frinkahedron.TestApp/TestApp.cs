@@ -112,7 +112,7 @@ namespace Frinkahedron.TestApp
                         GameObject obj = new GameObject(new Vector3(k * 1.01f, -14 + i * 2, j * 1.01f),
                             null,
                             box,
-                            new RigidBody { Mass = mass, InverseInertia = box.CalculateFilledInertia(mass), Gravity = true, Material = new PhysicsMaterial(0.0f, 0.8f) });
+                            new RigidBody { Mass = mass, InverseInertia = box.CalculateFilledInertia(mass).GetInverse(), Gravity = true, Material = new PhysicsMaterial(0.0f, 0.8f) });
                         gameObjects.Add(obj);
                     }
                 }
@@ -121,9 +121,9 @@ namespace Frinkahedron.TestApp
             Sphere sph = new Sphere(4);
             float sphMass = 10 * sph.CalculateVolume();
             GameObject sphObj = new GameObject(new Vector3(-50, 0, 0),
-                null,
+                new SphereControlBehaviour(),
                 sph,
-                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass), Gravity = true, Velocity = new Vector3(20, 0, 0) });
+                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(), Gravity = true, Velocity = new Vector3(30, 0, 0) });
             gameObjects.Add(sphObj);
 
             /*bool firstSphere = true;

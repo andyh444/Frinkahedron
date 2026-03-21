@@ -21,7 +21,7 @@ namespace Frinkahedron.TestApp
         public required Shader[] Shaders { get; init; }
         public required Pipeline Pipeline { get; init; }
         public required UniformBufferInfo MatricesBufferInfo { get; init; }
-        public required UniformBufferInfo PointLightsBufferInfo { get; init; }
+        public required LightingBufferInfo LightsBufferInfo{ get; init; }
         public required UniformBufferInfo CameraBufferInfo { get; init; }
 
         public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager)
@@ -38,7 +38,7 @@ namespace Frinkahedron.TestApp
 
             // Create uniform buffer
             var matricesBufferInfo = UniformBufferInfo.Create<MatrixUniforms>(factory, "Matrices", ShaderStages.Vertex);
-            var pointLightsBufferInfo = UniformBufferInfo.Create<PointLightsInfo>(factory, "PointLights", ShaderStages.Fragment);
+            var lightsBufferInfo = LightingBufferInfo.Create(factory, "PointLights", ShaderStages.Fragment);
             var cameraBufferInfo = UniformBufferInfo.Create<CameraInfo>(factory, "Camera", ShaderStages.Fragment);
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
@@ -68,7 +68,7 @@ namespace Frinkahedron.TestApp
             {
                 matricesBufferInfo.ResourceLayout,
                 TextureInfo.GetResourceLayout(factory),
-                pointLightsBufferInfo.ResourceLayout,
+                lightsBufferInfo.ResourceLayout,
                 cameraBufferInfo.ResourceLayout,
             };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
@@ -78,7 +78,7 @@ namespace Frinkahedron.TestApp
                 Shaders = shaders,
                 Pipeline = pipeline,
                 MatricesBufferInfo = matricesBufferInfo,
-                PointLightsBufferInfo = pointLightsBufferInfo,
+                LightsBufferInfo = lightsBufferInfo,
                 CameraBufferInfo = cameraBufferInfo,
             };
         }
@@ -91,7 +91,7 @@ namespace Frinkahedron.TestApp
             }
             Pipeline.Dispose();
             MatricesBufferInfo.Dispose();
-            PointLightsBufferInfo.Dispose();
+            LightsBufferInfo.Dispose();
         }
 
         public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene)
@@ -102,13 +102,13 @@ namespace Frinkahedron.TestApp
             commandList.ClearDepthStencil(1f);
             commandList.SetPipeline(Pipeline);
             commandList.SetGraphicsResourceSet(0, MatricesBufferInfo.ResourceSet);
-            commandList.SetGraphicsResourceSet(2, PointLightsBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(2, LightsBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(3, CameraBufferInfo.ResourceSet);
 
             // TODO: light info should come from scene
             PointLightsInfo pointLightInfo = new PointLightsInfo
             {
-                NumActiveLights = 3,
+                NumActiveLights = 0,
                 PointLights0 = new PointLightInfo { Colour = new Vector3(1, 1, 1), Position = new Vector3(0, 0, 0), Range = 100f },
                 PointLights1 = new PointLightInfo { Colour = new Vector3(1, 0, 0), Position = new Vector3(0, 0, -75), Range = 200f },
                 PointLights2 = new PointLightInfo { Colour = new Vector3(0, 1, 0), Position = new Vector3(0, 0, 75), Range = 300f }
@@ -120,7 +120,14 @@ namespace Frinkahedron.TestApp
                 LookDirection = scene.Camera.LookDirection,
             };
 
-            commandList.UpdateBuffer(PointLightsBufferInfo.DeviceBuffer, 0, ref pointLightInfo);
+            DirectionalLightInfo directionalLight = new DirectionalLightInfo()
+            {
+                Enabled = 1,
+                Colour = new Vector3(1, 1, 1),
+                Direction = Vector3.Normalize(new Vector3(-1, -1, 0))
+            };
+            commandList.UpdateBuffer(LightsBufferInfo.PointLightsBuffer, 0, ref pointLightInfo);
+            commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);
             commandList.UpdateBuffer(CameraBufferInfo.DeviceBuffer, 0, ref cameraInfo);
 
             VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, MatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, scene.Camera);

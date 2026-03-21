@@ -39,4 +39,44 @@ namespace Frinkahedron.TestApp
             ResourceSet.Dispose();
         }
     }
+
+    internal class LightingBufferInfo : IDisposable
+    {
+        public required DeviceBuffer PointLightsBuffer { get; init; }
+        public required DeviceBuffer DirectionalLightBuffer { get; init; }
+        public required ResourceLayout ResourceLayout { get; init; }
+        public required ResourceSet ResourceSet { get; init; }
+
+        public static LightingBufferInfo Create(ResourceFactory factory, string name, ShaderStages shaderStages)
+        {
+            var pointLightsBuffer = factory.CreateBuffer(new BufferDescription(
+                (uint)Unsafe.SizeOf<PointLightsInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+
+            var directionalLightBuffer = factory.CreateBuffer(new BufferDescription(
+                (uint)Unsafe.SizeOf<DirectionalLightInfo>(), BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+
+
+            var resourceLayout = factory.CreateResourceLayout(new ResourceLayoutDescription(
+                new ResourceLayoutElementDescription("PointLights", ResourceKind.UniformBuffer, shaderStages),
+                new ResourceLayoutElementDescription("DirectionalLight", ResourceKind.UniformBuffer, shaderStages)));
+
+            var resourceSet = factory.CreateResourceSet(new ResourceSetDescription(resourceLayout, pointLightsBuffer, directionalLightBuffer));
+
+            return new LightingBufferInfo
+            {
+                PointLightsBuffer = pointLightsBuffer,
+                DirectionalLightBuffer = directionalLightBuffer,
+                ResourceLayout = resourceLayout,
+                ResourceSet = resourceSet
+            };
+        }
+
+        public void Dispose()
+        {
+            PointLightsBuffer.Dispose();
+            DirectionalLightBuffer.Dispose();
+            ResourceLayout.Dispose();
+            ResourceSet.Dispose();
+        }
+    }
 }

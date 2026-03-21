@@ -21,6 +21,18 @@ struct PointLightsInfo
     float _padding2;
 };
 
+struct DirectionalLightInfo
+{
+    int Enabled;
+    float _pad0;
+    float _pad1;
+    float _pad2;
+    vec3 Direction;
+    float _pad3;
+    vec3 Colour;
+    float Intensity;
+};
+
 struct CameraInfo
 {
     vec3 WorldPosition;
@@ -42,6 +54,11 @@ layout(set = 2, binding = 0) uniform PointLights
     PointLightsInfo _PointLights;
 };
 
+layout(set = 2, binding = 1) uniform DirectionalLight
+{
+    DirectionalLightInfo _DirectionalLight;
+};
+
 layout(set = 3, binding = 0) uniform Camera
 {
     CameraInfo _CameraInfo;
@@ -58,9 +75,10 @@ void main()
     vec3 specular = vec3(0.0);
 
     // TODO: Get these from material
-    float specularPower = 64.0;
+    float specularPower = 64.0; // aka shininess
     float specularStrength = 0.5;
 
+    // point lights
     for (int i = 0; i < _PointLights.NumActiveLights; i++)
     {
         PointLightInfo pli = _PointLights.PointLights[i];
@@ -77,6 +95,19 @@ void main()
         vec3 halfDir = normalize(lightDir + viewDir);
         float spec = pow(max(dot(normal, halfDir), 0.0), specularPower);
         specular += specularStrength * spec * attenuation * pli.Colour;
+    }
+
+    // directional light
+    if (_DirectionalLight.Enabled > 0)
+    {
+        vec3 lightDir = normalize(-_DirectionalLight.Direction);
+        float diff = max(dot(normal, lightDir), 0.0);
+
+        diffuse += diff * _DirectionalLight.Colour;
+        vec3 halfDir = normalize(lightDir + viewDir);
+
+        float spec = pow(max(dot(normal, halfDir), 0.0), specularPower);
+        specular += specularStrength * spec * _DirectionalLight.Colour;
     }
 
     vec4 texColor = texture(sampler2D(Texture, TextureSampler), fsin_texCoord);
