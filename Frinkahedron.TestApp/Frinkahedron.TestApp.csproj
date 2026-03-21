@@ -25,6 +25,12 @@
     <None Update="Assets\Shaders\MainRenderPass.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Shaders\ShadowPass.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Shaders\ShadowPass.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\Textures\football.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
