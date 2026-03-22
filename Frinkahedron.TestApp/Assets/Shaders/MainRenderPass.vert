@@ -7,6 +7,7 @@ layout(location = 2) in vec2 TexCoord;
 layout(location = 0) out vec3 fsin_normal;
 layout(location = 1) out vec2 fsin_texCoord;
 layout(location = 2) out vec4 fsin_worldPos;
+layout(location = 3) out vec4 fsin_lightPos;
 
 layout(set = 0, binding = 0) uniform ModelMatrices
 {
@@ -29,6 +30,7 @@ void main()
 {
     fsin_worldPos = model * vec4(Position, 1);
     gl_Position = projection * view * fsin_worldPos;
+    fsin_lightPos = lightProjection * lightView * fsin_lightPos;
     fsin_normal = normalize(mat3(transpose(inverse(model))) * Normal);
     fsin_texCoord = TexCoord;
 }

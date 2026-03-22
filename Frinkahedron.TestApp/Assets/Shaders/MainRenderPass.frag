@@ -44,6 +44,7 @@ struct CameraInfo
 layout(location = 0) in vec3 fsin_normal;
 layout(location = 1) in vec2 fsin_texCoord;
 layout(location = 2) in vec4 fsin_worldPos;
+layout(location = 3) in vec4 fsin_lightPos;
 layout(location = 0) out vec4 fsout_Color;
 
 layout(set = 2, binding = 0) uniform texture2D Texture;
