@@ -118,12 +118,15 @@ void main()
 
         float closestDepth = texture(sampler2D(ShadowMap, ShadowMapSampler), projCoords.xy).r;
 
-        //fsout_Color = vec4(closestDepth, closestDepth, closestDepth, 1);
-        //return;
-
+        
         float currentDepth = projCoords.z;
 
-        float bias = 0.01;
+        //float difference = closestDepth - currentDepth;
+        //fsout_Color = vec4(currentDepth, currentDepth, currentDepth, 1);
+        //return;
+
+
+        float bias = 0.0001;
         shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
         if (projCoords.x < 0.0

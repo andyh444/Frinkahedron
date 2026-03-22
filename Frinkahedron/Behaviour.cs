@@ -23,11 +23,6 @@ namespace Frinkahedron.Core
         {
             base.Update(self, gameState);
 
-            Vector3 newDir
-                = Vector3.Transform(gameState.Scene.SceneLights.DirectionalLight.Value.Direction, Quaternion.CreateFromAxisAngle(Vector3.UnitY, 0.001f));
-
-            gameState.Scene.SceneLights.DirectionalLight = new DirectionalLight(newDir, gameState.Scene.SceneLights.DirectionalLight.Value.Colour);
-
             if (gameState.Input.IsMouseButtonDown(MouseButton.Right))
             {
                 Vector2 delta = gameState.Input.GetMouseDelta();

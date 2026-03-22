@@ -34,7 +34,7 @@ namespace Frinkahedron
             return new Camera(
                 initialPosition,
                 initialDirection,
-                CreateOrtho(false, -50, 50, -50, 50, 1.0f, 500f));
+                CreateOrtho(false, -100, 100, -100, 100, 1.0f, 1000f));
         }
 
         public void SetValues(Vector3 position, Vector3 direction)
