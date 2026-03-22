@@ -46,20 +46,20 @@ layout(location = 1) in vec2 fsin_texCoord;
 layout(location = 2) in vec4 fsin_worldPos;
 layout(location = 0) out vec4 fsout_Color;
 
-layout(set = 1, binding = 0) uniform texture2D Texture;
-layout(set = 1, binding = 1) uniform sampler TextureSampler;
+layout(set = 2, binding = 0) uniform texture2D Texture;
+layout(set = 2, binding = 1) uniform sampler TextureSampler;
 
-layout(set = 2, binding = 0) uniform PointLights
+layout(set = 3, binding = 0) uniform PointLights
 {
     PointLightsInfo _PointLights;
 };
 
-layout(set = 2, binding = 1) uniform DirectionalLight
+layout(set = 3, binding = 1) uniform DirectionalLight
 {
     DirectionalLightInfo _DirectionalLight;
 };
 
-layout(set = 3, binding = 0) uniform Camera
+layout(set = 4, binding = 0) uniform Camera
 {
     CameraInfo _CameraInfo;
 };

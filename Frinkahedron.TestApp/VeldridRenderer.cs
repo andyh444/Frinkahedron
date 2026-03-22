@@ -15,16 +15,14 @@ namespace Frinkahedron.TestApp
         private readonly DeviceBuffer matricesBuffer;
         private readonly CommandList commandList;
         private readonly AssetManager assets;
-        private Camera camera;
         private readonly bool texturesEnabled;
 
-        public VeldridRenderer(Primitives primitives, DeviceBuffer matricesBuffer, CommandList commandList, AssetManager assets, Camera camera, bool texturesEnabled)
+        public VeldridRenderer(Primitives primitives, DeviceBuffer modelMatrixBuffer, CommandList commandList, AssetManager assets, bool texturesEnabled)
         {
             this.primitives = primitives;
-            this.matricesBuffer = matricesBuffer;
+            this.matricesBuffer = modelMatrixBuffer;
             this.commandList = commandList;
             this.assets = assets;
-            this.camera = camera;
             this.texturesEnabled = texturesEnabled;
         }
 
@@ -45,17 +43,15 @@ namespace Frinkahedron.TestApp
 
         private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID)
         {
-            MatrixUniforms uniforms = new MatrixUniforms
+            ModelMatrixInfo modelInfo = new ModelMatrixInfo
             {
                 Model = transform,
-                View = camera.ViewMatrix,
-                Projection = camera.ProjectionMatrix
             };
             if (texturesEnabled)
             {
-                commandList.SetGraphicsResourceSet(1, assets.GetTextureResourceSet(textureID));
+                commandList.SetGraphicsResourceSet(2, assets.GetTextureResourceSet(textureID));
             }
-            commandList.UpdateBuffer(matricesBuffer, 0, ref uniforms);
+            commandList.UpdateBuffer(matricesBuffer, 0, ref modelInfo);
             meshInfo.Draw(commandList);
         }
     }

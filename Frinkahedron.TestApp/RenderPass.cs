@@ -20,7 +20,8 @@ namespace Frinkahedron.TestApp
     {
         public required Shader[] Shaders { get; init; }
         public required Pipeline Pipeline { get; init; }
-        public required UniformBufferInfo MatricesBufferInfo { get; init; }
+        public required UniformBufferInfo ModelMatricesBufferInfo { get; init; }
+        public required UniformBufferInfo CameraMatricesBufferInfo { get; init; }
         public required Framebuffer Framebuffer { get; init; }
         public required TextureInfo DepthTexture { get; init; }
 
@@ -36,7 +37,8 @@ namespace Frinkahedron.TestApp
                 "main");
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
 
-            var matricesBufferInfo = UniformBufferInfo.Create<MatrixUniforms>(factory, "Matrices", ShaderStages.Vertex);
+            var modelBufferInfo = UniformBufferInfo.Create<ModelMatrixInfo>(factory, "ModelMatrices", ShaderStages.Vertex);
+            var cameraMatrixBufferInfo = UniformBufferInfo.Create<CameraMatrixInfo>(factory, "CameraMatrices", ShaderStages.Vertex);
 
             TextureDescription depthDescription = TextureDescription.Texture2D(
                 1024,
@@ -77,7 +79,8 @@ namespace Frinkahedron.TestApp
             pipelineDescription.Outputs = frameBuffer.OutputDescription;
             pipelineDescription.ResourceLayouts = new[]
             {
-                matricesBufferInfo.ResourceLayout
+                modelBufferInfo.ResourceLayout,
+                cameraMatrixBufferInfo.ResourceLayout
             };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
@@ -85,7 +88,8 @@ namespace Frinkahedron.TestApp
             {
                 DepthTexture = depthTexture,
                 Framebuffer = frameBuffer,
-                MatricesBufferInfo = matricesBufferInfo,
+                ModelMatricesBufferInfo = modelBufferInfo,
+                CameraMatricesBufferInfo = cameraMatrixBufferInfo,
                 Pipeline = pipeline,
                 Shaders = shaders
             };
@@ -104,14 +108,22 @@ namespace Frinkahedron.TestApp
 
             commandList.ClearDepthStencil(1f);
             commandList.SetPipeline(Pipeline);
-            commandList.SetGraphicsResourceSet(0, MatricesBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(0, ModelMatricesBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(1, CameraMatricesBufferInfo.ResourceSet);
+
+            CameraMatrixInfo cameraMatrixInfo = new CameraMatrixInfo
+            {
+                Projection = scene.Camera.ProjectionMatrix,
+                View = scene.Camera.ViewMatrix,
+            };
+
+            commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
 
             VeldridRenderer renderer = new VeldridRenderer(
                 graphicsResources.Primitives,
-                MatricesBufferInfo.DeviceBuffer,
+                ModelMatricesBufferInfo.DeviceBuffer,
                 commandList,
                 graphicsResources.AssetManager,
-                lightCamera,
                 false);
             scene.Draw(renderer);
         }
@@ -123,7 +135,8 @@ namespace Frinkahedron.TestApp
                 shader.Dispose();
             }
             Pipeline.Dispose();
-            MatricesBufferInfo.Dispose();
+            ModelMatricesBufferInfo.Dispose();
+            CameraMatricesBufferInfo.Dispose();
         }
     }
 
@@ -132,7 +145,8 @@ namespace Frinkahedron.TestApp
     {
         public required Shader[] Shaders { get; init; }
         public required Pipeline Pipeline { get; init; }
-        public required UniformBufferInfo MatricesBufferInfo { get; init; }
+        public required UniformBufferInfo ModelMatricesBufferInfo { get; init; }
+        public required UniformBufferInfo CameraMatricesBufferInfo { get; init; }
         public required LightingBufferInfo LightsBufferInfo{ get; init; }
         public required UniformBufferInfo CameraBufferInfo { get; init; }
 
@@ -148,8 +162,8 @@ namespace Frinkahedron.TestApp
                 "main");
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
 
-            // Create uniform buffer
-            var matricesBufferInfo = UniformBufferInfo.Create<MatrixUniforms>(factory, "Matrices", ShaderStages.Vertex);
+            var modelBufferInfo = UniformBufferInfo.Create<ModelMatrixInfo>(factory, "ModelMatrices", ShaderStages.Vertex);
+            var cameraMatrixBufferInfo = UniformBufferInfo.Create<CameraMatrixInfo>(factory, "CameraMatrices", ShaderStages.Vertex);
             var lightsBufferInfo = LightingBufferInfo.Create(factory, "PointLights", ShaderStages.Fragment);
             var cameraBufferInfo = UniformBufferInfo.Create<CameraInfo>(factory, "Camera", ShaderStages.Fragment);
 
@@ -178,7 +192,8 @@ namespace Frinkahedron.TestApp
             pipelineDescription.Outputs = graphicsDevice.SwapchainFramebuffer.OutputDescription;
             pipelineDescription.ResourceLayouts = new[]
             {
-                matricesBufferInfo.ResourceLayout,
+                modelBufferInfo.ResourceLayout,
+                cameraMatrixBufferInfo.ResourceLayout,
                 TextureInfo.GetResourceLayout(factory),
                 lightsBufferInfo.ResourceLayout,
                 cameraBufferInfo.ResourceLayout,
@@ -189,7 +204,8 @@ namespace Frinkahedron.TestApp
             {
                 Shaders = shaders,
                 Pipeline = pipeline,
-                MatricesBufferInfo = matricesBufferInfo,
+                ModelMatricesBufferInfo = modelBufferInfo,
+                CameraMatricesBufferInfo = cameraMatrixBufferInfo,
                 LightsBufferInfo = lightsBufferInfo,
                 CameraBufferInfo = cameraBufferInfo,
             };
@@ -202,7 +218,8 @@ namespace Frinkahedron.TestApp
                 shader.Dispose();
             }
             Pipeline.Dispose();
-            MatricesBufferInfo.Dispose();
+            ModelMatricesBufferInfo.Dispose();
+            CameraMatricesBufferInfo.Dispose();
             LightsBufferInfo.Dispose();
             CameraBufferInfo.Dispose();
         }
@@ -214,19 +231,26 @@ namespace Frinkahedron.TestApp
             commandList.ClearColorTarget(0, RgbaFloat.Black);
             commandList.ClearDepthStencil(1f);
             commandList.SetPipeline(Pipeline);
-            commandList.SetGraphicsResourceSet(0, MatricesBufferInfo.ResourceSet);
-            commandList.SetGraphicsResourceSet(2, LightsBufferInfo.ResourceSet);
-            commandList.SetGraphicsResourceSet(3, CameraBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(0, ModelMatricesBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(1, CameraMatricesBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(3, LightsBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(4, CameraBufferInfo.ResourceSet);
 
             PointLightsInfo pointLightInfo = scene.GetPointLights();
             CameraInfo cameraInfo = scene.GetCameraInfo();
             DirectionalLightInfo directionalLight = scene.GetDirectionalLight();
+            CameraMatrixInfo cameraMatrixInfo = new CameraMatrixInfo
+            {
+                Projection = scene.Camera.ProjectionMatrix,
+                View = scene.Camera.ViewMatrix,
+            };
 
+            commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
             commandList.UpdateBuffer(LightsBufferInfo.PointLightsBuffer, 0, ref pointLightInfo);
             commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);
             commandList.UpdateBuffer(CameraBufferInfo.DeviceBuffer, 0, ref cameraInfo);
 
-            VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, MatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, scene.Camera, true);
+            VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, ModelMatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, true);
             scene.Draw(renderer);
         }
     }

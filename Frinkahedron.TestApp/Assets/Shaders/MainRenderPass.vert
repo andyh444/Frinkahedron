@@ -8,9 +8,13 @@ layout(location = 0) out vec3 fsin_normal;
 layout(location = 1) out vec2 fsin_texCoord;
 layout(location = 2) out vec4 fsin_worldPos;
 
-layout(set = 0, binding = 0) uniform Matrices
+layout(set = 0, binding = 0) uniform ModelMatrices
 {
     mat4 model;
+};
+
+layout(set = 1, binding = 0) uniform CameraMatrices
+{
     mat4 view;
     mat4 projection;
 };

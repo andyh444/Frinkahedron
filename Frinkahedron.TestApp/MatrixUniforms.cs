@@ -1,8 +1,12 @@
 ﻿using System.Numerics;
 
-internal struct MatrixUniforms
+internal struct ModelMatrixInfo
 {
     public Matrix4x4 Model;
+}
+
+internal struct CameraMatrixInfo
+{
     public Matrix4x4 View;
     public Matrix4x4 Projection;
 }
