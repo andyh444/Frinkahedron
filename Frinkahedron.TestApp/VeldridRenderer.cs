@@ -51,6 +51,15 @@ namespace Frinkahedron.TestApp
             {
                 commandList.SetGraphicsResourceSet(2, assets.GetTextureResourceSet(textureID));
             }
+
+            // Temporary check to not render the floors for shadow pass
+            // TODO Remove
+            Vector3 a = Vector3.Transform(new Vector3(-1, -1, -1), transform);
+            Vector3 b = Vector3.Transform(new Vector3(1, 1, 1), transform);
+            if (!texturesEnabled && textureID == "woodencontainer" && Vector3.Distance(a, b) > 10)
+            {
+                return;
+            }
             commandList.UpdateBuffer(matricesBuffer, 0, ref modelInfo);
             meshInfo.Draw(commandList);
         }

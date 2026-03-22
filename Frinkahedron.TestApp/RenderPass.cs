@@ -41,8 +41,8 @@ namespace Frinkahedron.TestApp
             var cameraMatrixBufferInfo = UniformBufferInfo.Create<CameraMatrixInfo>(factory, "CameraMatrices", ShaderStages.Vertex);
 
             TextureDescription depthDescription = TextureDescription.Texture2D(
-                1024,
-                1024,
+                4096,
+                4096,
                 1,
                 1,
                 PixelFormat.D32_Float_S8_UInt,
@@ -64,7 +64,7 @@ namespace Frinkahedron.TestApp
                 comparisonKind: ComparisonKind.LessEqual);
 
             pipelineDescription.RasterizerState = new RasterizerStateDescription(
-                cullMode: FaceCullMode.None,
+                cullMode: FaceCullMode.Front,
                 fillMode: PolygonFillMode.Solid,
                 frontFace: FrontFace.Clockwise,
                 depthClipEnabled: true,
@@ -260,7 +260,7 @@ namespace Frinkahedron.TestApp
                 View = lightCam.ViewMatrix,
             };
 
-            commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref lightMatrixInfo);
+            commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
             commandList.UpdateBuffer(LightMatricesBufferInfo.DeviceBuffer, 0, ref lightMatrixInfo);
             commandList.UpdateBuffer(LightsBufferInfo.PointLightsBuffer, 0, ref pointLightInfo);
             commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);

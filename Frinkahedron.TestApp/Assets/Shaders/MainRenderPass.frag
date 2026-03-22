@@ -113,7 +113,8 @@ void main()
 
         //shadow
         vec3 projCoords = fsin_lightPos.xyz / fsin_lightPos.w;
-        //projCoords = projCoords * 0.5 + 0.5; // [-1,1] → [0,1]
+        projCoords.y *= -1;
+        projCoords = projCoords * 0.5 + 0.5; // [-1,1] → [0,1]
 
         float closestDepth = texture(sampler2D(ShadowMap, ShadowMapSampler), projCoords.xy).r;
 
@@ -122,7 +123,7 @@ void main()
 
         float currentDepth = projCoords.z;
 
-        float bias = 0;
+        float bias = 0.01;
         shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
         if (projCoords.x < 0.0
@@ -141,14 +142,14 @@ void main()
         specular += specularStrength * spec * _DirectionalLight.Colour;
     }
 
+    vec4 texColor = texture(sampler2D(Texture, TextureSampler), fsin_texCoord);
     if (shadow < 0.001)
     {
-        vec4 texColor = texture(sampler2D(Texture, TextureSampler), fsin_texCoord);
         vec3 color = (ambient + diffuse) * texColor.rgb + specular;
         fsout_Color = vec4(color, texColor.a);
     }
     else
     {
-        fsout_Color = vec4(1, 0, 0, 1);
+        fsout_Color = vec4(ambient * texColor.rgb, texColor.a);
     }
 }
