@@ -189,7 +189,7 @@ namespace Frinkahedron.TestApp
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
 
-            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-1, -1, 0)), new Vector3(1));
+            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.8f, -1, 0)), new Vector3(1));
 
             return scene;
         }

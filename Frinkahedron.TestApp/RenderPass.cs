@@ -45,7 +45,7 @@ namespace Frinkahedron.TestApp
                 1024,
                 1,
                 1,
-                PixelFormat.R32_Float,
+                PixelFormat.D32_Float_S8_UInt,
                 TextureUsage.DepthStencil | TextureUsage.Sampled);
             var depthTexture = TextureInfo.Create(factory, graphicsDevice, depthDescription);
             var frameBuffer = factory.CreateFramebuffer(
@@ -64,7 +64,7 @@ namespace Frinkahedron.TestApp
                 comparisonKind: ComparisonKind.LessEqual);
 
             pipelineDescription.RasterizerState = new RasterizerStateDescription(
-                cullMode: FaceCullMode.Back,
+                cullMode: FaceCullMode.None,
                 fillMode: PolygonFillMode.Solid,
                 frontFace: FrontFace.Clockwise,
                 depthClipEnabled: true,
@@ -113,8 +113,8 @@ namespace Frinkahedron.TestApp
 
             CameraMatrixInfo cameraMatrixInfo = new CameraMatrixInfo
             {
-                Projection = scene.Camera.ProjectionMatrix,
-                View = scene.Camera.ViewMatrix,
+                Projection = lightCamera.ProjectionMatrix,
+                View = lightCamera.ViewMatrix,
             };
 
             commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
@@ -140,7 +140,6 @@ namespace Frinkahedron.TestApp
         }
     }
 
-    // TODO: Get the shadow map and light viewprojection into main render shaders
     internal sealed class MainRenderPass : IRenderPass
     {
         public required Shader[] Shaders { get; init; }
@@ -150,6 +149,7 @@ namespace Frinkahedron.TestApp
         public required UniformBufferInfo LightMatricesBufferInfo { get; init; }
         public required LightingBufferInfo LightsBufferInfo{ get; init; }
         public required UniformBufferInfo CameraBufferInfo { get; init; }
+        public TextureInfo? ShadowMapTextureInfo { get; set; }
 
         public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager)
         {
@@ -200,6 +200,7 @@ namespace Frinkahedron.TestApp
                 lightsBufferInfo.ResourceLayout,
                 cameraBufferInfo.ResourceLayout,
                 lightMatrixBufferInfo.ResourceLayout,
+                TextureInfo.GetResourceLayout(factory),
             };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
@@ -241,6 +242,7 @@ namespace Frinkahedron.TestApp
             commandList.SetGraphicsResourceSet(3, LightsBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(4, CameraBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(5, LightMatricesBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(6, ShadowMapTextureInfo.ResourceSet);
 
             PointLightsInfo pointLightInfo = scene.GetPointLights();
             CameraInfo cameraInfo = scene.GetCameraInfo();
@@ -258,7 +260,7 @@ namespace Frinkahedron.TestApp
                 View = lightCam.ViewMatrix,
             };
 
-            commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
+            commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref lightMatrixInfo);
             commandList.UpdateBuffer(LightMatricesBufferInfo.DeviceBuffer, 0, ref lightMatrixInfo);
             commandList.UpdateBuffer(LightsBufferInfo.PointLightsBuffer, 0, ref pointLightInfo);
             commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);

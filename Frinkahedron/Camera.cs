@@ -34,7 +34,7 @@ namespace Frinkahedron
             return new Camera(
                 initialPosition,
                 initialDirection,
-                CreateOrtho(true, -100, 100, -100, 100, 0.1f, 1000f));
+                CreateOrtho(false, -100, 100, -100, 100, 0.1f, 2000f));
         }
 
         public void SetValues(Vector3 position, Vector3 direction)
@@ -129,7 +129,7 @@ namespace Frinkahedron
             {
                 ortho = Matrix4x4.CreateOrthographicOffCenter(left, right, bottom, top, near, far);
             }
-            bool isClipSpaceYInverted = true;
+            bool isClipSpaceYInverted = false;
             if (isClipSpaceYInverted)
             {
                 ortho *= new Matrix4x4(

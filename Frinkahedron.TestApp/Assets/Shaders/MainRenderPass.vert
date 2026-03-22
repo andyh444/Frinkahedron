@@ -30,7 +30,7 @@ void main()
 {
     fsin_worldPos = model * vec4(Position, 1);
     gl_Position = projection * view * fsin_worldPos;
-    fsin_lightPos = lightProjection * lightView * fsin_lightPos;
+    fsin_lightPos = lightProjection * lightView * fsin_worldPos;
     fsin_normal = normalize(mat3(transpose(inverse(model))) * Normal);
     fsin_texCoord = TexCoord;
 }

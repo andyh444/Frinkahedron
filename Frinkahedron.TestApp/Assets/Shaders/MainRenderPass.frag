@@ -65,6 +65,10 @@ layout(set = 4, binding = 0) uniform Camera
     CameraInfo _CameraInfo;
 };
 
+layout(set = 6, binding = 0) uniform texture2D ShadowMap;
+layout(set = 6, binding = 1) uniform sampler ShadowMapSampler;
+
+
 void main()
 {
     vec3 fragPos = fsin_worldPos.xyz;
@@ -98,21 +102,53 @@ void main()
         specular += specularStrength * spec * attenuation * pli.Colour;
     }
 
+    float shadow = 0;
+
     // directional light
     if (_DirectionalLight.Enabled > 0)
     {
         vec3 lightDir = normalize(-_DirectionalLight.Direction);
         float diff = max(dot(normal, lightDir), 0.0);
-
         diffuse += diff * _DirectionalLight.Colour;
-        vec3 halfDir = normalize(lightDir + viewDir);
 
+        //shadow
+        vec3 projCoords = fsin_lightPos.xyz / fsin_lightPos.w;
+        //projCoords = projCoords * 0.5 + 0.5; // [-1,1] → [0,1]
+
+        float closestDepth = texture(sampler2D(ShadowMap, ShadowMapSampler), projCoords.xy).r;
+
+        //fsout_Color = vec4(closestDepth, closestDepth, closestDepth, 1);
+        //return;
+
+        float currentDepth = projCoords.z;
+
+        float bias = 0;
+        shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+
+        if (projCoords.x < 0.0
+            || projCoords.x > 1.0
+            || projCoords.y < 0.0
+            || projCoords.y > 1.0
+            || projCoords.z > 1.0)
+        {
+            shadow=  0;
+        }
+
+        diff *= (1 - shadow);
+        
+        vec3 halfDir = normalize(lightDir + viewDir);
         float spec = pow(max(dot(normal, halfDir), 0.0), specularPower);
         specular += specularStrength * spec * _DirectionalLight.Colour;
     }
 
-    vec4 texColor = texture(sampler2D(Texture, TextureSampler), fsin_texCoord);
-    vec3 color = (ambient + diffuse) * texColor.rgb + specular;
-
-    fsout_Color = vec4(color, texColor.a);
+    if (shadow < 0.001)
+    {
+        vec4 texColor = texture(sampler2D(Texture, TextureSampler), fsin_texCoord);
+        vec3 color = (ambient + diffuse) * texColor.rgb + specular;
+        fsout_Color = vec4(color, texColor.a);
+    }
+    else
+    {
+        fsout_Color = vec4(1, 0, 0, 1);
+    }
 }

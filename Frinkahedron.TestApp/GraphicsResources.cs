@@ -23,14 +23,19 @@ namespace Frinkahedron.TestApp
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
             AssetManager assetManager = AssetManager.LoadAssets(factory, graphicsDevice, "Assets");
+
             // note mainrenderpass needs to be created before shadow render pass otherwise the textures don't get drawn
+            MainRenderPass mainRenderPass = MainRenderPass.Create(factory, graphicsDevice, assetManager);
+            DirectionalShadowRenderPass directionalShadowRenderPass = DirectionalShadowRenderPass.Create(factory, graphicsDevice, assetManager);
+            mainRenderPass.ShadowMapTextureInfo = directionalShadowRenderPass.DepthTexture;
+
             return new GraphicsResources
             {
                 CommandList = factory.CreateCommandList(),
                 Primitives = Primitives.Create(graphicsDevice),
                 AssetManager = assetManager,
-                MainRenderPass = MainRenderPass.Create(factory, graphicsDevice, assetManager),
-                ShadowRenderPass = DirectionalShadowRenderPass.Create(factory, graphicsDevice, assetManager)
+                MainRenderPass = mainRenderPass,
+                ShadowRenderPass = directionalShadowRenderPass
             };
         }
 
