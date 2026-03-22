@@ -119,6 +119,8 @@ void main()
 
         float shadow = 0.0;
         float bias = 0.0001;
+
+        // TODO: Get textureSize() working
         vec2 texelSize = 1.0 / vec2(4096, 4096);//textureSize(shadowMap);
         for(int x = -1; x <= 1; ++x)
         {
