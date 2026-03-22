@@ -115,19 +115,24 @@ void main()
         vec3 projCoords = fsin_lightPos.xyz / fsin_lightPos.w;
         projCoords.y *= -1;
         projCoords = projCoords * 0.5 + 0.5; // [-1,1] → [0,1]
-
-        float closestDepth = texture(sampler2D(ShadowMap, ShadowMapSampler), projCoords.xy).r;
-
-        
         float currentDepth = projCoords.z;
 
-        //float difference = closestDepth - currentDepth;
-        //fsout_Color = vec4(currentDepth, currentDepth, currentDepth, 1);
-        //return;
-
-
+        float shadow = 0.0;
         float bias = 0.0001;
-        shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+        vec2 texelSize = 1.0 / vec2(4096, 4096);//textureSize(shadowMap);
+        for(int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                float pcfDepth = texture(sampler2D(ShadowMap, ShadowMapSampler), projCoords.xy + vec2(x, y) * texelSize).r; 
+                shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+            }    
+        }
+        shadow /= 9.0;
+
+        //float closestDepth = texture(sampler2D(ShadowMap, ShadowMapSampler), projCoords.xy).r;
+
+        //shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
         if (projCoords.x < 0.0
             || projCoords.x > 1.0
@@ -135,24 +140,19 @@ void main()
             || projCoords.y > 1.0
             || projCoords.z > 1.0)
         {
-            shadow=  0;
+            shadow = 0;
         }
 
-        diff *= (1 - shadow);
+        diffuse *= (1 - shadow);
         
         vec3 halfDir = normalize(lightDir + viewDir);
         float spec = pow(max(dot(normal, halfDir), 0.0), specularPower);
         specular += specularStrength * spec * _DirectionalLight.Colour;
+        specular *= (1 - shadow);
     }
 
     vec4 texColor = texture(sampler2D(Texture, TextureSampler), fsin_texCoord);
-    if (shadow < 0.001)
-    {
-        vec3 color = (ambient + diffuse) * texColor.rgb + specular;
-        fsout_Color = vec4(color, texColor.a);
-    }
-    else
-    {
-        fsout_Color = vec4(ambient * texColor.rgb, texColor.a);
-    }
+
+    vec3 color = (ambient + diffuse) * texColor.rgb + specular;
+    fsout_Color = vec4(color, texColor.a);
 }
