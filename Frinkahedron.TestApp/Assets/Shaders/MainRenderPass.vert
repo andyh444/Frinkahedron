@@ -19,6 +19,12 @@ layout(set = 1, binding = 0) uniform CameraMatrices
     mat4 projection;
 };
 
+layout(set = 5, binding = 0) uniform LightMatrices
+{
+    mat4 lightView;
+    mat4 lightProjection;
+};
+
 void main()
 {
     fsin_worldPos = model * vec4(Position, 1);

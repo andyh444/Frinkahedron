@@ -147,6 +147,7 @@ namespace Frinkahedron.TestApp
         public required Pipeline Pipeline { get; init; }
         public required UniformBufferInfo ModelMatricesBufferInfo { get; init; }
         public required UniformBufferInfo CameraMatricesBufferInfo { get; init; }
+        public required UniformBufferInfo LightMatricesBufferInfo { get; init; }
         public required LightingBufferInfo LightsBufferInfo{ get; init; }
         public required UniformBufferInfo CameraBufferInfo { get; init; }
 
@@ -164,6 +165,7 @@ namespace Frinkahedron.TestApp
 
             var modelBufferInfo = UniformBufferInfo.Create<ModelMatrixInfo>(factory, "ModelMatrices", ShaderStages.Vertex);
             var cameraMatrixBufferInfo = UniformBufferInfo.Create<CameraMatrixInfo>(factory, "CameraMatrices", ShaderStages.Vertex);
+            var lightMatrixBufferInfo = UniformBufferInfo.Create<CameraMatrixInfo>(factory, "LightMatrices", ShaderStages.Vertex);
             var lightsBufferInfo = LightingBufferInfo.Create(factory, "PointLights", ShaderStages.Fragment);
             var cameraBufferInfo = UniformBufferInfo.Create<CameraInfo>(factory, "Camera", ShaderStages.Fragment);
 
@@ -197,6 +199,7 @@ namespace Frinkahedron.TestApp
                 TextureInfo.GetResourceLayout(factory),
                 lightsBufferInfo.ResourceLayout,
                 cameraBufferInfo.ResourceLayout,
+                lightMatrixBufferInfo.ResourceLayout,
             };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
@@ -206,6 +209,7 @@ namespace Frinkahedron.TestApp
                 Pipeline = pipeline,
                 ModelMatricesBufferInfo = modelBufferInfo,
                 CameraMatricesBufferInfo = cameraMatrixBufferInfo,
+                LightMatricesBufferInfo = lightMatrixBufferInfo,
                 LightsBufferInfo = lightsBufferInfo,
                 CameraBufferInfo = cameraBufferInfo,
             };
@@ -220,6 +224,7 @@ namespace Frinkahedron.TestApp
             Pipeline.Dispose();
             ModelMatricesBufferInfo.Dispose();
             CameraMatricesBufferInfo.Dispose();
+            LightMatricesBufferInfo.Dispose();
             LightsBufferInfo.Dispose();
             CameraBufferInfo.Dispose();
         }
@@ -235,6 +240,7 @@ namespace Frinkahedron.TestApp
             commandList.SetGraphicsResourceSet(1, CameraMatricesBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(3, LightsBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(4, CameraBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(5, LightMatricesBufferInfo.ResourceSet);
 
             PointLightsInfo pointLightInfo = scene.GetPointLights();
             CameraInfo cameraInfo = scene.GetCameraInfo();
@@ -245,7 +251,15 @@ namespace Frinkahedron.TestApp
                 View = scene.Camera.ViewMatrix,
             };
 
+            var lightCam = scene.SceneLights.DirectionalLight.Value.GetDirectionalLightCamera();
+            CameraMatrixInfo lightMatrixInfo = new CameraMatrixInfo
+            {
+                Projection = lightCam.ProjectionMatrix,
+                View = lightCam.ViewMatrix,
+            };
+
             commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
+            commandList.UpdateBuffer(LightMatricesBufferInfo.DeviceBuffer, 0, ref lightMatrixInfo);
             commandList.UpdateBuffer(LightsBufferInfo.PointLightsBuffer, 0, ref pointLightInfo);
             commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);
             commandList.UpdateBuffer(CameraBufferInfo.DeviceBuffer, 0, ref cameraInfo);
