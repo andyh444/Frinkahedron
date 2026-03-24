@@ -1,0 +1,35 @@
+﻿Physics:
+-Colliders:
+	-Cylinder
+	-Cone
+	-ConvexHull
+	-Triangle
+	-Composite
+	-Heightmap/Terrain
+-Constraints:
+	-Fixed joint
+	-Sliding joint
+	-Spring
+-Other:
+	-Ray/Shape intersection
+	-Static/Dynamic/Kinematic bodies
+
+Game Engine:
+-Expand on behaviours
+-Virtual input mappings
+-Save/load
+-Multiple scenes
+-Nav mesh
+
+Veldrid/3D Rendering:
+-Render off-screen and then render to full-screen mesh
+-Post processing filters:
+	-Blur
+	-Pixellation
+	-Greyscale
+	-etc
+-Text rendering
+-Ambient Occlusion
+-Anti-aliasing
+-Controller support
+-Model import/rendering

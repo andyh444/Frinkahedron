@@ -71,7 +71,7 @@ namespace Frinkahedron.TestApp
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
 
-            gameObjects.Add(new GameObject(new Vector3(0, 10, 93),
+            /*gameObjects.Add(new GameObject(new Vector3(0, 10, 93),
                 null,
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
@@ -98,10 +98,10 @@ namespace Frinkahedron.TestApp
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 0, MathF.PI / 5);
+            */
 
 
-
-            for (int k = -1; k <= 2; k++)
+            /*for (int k = -1; k <= 2; k++)
             {
                 for (int j = -4; j < 4; j++)
                 {
@@ -123,24 +123,24 @@ namespace Frinkahedron.TestApp
             GameObject sphObj = new GameObject(new Vector3(-50, 0, 0),
                 new SphereControlBehaviour(),
                 sph,
-                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(), Gravity = true, Velocity = new Vector3(30, 0, 0) });
-            gameObjects.Add(sphObj);
+                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(), Gravity = true, Velocity = new Vector3(10, 0, 0) });
+            gameObjects.Add(sphObj);*/
 
-            /*bool firstSphere = true;
-            for (int i = 0; i < 10; i++)
+            bool firstSphere = true;
+            for (int i = 0; i < 1; i++)
             {
                 IShape collider;
                 float density;
                 var rand = r.NextSingle();
                 Behaviour? behaviour = null;
-                if (rand > 0.7f)
+                /*if (rand > 0.7f)
                 {
                     float radius = r.NextSingle(1.5f, 2.5f);
                     collider = new Sphere(radius);
                     density = 10f;
                     if (firstSphere)
                     {
-                        behaviour = new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour { distance = 15f}]);
+                        //behaviour = new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour { distance = 15f}]);
                         firstSphere = false;
                         density = 50f;
                     }
@@ -157,14 +157,18 @@ namespace Frinkahedron.TestApp
                     Vector3 dimensions = new Vector3(r.NextSingle(1f, 3f), r.NextSingle(1f, 3f), r.NextSingle(1f, 9f));
                     collider = new Box(dimensions);
                     density = 1f;
-                }
+                }*/
+
+                collider = new Cylinder(1f, 5f);
+                density = 1;
+
                 float volume = collider.CalculateVolume();
                 float mass = density * volume;
 
                 var inertia = collider.CalculateFilledInertia(mass);
 
                 gameObjects.Add(new GameObject(
-                    new Vector3(0, r.NextSingle(50f, 65f), r.NextSingle(-130f, 130f)),
+                    new Vector3(),//new Vector3(0, r.NextSingle(20f, 35f), r.NextSingle(-130f, 130f)),
                     behaviour,
                     collider,
                     new Core.Physics.RigidBody
@@ -172,11 +176,13 @@ namespace Frinkahedron.TestApp
                         Mass = mass,
                         InverseInertia = inertia.GetInverse(),
                         Gravity = true,
-                        Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f))
+                        Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f)),
+                        AngularVelocity = r.NextSingle(0f, 1f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f)),
+                        Material = new PhysicsMaterial(0.1f, 0.8f)
                     }));
 
-                gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI), r.NextSingle(0, MathF.PI));
-            }*/
+                gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, 0.15f * MathF.PI), r.NextSingle(0, 0.15f * MathF.PI), r.NextSingle(0, 0.15f * MathF.PI));
+            }
 
 
 

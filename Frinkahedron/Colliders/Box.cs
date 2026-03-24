@@ -45,33 +45,6 @@ namespace Frinkahedron.Core.Colliders
             cornersSpan[7] = new Vector3(-hd.X, -hd.Y, -hd.Z);
         }
 
-        /*public CollisionManifold CheckForCollisions(Position position, ICollider other, Position otherPosition)
-        {
-            if (other is SphereCollider sphereCollider)
-            {
-                if (position.Orientation.IsIdentity)
-                {
-                    return Collisions.AABBSphereCollision(this, position.Centre, sphereCollider, otherPosition);
-                }
-            }
-            if (other is BoxCollider boxCollider)
-            {
-                if (otherPosition.Orientation.IsIdentity)
-                {
-                    return Collisions.BoxAABBCollision(this, position, boxCollider, otherPosition.Centre);
-                }
-                else if (position.Orientation.IsIdentity)
-                {
-                    return Collisions.BoxAABBCollision(boxCollider, otherPosition, this, position.Centre).Invert();
-                }
-                else
-                {
-                    //return Collisions.BoxBoxCollision(this, position, boxCollider, otherPosition);
-                }
-            }
-            return CollisionManifold.NoCollision();
-        }*/
-
         public void Draw(IRenderer renderer, Matrix4x4 position)
         {
             Matrix4x4 scale = Matrix4x4.CreateScale(Dimensions);
@@ -87,13 +60,59 @@ namespace Frinkahedron.Core.Colliders
             };
 
             Vector3 halfExtent = Dimensions / 2;
-            BoxBoxTester.Project(position.Centre, halfExtent, axes, Vector3.UnitX, out float minX, out float maxX);
-            BoxBoxTester.Project(position.Centre, halfExtent, axes, Vector3.UnitY, out float minY, out float maxY);
-            BoxBoxTester.Project(position.Centre, halfExtent, axes, Vector3.UnitZ, out float minZ, out float maxZ);
+            Project(position.Centre, halfExtent, axes, Vector3.UnitX, out float minX, out float maxX);
+            Project(position.Centre, halfExtent, axes, Vector3.UnitY, out float minY, out float maxY);
+            Project(position.Centre, halfExtent, axes, Vector3.UnitZ, out float minZ, out float maxZ);
 
             return new AxisAlignedBoundingBox(
                 new Vector3(minX, minY, minZ),
                 new Vector3(maxX, maxY, maxZ));
         }
+
+        public static void Project(
+            Vector3 position,
+            Vector3 halfExtent,
+            Span<Vector3> boxWorldAxes,
+            Vector3 axis,
+            out float min,
+            out float max)
+        {
+            // OBB local axes in world space
+            Vector3 u0 = boxWorldAxes[0];
+            Vector3 u1 = boxWorldAxes[1];
+            Vector3 u2 = boxWorldAxes[2];
+
+            // Project center onto axis
+            float centerProjection = Vector3.Dot(position, axis);
+
+            // Compute projection radius
+            float r =
+                halfExtent.X * MathF.Abs(Vector3.Dot(axis, u0)) +
+                halfExtent.Y * MathF.Abs(Vector3.Dot(axis, u1)) +
+                halfExtent.Z * MathF.Abs(Vector3.Dot(axis, u2));
+
+            min = centerProjection - r;
+            max = centerProjection + r;
+        }
+
+        public IReadOnlyList<BoxFace> GetFaces(Position position)
+        {
+            Span<Vector3> axes = stackalloc Vector3[] {
+                Vector3.Transform(Vector3.UnitX, position.Orientation),
+                Vector3.Transform(Vector3.UnitY, position.Orientation),
+                Vector3.Transform(Vector3.UnitZ, position.Orientation),
+            };
+            Vector3 centre = position.ToWorld(new Vector3());
+            Vector3 halfDimensions = Dimensions / 2;
+            return [
+                    BoxFace.GetFace(centre, axes, halfDimensions, axes[0]),
+                    BoxFace.GetFace(centre, axes, halfDimensions, -axes[0]),
+                    BoxFace.GetFace(centre, axes, halfDimensions, axes[1]),
+                    BoxFace.GetFace(centre, axes, halfDimensions, -axes[1]),
+                    BoxFace.GetFace(centre, axes, halfDimensions, axes[2]),
+                    BoxFace.GetFace(centre, axes, halfDimensions, -axes[2]),
+                ];
+        }
     }
+
 }

@@ -93,8 +93,8 @@ namespace Frinkahedron.Core.Colliders
         {
             const float DEPTH_THRESHOLD = 1e-3f;
 
-            Face faceA = Face.GetFace(positionA.Centre, axesA, boxA.Dimensions / 2, -normal); // note, this was originally +normal and faceB was -normal
-            Face faceB = Face.GetFace(positionB.Centre, axesB, boxB.Dimensions / 2, normal);
+            BoxFace faceA = BoxFace.GetFace(positionA.Centre, axesA, boxA.Dimensions / 2, -normal); // note, this was originally +normal and faceB was -normal
+            BoxFace faceB = BoxFace.GetFace(positionB.Centre, axesB, boxB.Dimensions / 2, normal);
 
             var intersection = ClipFaces(faceA, faceB);
 
@@ -226,7 +226,7 @@ namespace Frinkahedron.Core.Colliders
             ];
         }
 
-        private static List<Vector3> ClipFaces(Face reference, Face incident)
+        private static List<Vector3> ClipFaces(BoxFace reference, BoxFace incident)
         {
             var polygon = incident.GetVertices();
             List<Vector3> outputBuffer = new List<Vector3>(8);
@@ -289,80 +289,13 @@ namespace Frinkahedron.Core.Colliders
             }
         }
 
-        private readonly record struct Face(Vector3 Centre, Vector3 Tangent1, Vector3 Tangent2, float HalfExtent1, float HalfExtent2)
-        {
-            public static Face GetFace(
-                Vector3 boxCenter,
-                Span<Vector3> axes,
-                Vector3 halfDimensions,
-                Vector3 normal)
-            {
-                Vector3 axisX = axes[0];
-                Vector3 axisY = axes[1];
-                Vector3 axisZ = axes[2];
-
-                var nax = Vector3.Dot(normal, axisX);
-                var nay = Vector3.Dot(normal, axisY);
-                var naz = Vector3.Dot(normal, axisZ);
-
-                float dx = MathF.Abs(nax);
-                float dy = MathF.Abs(nay);
-                float dz = MathF.Abs(naz);
-
-                if (dx > dy && dx > dz)
-                {
-                    var faceNormal = nax > 0 ? axisX : -axisX;
-
-                    return new Face(
-                        boxCenter + faceNormal * halfDimensions.X,
-                        axisY,
-                        axisZ,
-                        halfDimensions.Y,
-                        halfDimensions.Z);
-                }
-
-                if (dy > dz)
-                {
-                    var faceNormal = nay > 0 ? axisY : -axisY;
-
-                    return new Face(
-                        boxCenter + faceNormal * halfDimensions.Y,
-                        axisX,
-                        axisZ,
-                        halfDimensions.X,
-                        halfDimensions.Z);
-                }
-
-                var faceNormalZ = naz > 0 ? axisZ : -axisZ;
-
-                return new Face(
-                    boxCenter + faceNormalZ * halfDimensions.Z,
-                    axisX,
-                    axisY,
-                    halfDimensions.X,
-                    halfDimensions.Y);
-            }
-
-            public List<Vector3> GetVertices()
-            {
-                var t1 = Tangent1 * HalfExtent1;
-                var t2 = Tangent2 * HalfExtent2;
-
-                return [
-                    Centre - t1 - t2,
-                    Centre + t1 - t2,
-                    Centre + t1 + t2,
-                    Centre - t1 + t2
-                ];
-            }
-        }
-
+        
         private static bool TestAxes(Vector3 centreA, Vector3 halfExtentA, Span<Vector3> axesA, Vector3 centreB, Vector3 halfExtentB, Span<Vector3> axesB, Span<Vector3> testAxes, ref Vector3 bestNormal, ref float bestPenetration)
         {
             foreach (var axis in testAxes)
             {
-                Project(centreA, halfExtentA, axesA, axis, out float minA, out float maxA);
-                Project(centreB, halfExtentB, axesB, axis, out float minB, out float maxB);
+                Box.Project(centreA, halfExtentA, axesA, axis, out float minA, out float maxA);
+                Box.Project(centreB, halfExtentB, axesB, axis, out float minB, out float maxB);
 
                 if (maxA < minB
                     || maxB < minA)
@@ -378,55 +311,6 @@ namespace Frinkahedron.Core.Colliders
                 }
             }
             return true;
-        }
-
-        public static void Project(
-            Vector3 position,
-            Vector3 halfExtent,
-            Span<Vector3> boxWorldAxes,
-            Vector3 axis,
-            out float min,
-            out float max)
-        {
-            // OBB local axes in world space
-            Vector3 u0 = boxWorldAxes[0];
-            Vector3 u1 = boxWorldAxes[1];
-            Vector3 u2 = boxWorldAxes[2];
-
-            // Project center onto axis
-            float centerProjection = Vector3.Dot(position, axis);
-
-            // Compute projection radius
-            float r =
-                halfExtent.X * MathF.Abs(Vector3.Dot(axis, u0)) +
-                halfExtent.Y * MathF.Abs(Vector3.Dot(axis, u1)) +
-                halfExtent.Z * MathF.Abs(Vector3.Dot(axis, u2));
-
-            min = centerProjection - r;
-            max = centerProjection + r;
-        }
-
-        private static void Project(
-            Span<Vector3> poly,
-            Vector3 axis,
-            out float min,
-            out float max)
-        {
-            min = Vector3.Dot(poly[0], axis);
-            max = min;
-
-            for (int i = 1; i < poly.Length; i++)
-            {
-                float p = Vector3.Dot(poly[i], axis);
-                if (p < min)
-                {
-                    min = p;
-                }
-                if (p > max)
-                {
-                    max = p;
-                }
-            }
         }
     }
 }
