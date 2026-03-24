@@ -41,6 +41,12 @@ namespace Frinkahedron.Core.Colliders
         {
             Matrix4x4 scale = Matrix4x4.CreateScale(2 * Radius, Height, 2 * Radius);
             renderer.DrawCylinder(scale * position);
+
+            Matrix4x4 cap1Transform = Matrix4x4.CreateScale(-2 * Radius, 1, 2 * Radius) * Matrix4x4.CreateTranslation(0, Height / 2, 0);
+            renderer.DrawDisc(cap1Transform * position);
+
+            Matrix4x4 cap2Transform = Matrix4x4.CreateScale(2 * Radius, 1, 2 * Radius) * Matrix4x4.CreateTranslation(0, -Height / 2, 0);
+            renderer.DrawDisc(cap2Transform * position);
         }
     }
 }

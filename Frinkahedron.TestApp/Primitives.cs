@@ -9,6 +9,7 @@ namespace Frinkahedron.TestApp
         public required MeshInfo CubeInfo { get; init; }
         public required MeshInfo SphereInfo { get; init; }
         public required MeshInfo CylinderInfo { get; init; }
+        public required MeshInfo DiscInfo { get; init; }
 
         public static Primitives Create(GraphicsDevice graphicsDevice)
         {
@@ -16,12 +17,14 @@ namespace Frinkahedron.TestApp
             var cubeInfo = MeshInfo.Create(mesh, graphicsDevice);
             var sphereInfo = MeshInfo.Create(CreateUnitUVSphere(24, 24, RgbaFloat.Red.ToVector4(), RgbaFloat.Blue.ToVector4()), graphicsDevice);
             var cylinderInfo = MeshInfo.Create(CreateUnitCylinderMesh(24, new RgbaFloat(0.5f, 0, 0.5f, 1).ToVector4(), new RgbaFloat(0.5f, 0, 0.5f, 1).ToVector4()), graphicsDevice);
+            var discInfo = MeshInfo.Create(CreateUnitDiscMesh(24), graphicsDevice);
 
             return new Primitives
             {
                 CubeInfo = cubeInfo,
                 SphereInfo = sphereInfo,
                 CylinderInfo = cylinderInfo,
+                DiscInfo = discInfo
             };
         }
 
@@ -30,6 +33,7 @@ namespace Frinkahedron.TestApp
             CubeInfo.Dispose();
             SphereInfo.Dispose();
             CylinderInfo.Dispose();
+            DiscInfo.Dispose();
         }
 
         /*private static Mesh CreateQuadMesh()
@@ -99,6 +103,33 @@ namespace Frinkahedron.TestApp
             };
 
             return new Mesh(vertices, indices);
+        }
+
+        public static Mesh CreateUnitDiscMesh(int segments)
+        {
+            var vertList = new List<Vertex>();
+            var indexList = new List<ushort>();
+
+            Vector3 normal = Vector3.UnitY;
+            Vertex centre = new Vertex(new Vector3(), normal, new Vector2(0.5f, 0.5f));
+            vertList.Add(centre);
+
+            float radius = 0.5f;
+
+            for (int i = 0; i < segments; i++)
+            {
+                float theta = i * 2 * MathF.PI / segments;
+                float sinTheta = MathF.Sin(theta);
+                float cosTheta = MathF.Cos(theta);
+
+                Vector3 position = new Vector3(radius * sinTheta, 0, radius * cosTheta);
+                vertList.Add(new Vertex(position, normal, new Vector2(0.5f + radius * sinTheta, 0.5f + radius * cosTheta)));
+                indexList.Add(0); // centre
+                indexList.Add((ushort)(i + 1)); // this one
+                indexList.Add((ushort)(((i + 2) % segments) + 1)); // next one
+            }
+
+            return new Mesh(vertList.ToArray(), indexList.ToArray());
         }
 
         public static Mesh CreateUnitCylinderMesh(int segments, Vector4 topColour, Vector4 bottomColour)

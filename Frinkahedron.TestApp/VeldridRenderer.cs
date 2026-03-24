@@ -36,6 +36,11 @@ namespace Frinkahedron.TestApp
             DrawMesh(primitives.CylinderInfo, transform, "woodencontainer");
         }
 
+        public void DrawDisc(Matrix4x4 transform)
+        {
+            DrawMesh(primitives.DiscInfo, transform, "woodencontainer");
+        }
+
         public void DrawEllipsoid(Matrix4x4 transform)
         {
             DrawMesh(primitives.SphereInfo, transform, "football");

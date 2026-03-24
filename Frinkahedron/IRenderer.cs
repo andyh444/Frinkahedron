@@ -9,6 +9,8 @@ namespace Frinkahedron.Core
         public void DrawEllipsoid(Matrix4x4 transform);
 
         public void DrawCylinder(Matrix4x4 transform);
+
+        public void DrawDisc(Matrix4x4 transform);
     }
 
     public class DummyRenderer : IRenderer
@@ -18,6 +20,10 @@ namespace Frinkahedron.Core
         }
 
         public void DrawCylinder(Matrix4x4 transform)
+        {
+        }
+
+        public void DrawDisc(Matrix4x4 transform)
         {
         }
 

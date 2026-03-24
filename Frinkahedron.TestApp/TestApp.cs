@@ -71,7 +71,7 @@ namespace Frinkahedron.TestApp
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
 
-            /*gameObjects.Add(new GameObject(new Vector3(0, 10, 93),
+            gameObjects.Add(new GameObject(new Vector3(0, 10, 93),
                 null,
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
@@ -98,7 +98,7 @@ namespace Frinkahedron.TestApp
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 0, MathF.PI / 5);
-            */
+            
 
 
             /*for (int k = -1; k <= 2; k++)
@@ -168,7 +168,7 @@ namespace Frinkahedron.TestApp
                 var inertia = collider.CalculateFilledInertia(mass);
 
                 gameObjects.Add(new GameObject(
-                    new Vector3(),//new Vector3(0, r.NextSingle(20f, 35f), r.NextSingle(-130f, 130f)),
+                    new Vector3(0, r.NextSingle(20f, 35f), r.NextSingle(-130f, 130f)),
                     behaviour,
                     collider,
                     new Core.Physics.RigidBody
@@ -177,7 +177,7 @@ namespace Frinkahedron.TestApp
                         InverseInertia = inertia.GetInverse(),
                         Gravity = true,
                         Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f)),
-                        AngularVelocity = r.NextSingle(0f, 1f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f)),
+                        AngularVelocity = r.NextSingle(0f, 6f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f)),
                         Material = new PhysicsMaterial(0.1f, 0.8f)
                     }));
 
