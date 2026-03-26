@@ -92,23 +92,23 @@ namespace Frinkahedron.TestApp
                 new Vertex(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(1, 1)),
             };
 
-            ushort[] indices =
+            IndexTriangle[] triangles =
             {
-                0,1,2,  2,1,3,        // Front
-                4,5,6,  6,5,7,        // Back
-                8,9,10, 10,9,11,      // Left
-                12,13,14, 14,13,15,   // Right
-                16,17,18, 18,17,19,   // Top
-                20,21,22, 22,21,23    // Bottom
+                new IndexTriangle(0,1,2), new IndexTriangle( 2,1,3),        // Front
+                new IndexTriangle(4,5,6), new IndexTriangle( 6,5,7),        // Back
+                new IndexTriangle(8,9,10), new IndexTriangle(10,9,11),      // Left
+                new IndexTriangle(12,13,14), new IndexTriangle(14,13,15),   // Right
+                new IndexTriangle(16,17,18), new IndexTriangle(18,17,19),   // Top
+                new IndexTriangle(20,21,22), new IndexTriangle(22,21,23)   // Bottom
             };
 
-            return new Mesh(vertices, indices);
+            return new Mesh(vertices, triangles);
         }
 
         public static Mesh CreateUnitDiscMesh(int segments)
         {
             var vertList = new List<Vertex>();
-            var indexList = new List<ushort>();
+            var triangleList = new List<IndexTriangle>();
 
             Vector3 normal = Vector3.UnitY;
             Vertex centre = new Vertex(new Vector3(), normal, new Vector2(0.5f, 0.5f));
@@ -124,18 +124,19 @@ namespace Frinkahedron.TestApp
 
                 Vector3 position = new Vector3(radius * sinTheta, 0, radius * cosTheta);
                 vertList.Add(new Vertex(position, normal, new Vector2(0.5f + radius * sinTheta, 0.5f + radius * cosTheta)));
-                indexList.Add(0); // centre
-                indexList.Add((ushort)(i + 1)); // this one
-                indexList.Add((ushort)(((i + 2) % segments) + 1)); // next one
+                triangleList.Add(new IndexTriangle(
+                    0, // centre
+                    (ushort)(i + 1), // this one
+                    (ushort)(((i + 2) % segments) + 1))); // next one;
             }
 
-            return new Mesh(vertList.ToArray(), indexList.ToArray());
+            return new Mesh(vertList.ToArray(), triangleList.ToArray());
         }
 
         public static Mesh CreateUnitCylinderMesh(int segments, Vector4 topColour, Vector4 bottomColour)
         {
             var vertList = new List<Vertex>();
-            var indexList = new List<ushort>();
+            var triangleList = new List<IndexTriangle>();
 
             float halfHeight = 0.5f;
             float radius = 0.5f;
@@ -183,16 +184,11 @@ namespace Frinkahedron.TestApp
                 ushort bottomCurrent = (ushort)(topCurrent + bottomStart);
                 ushort bottomNext = (ushort)(topNext + bottomStart);
 
-                indexList.Add(topCurrent);
-                indexList.Add(topNext);
-                indexList.Add(bottomCurrent);
-
-                indexList.Add(topNext);
-                indexList.Add(bottomNext);
-                indexList.Add(bottomCurrent);
+                triangleList.Add(new IndexTriangle(topCurrent, topNext, bottomCurrent));
+                triangleList.Add(new IndexTriangle(topNext, bottomNext, bottomCurrent));
             }
 
-            return new Mesh(vertList.ToArray(), indexList.ToArray());
+            return new Mesh(vertList.ToArray(), triangleList.ToArray());
         }
 
         /// <summary>
@@ -207,7 +203,7 @@ namespace Frinkahedron.TestApp
         public static Mesh CreateUnitUVSphere(int longitudeSegments, int latitudeSegments, Vector4 topColor, Vector4 bottomColour)
         {
             var vertList = new List<Vertex>();
-            var indexList = new List<ushort>();
+            var triangleList = new List<IndexTriangle>();
             float radius = 0.5f;
             // Generate vertices
             for (int lat = 0; lat <= latitudeSegments; lat++)
@@ -239,16 +235,11 @@ namespace Frinkahedron.TestApp
                     ushort second = (ushort)(first + longitudeSegments + 1);
 
                     // Each quad is split into two triangles
-                    indexList.Add(first);
-                    indexList.Add(second);
-                    indexList.Add((ushort)(first + 1));
-
-                    indexList.Add(second);
-                    indexList.Add((ushort)(second + 1));
-                    indexList.Add((ushort)(first + 1));
+                    triangleList.Add(new IndexTriangle(first, second, (ushort)(first + 1)));
+                    triangleList.Add(new IndexTriangle(second, (ushort)(second + 1), (ushort)(first + 1)));
                 }
             }
-            return new Mesh(vertList.ToArray(), indexList.ToArray());
+            return new Mesh(vertList.ToArray(), triangleList.ToArray());
         }
 
         

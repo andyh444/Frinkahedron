@@ -43,10 +43,10 @@ namespace Frinkahedron.TestApp
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
             var vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Vertices.Length * Vertex.SizeInBytes, BufferUsage.VertexBuffer));
-            var indexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Indices.Length * sizeof(ushort), BufferUsage.IndexBuffer));
+            var indexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Triangles.Length * IndexTriangle.SizeInBytes, BufferUsage.IndexBuffer));
 
             graphicsDevice.UpdateBuffer(vertexBuffer, 0, mesh.Vertices);
-            graphicsDevice.UpdateBuffer(indexBuffer, 0, mesh.Indices);
+            graphicsDevice.UpdateBuffer(indexBuffer, 0, mesh.Triangles);
 
             return new MeshInfo(vertexBuffer, indexBuffer, mesh);
         }
@@ -57,7 +57,7 @@ namespace Frinkahedron.TestApp
             commandList.SetVertexBuffer(0, _vertexBuffer);
             commandList.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
             commandList.DrawIndexed(
-                indexCount: (uint)_mesh.Indices.Length,
+                indexCount: (uint)_mesh.Triangles.Length * 3, // 3 indices per triangle
                 instanceCount: 1,
                 indexStart: 0,
                 vertexOffset: 0,
