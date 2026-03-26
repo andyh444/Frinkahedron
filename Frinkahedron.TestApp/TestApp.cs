@@ -127,7 +127,7 @@ namespace Frinkahedron.TestApp
             gameObjects.Add(sphObj);*/
 
             bool firstSphere = true;
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 10; i++)
             {
                 IShape collider;
                 float density;
@@ -159,7 +159,7 @@ namespace Frinkahedron.TestApp
                     density = 1f;
                 }*/
 
-                collider = new Cylinder(1f, 5f);
+                collider = new Cylinder(r.NextSingle(1f, 3f), r.NextSingle(4f, 10f));
                 density = 1;
 
                 float volume = collider.CalculateVolume();

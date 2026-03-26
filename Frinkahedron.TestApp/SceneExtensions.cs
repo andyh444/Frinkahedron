@@ -30,6 +30,7 @@ namespace Frinkahedron.TestApp
             {
                 lightsInfo.PointLights1 = lights[3];
             }
+            //lightsInfo.NumActiveLights = Math.Min(4, lights.Count);
             return lightsInfo;
         }
 
