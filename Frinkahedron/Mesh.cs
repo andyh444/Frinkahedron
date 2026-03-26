@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace Frinkahedron.Core
 {
-    public struct Vertex
+    public struct TexVertex
     {
         public Vector3 Position;
         public Vector3 Normal;
         public Vector2 TexCoord;
-        public Vertex(Vector3 position, Vector3 normal, Vector2 texCoord)
+        public TexVertex(Vector3 position, Vector3 normal, Vector2 texCoord)
         {
             Position = position;
             Normal = Vector3.Normalize(normal);
@@ -31,16 +31,16 @@ namespace Frinkahedron.Core
         public static uint SizeInBytes => sizeof(ushort) * 3;
     }
 
-    public sealed class Mesh
+    public sealed class BasicMesh(Vector3[] vertices, IndexTriangle[] indexTriangles)
     {
-        public Vertex[] Vertices { get; }
+        public Vector3[] Vertices { get; } = vertices;
+        public IndexTriangle[] IndexTriangles { get; } = indexTriangles;
+    }
 
-        public IndexTriangle[] Triangles { get; }
+    public sealed class TexMesh(TexVertex[] vertices, IndexTriangle[] indices)
+    {
+        public TexVertex[] Vertices { get; } = vertices;
 
-        public Mesh(Vertex[] vertices, IndexTriangle[] indices)
-        {
-            Vertices = vertices;
-            Triangles = indices;
-        }
+        public IndexTriangle[] Triangles { get; } = indices;
     }
 }

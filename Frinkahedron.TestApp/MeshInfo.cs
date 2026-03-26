@@ -22,9 +22,9 @@ namespace Frinkahedron.TestApp
     {
         private readonly DeviceBuffer _vertexBuffer;
         private readonly DeviceBuffer _indexBuffer;
-        private readonly Mesh _mesh;
+        private readonly TexMesh _mesh;
 
-        private MeshInfo(DeviceBuffer vertexBuffer, DeviceBuffer indexBuffer, Mesh mesh)
+        private MeshInfo(DeviceBuffer vertexBuffer, DeviceBuffer indexBuffer, TexMesh mesh)
         {
             _vertexBuffer = vertexBuffer;
             _indexBuffer = indexBuffer;
@@ -39,10 +39,10 @@ namespace Frinkahedron.TestApp
                 new VertexElementDescription("TexCoord", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2));
         }
 
-        public static MeshInfo Create(Mesh mesh, GraphicsDevice graphicsDevice)
+        public static MeshInfo Create(TexMesh mesh, GraphicsDevice graphicsDevice)
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
-            var vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Vertices.Length * Vertex.SizeInBytes, BufferUsage.VertexBuffer));
+            var vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Vertices.Length * TexVertex.SizeInBytes, BufferUsage.VertexBuffer));
             var indexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Triangles.Length * IndexTriangle.SizeInBytes, BufferUsage.IndexBuffer));
 
             graphicsDevice.UpdateBuffer(vertexBuffer, 0, mesh.Vertices);

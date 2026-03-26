@@ -13,8 +13,7 @@ namespace Frinkahedron.TestApp
 
         public static Primitives Create(GraphicsDevice graphicsDevice)
         {
-            Mesh mesh = CreateUnitCubeMesh();
-            var cubeInfo = MeshInfo.Create(mesh, graphicsDevice);
+            var cubeInfo = MeshInfo.Create(CreateUnitCubeMesh(), graphicsDevice);
             var sphereInfo = MeshInfo.Create(CreateUnitUVSphere(24, 24, RgbaFloat.Red.ToVector4(), RgbaFloat.Blue.ToVector4()), graphicsDevice);
             var cylinderInfo = MeshInfo.Create(CreateUnitCylinderMesh(24, new RgbaFloat(0.5f, 0, 0.5f, 1).ToVector4(), new RgbaFloat(0.5f, 0, 0.5f, 1).ToVector4()), graphicsDevice);
             var discInfo = MeshInfo.Create(CreateUnitDiscMesh(24), graphicsDevice);
@@ -51,45 +50,45 @@ namespace Frinkahedron.TestApp
             return new Mesh(quadVertices, quadIndices);
         }*/
 
-        private static Mesh CreateUnitCubeMesh()
+        private static TexMesh CreateUnitCubeMesh()
         {
-            Vertex[] vertices =
+            TexVertex[] vertices =
             {
                 // Front
-                new Vertex(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 0)),
-                new Vertex(new Vector3( 0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 0)),
-                new Vertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 1)),
-                new Vertex(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 1)),
+                new TexVertex(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 0)),
+                new TexVertex(new Vector3( 0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 0)),
+                new TexVertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 1)),
+                new TexVertex(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 1)),
 
                 // Back
-                new Vertex(new Vector3( 0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 0)),
-                new Vertex(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 0)),
-                new Vertex(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 1)),
-                new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 1)),
+                new TexVertex(new Vector3( 0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 0)),
+                new TexVertex(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 0)),
+                new TexVertex(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 1)),
+                new TexVertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 1)),
 
                 // Left
-                new Vertex(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 0)),
-                new Vertex(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 0)),
-                new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 1)),
-                new Vertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 1)),
+                new TexVertex(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 0)),
+                new TexVertex(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 0)),
+                new TexVertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 1)),
+                new TexVertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 1)),
 
                 // Right
-                new Vertex(new Vector3(0.5f,  0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 0)),
-                new Vertex(new Vector3(0.5f,  0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 0)),
-                new Vertex(new Vector3(0.5f, -0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 1)),
-                new Vertex(new Vector3(0.5f, -0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 1)),
+                new TexVertex(new Vector3(0.5f,  0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 0)),
+                new TexVertex(new Vector3(0.5f,  0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 0)),
+                new TexVertex(new Vector3(0.5f, -0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 1)),
+                new TexVertex(new Vector3(0.5f, -0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 1)),
 
                 // Top
-                new Vertex(new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(0, 0)),
-                new Vertex(new Vector3( 0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(1, 0)),
-                new Vertex(new Vector3(-0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(0, 1)),
-                new Vertex(new Vector3( 0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(1, 1)),
+                new TexVertex(new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(0, 0)),
+                new TexVertex(new Vector3( 0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(1, 0)),
+                new TexVertex(new Vector3(-0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(0, 1)),
+                new TexVertex(new Vector3( 0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(1, 1)),
 
                 // Bottom
-                new Vertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(0, 0)),
-                new Vertex(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(1, 0)),
-                new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(0, 1)),
-                new Vertex(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(1, 1)),
+                new TexVertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(0, 0)),
+                new TexVertex(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(1, 0)),
+                new TexVertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(0, 1)),
+                new TexVertex(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(1, 1)),
             };
 
             IndexTriangle[] triangles =
@@ -102,16 +101,16 @@ namespace Frinkahedron.TestApp
                 new IndexTriangle(20,21,22), new IndexTriangle(22,21,23)   // Bottom
             };
 
-            return new Mesh(vertices, triangles);
+            return new TexMesh(vertices, triangles);
         }
 
-        public static Mesh CreateUnitDiscMesh(int segments)
+        public static TexMesh CreateUnitDiscMesh(int segments)
         {
-            var vertList = new List<Vertex>();
+            var vertList = new List<TexVertex>();
             var triangleList = new List<IndexTriangle>();
 
             Vector3 normal = Vector3.UnitY;
-            Vertex centre = new Vertex(new Vector3(), normal, new Vector2(0.5f, 0.5f));
+            TexVertex centre = new TexVertex(new Vector3(), normal, new Vector2(0.5f, 0.5f));
             vertList.Add(centre);
 
             float radius = 0.5f;
@@ -123,19 +122,19 @@ namespace Frinkahedron.TestApp
                 float cosTheta = MathF.Cos(theta);
 
                 Vector3 position = new Vector3(radius * sinTheta, 0, radius * cosTheta);
-                vertList.Add(new Vertex(position, normal, new Vector2(0.5f + radius * sinTheta, 0.5f + radius * cosTheta)));
+                vertList.Add(new TexVertex(position, normal, new Vector2(0.5f + radius * sinTheta, 0.5f + radius * cosTheta)));
                 triangleList.Add(new IndexTriangle(
                     0, // centre
                     (ushort)(i + 1), // this one
                     (ushort)(((i + 2) % segments) + 1))); // next one;
             }
 
-            return new Mesh(vertList.ToArray(), triangleList.ToArray());
+            return new TexMesh(vertList.ToArray(), triangleList.ToArray());
         }
 
-        public static Mesh CreateUnitCylinderMesh(int segments, Vector4 topColour, Vector4 bottomColour)
+        public static TexMesh CreateUnitCylinderMesh(int segments, Vector4 topColour, Vector4 bottomColour)
         {
-            var vertList = new List<Vertex>();
+            var vertList = new List<TexVertex>();
             var triangleList = new List<IndexTriangle>();
 
             float halfHeight = 0.5f;
@@ -155,7 +154,7 @@ namespace Frinkahedron.TestApp
 
                 Vector3 normal = new Vector3(sinTheta, 0, cosTheta);
 
-                vertList.Add(new Vertex(position, normal, new Vector2((float)i / segments, 0)));
+                vertList.Add(new TexVertex(position, normal, new Vector2((float)i / segments, 0)));
             }
 
             // bottom circle
@@ -172,7 +171,7 @@ namespace Frinkahedron.TestApp
 
                 Vector3 normal = new Vector3(sinTheta, 0, cosTheta);
 
-                vertList.Add(new Vertex(position, normal, new Vector2((float)i / segments, 1)));
+                vertList.Add(new TexVertex(position, normal, new Vector2((float)i / segments, 1)));
             }
 
             int bottomStart = segments;
@@ -188,7 +187,7 @@ namespace Frinkahedron.TestApp
                 triangleList.Add(new IndexTriangle(topNext, bottomNext, bottomCurrent));
             }
 
-            return new Mesh(vertList.ToArray(), triangleList.ToArray());
+            return new TexMesh(vertList.ToArray(), triangleList.ToArray());
         }
 
         /// <summary>
@@ -200,9 +199,9 @@ namespace Frinkahedron.TestApp
         /// <param name="color">Vertex color</param>
         /// <param name="vertices">Output vertex array</param>
         /// <param name="indices">Output triangle indices</param>
-        public static Mesh CreateUnitUVSphere(int longitudeSegments, int latitudeSegments, Vector4 topColor, Vector4 bottomColour)
+        public static TexMesh CreateUnitUVSphere(int longitudeSegments, int latitudeSegments, Vector4 topColor, Vector4 bottomColour)
         {
-            var vertList = new List<Vertex>();
+            var vertList = new List<TexVertex>();
             var triangleList = new List<IndexTriangle>();
             float radius = 0.5f;
             // Generate vertices
@@ -222,7 +221,7 @@ namespace Frinkahedron.TestApp
                     Vector3 normal = new Vector3(sinTheta * cosPhi, cosTheta, sinTheta * sinPhi);
                     Vector3 pos = radius * normal;
 
-                    vertList.Add(new Vertex(pos, normal, new Vector2(phi / (2f * MathF.PI), theta / MathF.PI)));
+                    vertList.Add(new TexVertex(pos, normal, new Vector2(phi / (2f * MathF.PI), theta / MathF.PI)));
                 }
             }
 
@@ -239,7 +238,7 @@ namespace Frinkahedron.TestApp
                     triangleList.Add(new IndexTriangle(second, (ushort)(second + 1), (ushort)(first + 1)));
                 }
             }
-            return new Mesh(vertList.ToArray(), triangleList.ToArray());
+            return new TexMesh(vertList.ToArray(), triangleList.ToArray());
         }
 
         
