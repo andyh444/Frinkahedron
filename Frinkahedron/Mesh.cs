@@ -13,13 +13,16 @@ namespace Frinkahedron.Core
         public Vector3 Position;
         public Vector3 Normal;
         public Vector2 TexCoord;
-        public TexVertex(Vector3 position, Vector3 normal, Vector2 texCoord)
+        public Vector4 Tangent;
+
+        public TexVertex(Vector3 position, Vector3 normal, Vector2 texCoord, Vector4 tangent)
         {
             Position = position;
             Normal = Vector3.Normalize(normal);
             TexCoord = texCoord;
+            Tangent = tangent;
         }
-        public static uint SizeInBytes => sizeof(float) * 8;
+        public static uint SizeInBytes => sizeof(float) * (3 + 3 + 2 + 4);
     }
 
     public readonly struct IndexTriangle(ushort index1, ushort index2, ushort index3)

@@ -9,11 +9,12 @@ using Veldrid;
 
 namespace Frinkahedron.VeldridImplementation
 {
-    public class Entity(MeshInfo mesh, TextureInfo colourTexture, Matrix4x4 transform) : IDisposable
+    public class Entity(MeshInfo mesh, TextureInfo colourTexture, TextureInfo normalMap, Matrix4x4 transform) : IDisposable
     {
         public MeshInfo Mesh { get; } = mesh;
 
         public TextureInfo ColourTexture { get; } = colourTexture;
+        public TextureInfo NormalMap { get; } = normalMap;
 
         public Matrix4x4 Transform { get; } = transform;
 
@@ -32,8 +33,6 @@ namespace Frinkahedron.VeldridImplementation
 
     public static class ModelLoader
     {
-        
-
         public static Model LoadModel(ResourceFactory factory, GraphicsDevice graphicsDevice, string file)
         {
             var model = SharpGLTF.Schema2.ModelRoot.Load(file);
@@ -52,6 +51,7 @@ namespace Frinkahedron.VeldridImplementation
                 {
                     var positions = primitive.GetVertexAccessor("POSITION").AsVector3Array();
                     var normals = primitive.GetVertexAccessor("NORMAL").AsVector3Array();
+                    var tangents = primitive.GetVertexAccessor("TANGENT").AsVector4Array();
                     var uvs = primitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array();
                     var indices = primitive.GetIndexAccessor().AsIndicesArray();
 
@@ -63,7 +63,8 @@ namespace Frinkahedron.VeldridImplementation
                         vertices[i] = new TexVertex(
                             positions[i],
                             normals[i],
-                            uvs[i]);
+                            uvs[i],
+                            tangents[i]);
                     }
                     foreach ((int i1, int i2, int i3) in primitive.GetTriangleIndices())
                     {
@@ -76,7 +77,7 @@ namespace Frinkahedron.VeldridImplementation
                     TexMesh texMesh = new TexMesh(vertices, triangles.ToArray());
                     MeshInfo texMeshInfo = MeshInfo.Create(texMesh, graphicsDevice);
 
-                    entities.Add(new Entity(texMeshInfo, textures[0], Matrix4x4.Identity));
+                    entities.Add(new Entity(texMeshInfo, textures[0], textures[2], Matrix4x4.Identity));
                 }
             }
 

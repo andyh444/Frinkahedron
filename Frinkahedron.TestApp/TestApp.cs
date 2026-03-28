@@ -124,10 +124,18 @@ namespace Frinkahedron.TestApp
 
             Sphere sph = new Sphere(4);
             float sphMass = 10 * sph.CalculateVolume();
-            GameObject sphObj = new GameObject(new Vector3(-50, 0, 0),
+            GameObject sphObj = new GameObject(new Vector3(-60, 0, 0),
                 new SphereControlBehaviour(),
                 sph,
-                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(), Gravity = true, Velocity = new Vector3(20, 0, 0) });
+                new RigidBody
+                {
+                    Mass = sphMass,
+                    InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(),
+                    Gravity = true,
+                    Velocity = new Vector3(30, 0, 0),
+                    AngularVelocity = new Vector3(0.5f, 1f, 1.5f),
+                });
+            sphObj.Position.Orientation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI);
             gameObjects.Add(sphObj);
 
             /*bool firstSphere = true;
@@ -215,20 +223,28 @@ namespace Frinkahedron.TestApp
                 {
                     var inputSnapshot = _window.PumpEvents();
                     UpdateInput(gameState.Input, inputSnapshot);
-                    gameState.DeltaTime /= 20;
-                    for (int i = 0; i < 20; i++)
+                    if (gameState.Input.IsKeyPressed(Core.Key.R))
                     {
-                        _scene.Update(gameState);
+                        _scene = CreateScene();
+                        gameState = new GameState(0.01f, _scene);
                     }
-                    var start = Stopwatch.GetTimestamp();
-                    Draw();
-                    Console.WriteLine($"Draw took {Stopwatch.GetElapsedTime(start).TotalMilliseconds:#0.000} ms");
+                    else
+                    {
+                        gameState.DeltaTime /= 20;
+                        for (int i = 0; i < 20; i++)
+                        {
+                            _scene.Update(gameState);
+                        }
+                        var start = Stopwatch.GetTimestamp();
+                        Draw();
+                        Console.WriteLine($"Draw took {Stopwatch.GetElapsedTime(start).TotalMilliseconds:#0.000} ms");
 
-                    gameState.Input.Clear();
+                        gameState.Input.Clear();
 
-                    sw.Stop();
-                    gameState.DeltaTime = (float)sw.Elapsed.TotalSeconds;
-                    sw.Restart();
+                        sw.Stop();
+                        gameState.DeltaTime = (float)sw.Elapsed.TotalSeconds;
+                        sw.Restart();
+                    }
                 }
             }
             finally

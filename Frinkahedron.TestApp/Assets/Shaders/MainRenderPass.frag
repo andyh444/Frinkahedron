@@ -45,6 +45,9 @@ layout(location = 0) in vec3 fsin_normal;
 layout(location = 1) in vec2 fsin_texCoord;
 layout(location = 2) in vec4 fsin_worldPos;
 layout(location = 3) in vec4 fsin_lightPos;
+layout(location = 4) in vec4 fsin_tangent;
+//layout(location = 4) in mat3 fsin_TBN; // TBN Matrix
+
 layout(location = 0) out vec4 fsout_Color;
 
 layout(set = 2, binding = 0) uniform texture2D Texture;
@@ -68,14 +71,24 @@ layout(set = 4, binding = 0) uniform Camera
 layout(set = 6, binding = 0) uniform texture2D ShadowMap;
 layout(set = 6, binding = 1) uniform sampler ShadowMapSampler;
 
+layout(set = 7, binding = 0) uniform texture2D NormalMap;
+layout(set = 7, binding = 1) uniform sampler NormalSampler;
+
 
 void main()
 {
     vec3 fragPos = fsin_worldPos.xyz;
-    vec3 normal = normalize(fsin_normal);
+
+    // in theory we should be able to calculate the tbn in the vertex shader and output it, but that makes the fragment colours go all screwy
+    vec3 bitangent = cross(fsin_normal, fsin_tangent.xyz) * fsin_tangent.w;
+    mat3 tbn = mat3(fsin_tangent.xyz, bitangent, fsin_normal);
+
+    vec3 normalTS = texture(sampler2D(NormalMap, NormalSampler), fsin_texCoord).rgb * 2.0 - 1.0;
+    vec3 normal = normalize(tbn * normalTS);
+
     vec3 viewDir = normalize(_CameraInfo.WorldPosition - fragPos);
 
-    vec3 ambient = vec3(0.2);
+    vec3 ambient = vec3(0.4);
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 

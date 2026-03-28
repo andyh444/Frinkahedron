@@ -147,7 +147,7 @@ namespace Frinkahedron.VeldridImplementation
         public required UniformBufferInfo ModelMatricesBufferInfo { get; init; }
         public required UniformBufferInfo CameraMatricesBufferInfo { get; init; }
         public required UniformBufferInfo LightMatricesBufferInfo { get; init; }
-        public required LightingBufferInfo LightsBufferInfo{ get; init; }
+        public required LightingBufferInfo LightsBufferInfo { get; init; }
         public required UniformBufferInfo CameraBufferInfo { get; init; }
         public TextureInfo? ShadowMapTextureInfo { get; set; }
 
@@ -200,6 +200,7 @@ namespace Frinkahedron.VeldridImplementation
                 lightsBufferInfo.ResourceLayout,
                 cameraBufferInfo.ResourceLayout,
                 lightMatrixBufferInfo.ResourceLayout,
+                TextureInfo.GetResourceLayout(factory),
                 TextureInfo.GetResourceLayout(factory),
             };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);

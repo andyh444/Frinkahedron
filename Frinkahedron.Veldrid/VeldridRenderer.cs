@@ -1,4 +1,5 @@
 ﻿using Frinkahedron.Core;
+using SharpGLTF.Schema2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,17 +29,17 @@ namespace Frinkahedron.VeldridImplementation
 
         public void DrawCuboid(Matrix4x4 transform)
         {
-            DrawMesh(primitives.CubeInfo, transform, "woodencontainer");
+            DrawMesh(primitives.CubeInfo, transform, "woodencontainer", "NeutralNormalMap");
         }
 
         public void DrawCylinder(Matrix4x4 transform)
         {
-            DrawMesh(primitives.CylinderInfo, transform, "woodencontainer");
+            DrawMesh(primitives.CylinderInfo, transform, "woodencontainer", "NeutralNormalMap");
         }
 
         public void DrawDisc(Matrix4x4 transform)
         {
-            DrawMesh(primitives.DiscInfo, transform, "woodencontainer");
+            DrawMesh(primitives.DiscInfo, transform, "woodencontainer", "NeutralNormalMap");
         }
 
         public void DrawEllipsoid(Matrix4x4 transform)
@@ -46,23 +47,34 @@ namespace Frinkahedron.VeldridImplementation
             //DrawMesh(primitives.SphereInfo, transform, "football");
 
             var model = assets.GetModel("bowlingball");
-            DrawMesh(model.Entities[0].Mesh, transform, model.Entities[0].ColourTexture);
+            DrawMesh(model.Entities[0].Mesh, transform, model.Entities[0].ColourTexture, model.Entities[0].NormalMap);
         }
 
-        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID)
+        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID, string normalID)
         {
-            DrawMesh(meshInfo, transform, texturesEnabled ? assets.GetTexture(textureID) : null);
+            DrawMesh(
+                meshInfo,
+                transform,
+                texturesEnabled ? assets.GetTexture(textureID) : null,
+                texturesEnabled ? assets.GetTexture(normalID) : null);
         }
 
-        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, TextureInfo? texture)
+        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, TextureInfo? albedo, TextureInfo? normalMap)
         {
             ModelMatrixInfo modelInfo = new ModelMatrixInfo
             {
                 Model = transform,
             };
-            if (texture is not null && texturesEnabled)
+            if (texturesEnabled)
             {
-                commandList.SetGraphicsResourceSet(2, texture.ResourceSet);
+                if (albedo is not null)
+                {
+                    commandList.SetGraphicsResourceSet(2, albedo.ResourceSet);
+                }
+                if (normalMap is not null)
+                {
+                    commandList.SetGraphicsResourceSet(7, normalMap.ResourceSet);
+                }
             }
             commandList.UpdateBuffer(matricesBuffer, 0, ref modelInfo);
             meshInfo.Draw(commandList);
