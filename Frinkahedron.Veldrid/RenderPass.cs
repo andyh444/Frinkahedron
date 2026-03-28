@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 using Veldrid;
 using Veldrid.SPIRV;
 
-namespace Frinkahedron.TestApp
+namespace Frinkahedron.VeldridImplementation
 {
-    internal interface IRenderPass : IDisposable
+    public interface IRenderPass : IDisposable
     {
         public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene);
     }
 
-    internal sealed class DirectionalShadowRenderPass : IRenderPass
+    public sealed class DirectionalShadowRenderPass : IRenderPass
     {
         public required Shader[] Shaders { get; init; }
         public required Pipeline Pipeline { get; init; }
@@ -140,7 +140,7 @@ namespace Frinkahedron.TestApp
         }
     }
 
-    internal sealed class MainRenderPass : IRenderPass
+    public sealed class MainRenderPass : IRenderPass
     {
         public required Shader[] Shaders { get; init; }
         public required Pipeline Pipeline { get; init; }

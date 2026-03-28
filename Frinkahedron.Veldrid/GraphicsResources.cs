@@ -4,10 +4,10 @@ using Frinkahedron.Core;
 using System.Runtime.CompilerServices;
 using Veldrid.SPIRV;
 
-namespace Frinkahedron.TestApp
+namespace Frinkahedron.VeldridImplementation
 {
 
-    internal sealed class GraphicsResources : IDisposable
+    public sealed class GraphicsResources : IDisposable
     {
         public required CommandList CommandList { get; init; }
         

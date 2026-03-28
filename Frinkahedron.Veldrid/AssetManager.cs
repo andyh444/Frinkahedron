@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using Veldrid;
 
-namespace Frinkahedron.TestApp
+namespace Frinkahedron.VeldridImplementation
 {
-    internal sealed class AssetManager : IDisposable
+    public sealed class AssetManager : IDisposable
     {
         private readonly IReadOnlyDictionary<string, TextureInfo> textures;
         private readonly IReadOnlyDictionary<string, byte[]> shaders;

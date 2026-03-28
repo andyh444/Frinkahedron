@@ -8,13 +8,11 @@
   </PropertyGroup>
   
   <ItemGroup>
-      <PackageReference Include="Veldrid" Version="4.9.0" />
-      <PackageReference Include="Veldrid.ImageSharp" Version="4.9.0" />
       <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />
-      <PackageReference Include="Veldrid.Spirv" Version="1.0.15" />
     </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\Frinkahedron.Veldrid\Frinkahedron.VeldridImplementation.csproj" />
     <ProjectReference Include="..\Frinkahedron\Frinkahedron.Core.csproj" />
   </ItemGroup>
   

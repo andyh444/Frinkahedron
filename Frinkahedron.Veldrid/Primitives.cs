@@ -2,9 +2,9 @@
 using Veldrid;
 using Frinkahedron.Core;
 
-namespace Frinkahedron.TestApp
+namespace Frinkahedron.VeldridImplementation
 {
-    internal sealed class Primitives : IDisposable
+    public sealed class Primitives : IDisposable
     {
         public required MeshInfo CubeInfo { get; init; }
         public required MeshInfo SphereInfo { get; init; }

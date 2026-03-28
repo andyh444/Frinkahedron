@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
 
-namespace Frinkahedron.TestApp
+namespace Frinkahedron.VeldridImplementation
 {
-    internal class UniformBufferInfo : IDisposable
+    public class UniformBufferInfo : IDisposable
     {
         public required DeviceBuffer DeviceBuffer { get; init; }
         public required ResourceLayout ResourceLayout { get; init; }
@@ -40,7 +40,7 @@ namespace Frinkahedron.TestApp
         }
     }
 
-    internal class LightingBufferInfo : IDisposable
+    public sealed class LightingBufferInfo : IDisposable
     {
         public required DeviceBuffer PointLightsBuffer { get; init; }
         public required DeviceBuffer DirectionalLightBuffer { get; init; }

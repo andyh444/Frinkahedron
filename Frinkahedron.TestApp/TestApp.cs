@@ -13,6 +13,7 @@ using Vulkan;
 using Frinkahedron.Core.Colliders;
 using Frinkahedron.Core.Maths;
 using Frinkahedron.Core.Physics;
+using Frinkahedron.VeldridImplementation;
 
 namespace Frinkahedron.TestApp
 {
@@ -158,6 +159,7 @@ namespace Frinkahedron.TestApp
                     collider = new Box(dimensions);
                     density = 1f;
                 }*/
+
 
                 collider = new Cylinder(r.NextSingle(1f, 3f), r.NextSingle(4f, 10f));
                 density = 1;

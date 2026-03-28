@@ -1,7 +1,7 @@
 ﻿using Veldrid;
 using Veldrid.ImageSharp;
 
-namespace Frinkahedron.TestApp
+namespace Frinkahedron.VeldridImplementation
 {
     public class TextureInfo : IDisposable
     {

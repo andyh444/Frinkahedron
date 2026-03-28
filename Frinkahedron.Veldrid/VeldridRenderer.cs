@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
 
-namespace Frinkahedron.TestApp
+namespace Frinkahedron.VeldridImplementation
 {
-    internal sealed class VeldridRenderer : IRenderer
+    public sealed class VeldridRenderer : IRenderer
     {
         private readonly Primitives primitives;
         private readonly DeviceBuffer matricesBuffer;

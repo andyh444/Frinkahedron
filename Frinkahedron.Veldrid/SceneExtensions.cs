@@ -1,7 +1,7 @@
 ﻿using Frinkahedron.Core;
 using System.Numerics;
 
-namespace Frinkahedron.TestApp
+namespace Frinkahedron.VeldridImplementation
 {
     internal static class SceneExtensions
     {

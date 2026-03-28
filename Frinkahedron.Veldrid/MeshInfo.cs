@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
 
-namespace Frinkahedron.TestApp
+namespace Frinkahedron.VeldridImplementation
 {
     public class Entity(MeshInfo mesh, Matrix4x4 transform) : IDisposable
     {
@@ -53,7 +53,6 @@ namespace Frinkahedron.TestApp
 
         public void Draw(CommandList commandList)
         {
-            //commandList.Bui
             commandList.SetVertexBuffer(0, _vertexBuffer);
             commandList.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
             commandList.DrawIndexed(
