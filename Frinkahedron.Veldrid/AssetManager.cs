@@ -7,11 +7,13 @@ namespace Frinkahedron.VeldridImplementation
     {
         private readonly IReadOnlyDictionary<string, TextureInfo> textures;
         private readonly IReadOnlyDictionary<string, byte[]> shaders;
+        private readonly IReadOnlyDictionary<string, Model> models;
 
-        private AssetManager(IReadOnlyDictionary<string, TextureInfo> textures, IReadOnlyDictionary<string, byte[]> shaders)
+        private AssetManager(IReadOnlyDictionary<string, TextureInfo> textures, IReadOnlyDictionary<string, byte[]> shaders, IReadOnlyDictionary<string, Model> models)
         {
             this.textures = textures;
             this.shaders = shaders;
+            this.models = models;
         }
 
         public static AssetManager LoadAssets(ResourceFactory factory, GraphicsDevice graphicsDevice, string assetsFolder)
@@ -31,12 +33,17 @@ namespace Frinkahedron.VeldridImplementation
                 byte[] shaderCodeUtf8 = Encoding.UTF8.GetBytes(shaderCode);
                 shaders.Add(key, shaderCodeUtf8);
             }
-            return new AssetManager(textures, shaders);
+
+            Dictionary<string, Model> models = new Dictionary<string, Model>();
+            models.Add("bowlingball", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\bowling_ball\scene.gltf"));
+            return new AssetManager(textures, shaders, models);
         }
 
-        internal ResourceSet GetTextureResourceSet(string v)
+        internal Model GetModel(string name) => models[name];
+
+        internal TextureInfo GetTexture(string v)
         {
-            return textures[v].ResourceSet;
+            return textures[v];
         }
 
         internal byte[] GetShaderCode(string v)

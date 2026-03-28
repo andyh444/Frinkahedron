@@ -24,10 +24,11 @@ namespace Frinkahedron.TestApp
         private GraphicsDevice _graphicsDevice;
         private GraphicsResources _graphicsResources;
         private Scene _scene;
+        private Task _warmupTask;
 
         public TestApp()
         {
-            Warmup();
+            _warmupTask = Task.Run(() => Warmup());
 
             WindowCreateInfo windowCI = new WindowCreateInfo()
             {
@@ -49,6 +50,8 @@ namespace Frinkahedron.TestApp
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
             _scene = CreateScene();
             _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice);
+
+            _warmupTask.Wait();
         }
 
         private void Warmup()
@@ -102,7 +105,7 @@ namespace Frinkahedron.TestApp
             
 
 
-            /*for (int k = -1; k <= 2; k++)
+            for (int k = -1; k <= 2; k++)
             {
                 for (int j = -4; j < 4; j++)
                 {
@@ -125,40 +128,40 @@ namespace Frinkahedron.TestApp
                 new SphereControlBehaviour(),
                 sph,
                 new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(), Gravity = true, Velocity = new Vector3(10, 0, 0) });
-            gameObjects.Add(sphObj);*/
+            gameObjects.Add(sphObj);
 
-            bool firstSphere = true;
+            /*bool firstSphere = true;
             for (int i = 0; i < 10; i++)
             {
                 IShape collider;
                 float density;
                 var rand = r.NextSingle();
                 Behaviour? behaviour = null;
-                /*if (rand > 0.7f)
-                {
-                    float radius = r.NextSingle(1.5f, 2.5f);
-                    collider = new Sphere(radius);
-                    density = 10f;
-                    if (firstSphere)
-                    {
-                        //behaviour = new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour { distance = 15f}]);
-                        firstSphere = false;
-                        density = 50f;
-                    }
-                }
-                else if (rand > 0.45f)
-                {
-                    float radius = r.NextSingle(1.5f, 2.5f);
-                    float length = r.NextSingle(2.5f, 5.5f);
-                    density = 1f;
-                    collider = new Capsule(length, radius);
-                }
-                else
-                {
-                    Vector3 dimensions = new Vector3(r.NextSingle(1f, 3f), r.NextSingle(1f, 3f), r.NextSingle(1f, 9f));
-                    collider = new Box(dimensions);
-                    density = 1f;
-                }*/
+                //if (rand > 0.7f)
+                //{
+                //    float radius = r.NextSingle(1.5f, 2.5f);
+                //    collider = new Sphere(radius);
+                //    density = 10f;
+                //    if (firstSphere)
+                //    {
+                //        //behaviour = new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour { distance = 15f}]);
+                //        firstSphere = false;
+                //        density = 50f;
+                //    }
+                //}
+                //else if (rand > 0.45f)
+                //{
+                //    float radius = r.NextSingle(1.5f, 2.5f);
+                //    float length = r.NextSingle(2.5f, 5.5f);
+                //    density = 1f;
+                //    collider = new Capsule(length, radius);
+                //}
+                //else
+                //{
+                //    Vector3 dimensions = new Vector3(r.NextSingle(1f, 3f), r.NextSingle(1f, 3f), r.NextSingle(1f, 9f));
+                //    collider = new Box(dimensions);
+                //    density = 1f;
+                //}
 
 
                 collider = new Cylinder(r.NextSingle(1f, 3f), r.NextSingle(4f, 10f));
@@ -184,7 +187,7 @@ namespace Frinkahedron.TestApp
                     }));
 
                 gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, 0.15f * MathF.PI), r.NextSingle(0, 0.15f * MathF.PI), r.NextSingle(0, 0.15f * MathF.PI));
-            }
+            }*/
 
 
 

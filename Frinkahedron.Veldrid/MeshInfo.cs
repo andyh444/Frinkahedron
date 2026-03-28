@@ -9,15 +9,6 @@ using Veldrid;
 
 namespace Frinkahedron.VeldridImplementation
 {
-    public class Entity(MeshInfo mesh, Matrix4x4 transform) : IDisposable
-    {
-        public MeshInfo Mesh { get; } = mesh;
-
-        public Matrix4x4 Transform { get; } = transform;
-
-        public void Dispose() => Mesh.Dispose();
-    }
-
     public class MeshInfo : IDisposable
     {
         private readonly DeviceBuffer _vertexBuffer;

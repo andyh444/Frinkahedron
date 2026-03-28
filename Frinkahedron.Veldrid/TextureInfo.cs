@@ -34,10 +34,20 @@ namespace Frinkahedron.VeldridImplementation
             };
         }
 
+        public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice, Stream stream)
+        {
+            var ist = new ImageSharpTexture(stream);
+            return GetTextureInfo(factory, graphicsDevice, ist);
+        }
+
         public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice, string filePath)
         {
             var ist = new ImageSharpTexture(filePath);
+            return GetTextureInfo(factory, graphicsDevice, ist);
+        }
 
+        private static TextureInfo GetTextureInfo(ResourceFactory factory, GraphicsDevice graphicsDevice, ImageSharpTexture ist)
+        {
             Texture texture = ist.CreateDeviceTexture(graphicsDevice, factory);
             TextureView textureView = factory.CreateTextureView(texture);
             Sampler sampler = graphicsDevice.Aniso4xSampler;

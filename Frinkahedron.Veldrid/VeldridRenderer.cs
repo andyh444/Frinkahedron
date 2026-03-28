@@ -43,18 +43,26 @@ namespace Frinkahedron.VeldridImplementation
 
         public void DrawEllipsoid(Matrix4x4 transform)
         {
-            DrawMesh(primitives.SphereInfo, transform, "football");
+            //DrawMesh(primitives.SphereInfo, transform, "football");
+
+            var model = assets.GetModel("bowlingball");
+            DrawMesh(model.Entities[0].Mesh, Matrix4x4.CreateScale(0.5f) * transform, model.Entities[0].ColourTexture);
         }
 
         private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID)
+        {
+            DrawMesh(meshInfo, transform, texturesEnabled ? assets.GetTexture(textureID) : null);
+        }
+
+        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, TextureInfo? texture)
         {
             ModelMatrixInfo modelInfo = new ModelMatrixInfo
             {
                 Model = transform,
             };
-            if (texturesEnabled)
+            if (texture is not null && texturesEnabled)
             {
-                commandList.SetGraphicsResourceSet(2, assets.GetTextureResourceSet(textureID));
+                commandList.SetGraphicsResourceSet(2, texture.ResourceSet);
             }
             commandList.UpdateBuffer(matricesBuffer, 0, ref modelInfo);
             meshInfo.Draw(commandList);
