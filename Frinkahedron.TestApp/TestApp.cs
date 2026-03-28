@@ -127,7 +127,7 @@ namespace Frinkahedron.TestApp
             GameObject sphObj = new GameObject(new Vector3(-50, 0, 0),
                 new SphereControlBehaviour(),
                 sph,
-                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(), Gravity = true, Velocity = new Vector3(10, 0, 0) });
+                new RigidBody { Mass = sphMass, InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(), Gravity = true, Velocity = new Vector3(20, 0, 0) });
             gameObjects.Add(sphObj);
 
             /*bool firstSphere = true;
@@ -200,7 +200,7 @@ namespace Frinkahedron.TestApp
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
 
-            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-1f, -0.5f, -1f)), new Vector3(1));
+            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
 
             return scene;
         }

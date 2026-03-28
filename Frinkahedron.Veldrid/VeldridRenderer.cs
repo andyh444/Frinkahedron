@@ -46,7 +46,7 @@ namespace Frinkahedron.VeldridImplementation
             //DrawMesh(primitives.SphereInfo, transform, "football");
 
             var model = assets.GetModel("bowlingball");
-            DrawMesh(model.Entities[0].Mesh, Matrix4x4.CreateScale(0.5f) * transform, model.Entities[0].ColourTexture);
+            DrawMesh(model.Entities[0].Mesh, transform, model.Entities[0].ColourTexture);
         }
 
         private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID)

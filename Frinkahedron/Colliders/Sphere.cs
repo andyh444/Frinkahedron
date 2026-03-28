@@ -29,7 +29,7 @@ namespace Frinkahedron.Core.Colliders
 
         public void Draw(IRenderer renderer, Matrix4x4 position)
         {
-            Matrix4x4 scale = Matrix4x4.CreateScale(2 * Radius);
+            Matrix4x4 scale = Matrix4x4.CreateScale(Radius);
             renderer.DrawEllipsoid(scale * position);
         }
     }

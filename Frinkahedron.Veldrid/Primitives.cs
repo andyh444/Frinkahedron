@@ -113,7 +113,7 @@ namespace Frinkahedron.VeldridImplementation
             TexVertex centre = new TexVertex(new Vector3(), normal, new Vector2(0.5f, 0.5f));
             vertList.Add(centre);
 
-            float radius = 0.5f;
+            float radius = 1f;
 
             for (int i = 0; i < segments; i++)
             {
@@ -138,7 +138,7 @@ namespace Frinkahedron.VeldridImplementation
             var triangleList = new List<IndexTriangle>();
 
             float halfHeight = 0.5f;
-            float radius = 0.5f;
+            float radius = 1f;
 
             // top circle
             for (int i = 0; i < segments; i++)
@@ -203,7 +203,7 @@ namespace Frinkahedron.VeldridImplementation
         {
             var vertList = new List<TexVertex>();
             var triangleList = new List<IndexTriangle>();
-            float radius = 0.5f;
+            float radius = 1f;
             // Generate vertices
             for (int lat = 0; lat <= latitudeSegments; lat++)
             {
