@@ -244,8 +244,10 @@ namespace Frinkahedron.VeldridImplementation
             commandList.SetGraphicsResourceSet(3, LightsBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(4, CameraBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(5, LightMatricesBufferInfo.ResourceSet);
-            commandList.SetGraphicsResourceSet(6, ShadowMapTextureInfo.ResourceSet);
-
+            if (ShadowMapTextureInfo is not null)
+            {
+                commandList.SetGraphicsResourceSet(6, ShadowMapTextureInfo.ResourceSet);
+            }
             PointLightsInfo pointLightInfo = scene.GetPointLights();
             CameraInfo cameraInfo = scene.GetCameraInfo();
             DirectionalLightInfo directionalLight = scene.GetDirectionalLight();
@@ -255,15 +257,17 @@ namespace Frinkahedron.VeldridImplementation
                 View = scene.Camera.ViewMatrix,
             };
 
-            var lightCam = scene.SceneLights.DirectionalLight.Value.GetDirectionalLightCamera();
-            CameraMatrixInfo lightMatrixInfo = new CameraMatrixInfo
+            if (scene.SceneLights.DirectionalLight is not null)
             {
-                Projection = lightCam.ProjectionMatrix,
-                View = lightCam.ViewMatrix,
-            };
-
+                var lightCam = scene.SceneLights.DirectionalLight.Value.GetDirectionalLightCamera();
+                CameraMatrixInfo lightMatrixInfo = new CameraMatrixInfo
+                {
+                    Projection = lightCam.ProjectionMatrix,
+                    View = lightCam.ViewMatrix,
+                };
+                commandList.UpdateBuffer(LightMatricesBufferInfo.DeviceBuffer, 0, ref lightMatrixInfo);
+            }
             commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
-            commandList.UpdateBuffer(LightMatricesBufferInfo.DeviceBuffer, 0, ref lightMatrixInfo);
             commandList.UpdateBuffer(LightsBufferInfo.PointLightsBuffer, 0, ref pointLightInfo);
             commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);
             commandList.UpdateBuffer(CameraBufferInfo.DeviceBuffer, 0, ref cameraInfo);

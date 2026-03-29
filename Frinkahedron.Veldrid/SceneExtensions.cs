@@ -24,13 +24,13 @@ namespace Frinkahedron.VeldridImplementation
             }
             if (lights.Count > 2)
             {
-                lightsInfo.PointLights1 = lights[2];
+                lightsInfo.PointLights2 = lights[2];
             }
             if (lights.Count > 3)
             {
-                lightsInfo.PointLights1 = lights[3];
+                lightsInfo.PointLights3 = lights[3];
             }
-            //lightsInfo.NumActiveLights = Math.Min(4, lights.Count);
+            lightsInfo.NumActiveLights = Math.Min(4, lights.Count);
             return lightsInfo;
         }
 
