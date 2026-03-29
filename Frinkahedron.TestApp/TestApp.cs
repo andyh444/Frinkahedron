@@ -133,7 +133,7 @@ namespace Frinkahedron.TestApp
                     Mass = sphMass,
                     InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(),
                     Gravity = true,
-                    Velocity = new Vector3(80, 0, 0),
+                    Velocity = new Vector3(40, 0, 0),
                     AngularVelocity = new Vector3(0.5f, 1f, 1.5f),
                 });
             sphObj.Position.Orientation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI);
