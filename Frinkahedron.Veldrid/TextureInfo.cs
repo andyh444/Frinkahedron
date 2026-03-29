@@ -15,7 +15,7 @@ namespace Frinkahedron.VeldridImplementation
         {
             Texture texture = factory.CreateTexture(textureDescription);
             TextureView textureView = factory.CreateTextureView(texture);
-            Sampler sampler = graphicsDevice.LinearSampler;
+            Sampler sampler = graphicsDevice.Aniso4xSampler;
             var textureLayout = GetResourceLayout(factory);
 
             ResourceSet textureSet = factory.CreateResourceSet(

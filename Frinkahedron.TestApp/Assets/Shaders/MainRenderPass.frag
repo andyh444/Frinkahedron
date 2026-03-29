@@ -212,12 +212,12 @@ void main()
         vec3 specular = numerator / denominator;
 
         float NdotL = max(dot(normal, lightDir), 0.0);
-        float lightIntensity = 10; // TODO: Add this to the directional light uniform
+        float lightIntensity = 5; // TODO: Add this to the directional light uniform
         vec3 radiance = _DirectionalLight.Colour * lightIntensity;
         Lo += (kD * albedo / PI + specular) * radiance * NdotL * (1 - shadow);
     }
 
-    vec3 ambient = vec3(0.03) * albedo;
+    vec3 ambient = vec3(0.3) * albedo;
     vec3 color = ambient + Lo;
 
     color = color / (color + vec3(1.0));
