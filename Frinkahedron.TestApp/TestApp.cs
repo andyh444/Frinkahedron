@@ -71,7 +71,8 @@ namespace Frinkahedron.TestApp
             Random r = Random.Shared;
 
             gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
-                null,//new OrbitalCameraMouseBehaviour(),
+                new CompositeBehaviour([new OrbitalCameraMouseBehaviour(),
+                    new ImpulseOnClickBehaviour()]),
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
 
@@ -122,22 +123,22 @@ namespace Frinkahedron.TestApp
                 }
             }
 
-            Sphere sph = new Sphere(4);
+            /*Sphere sph = new Sphere(4);
             float sphMass = 10 * sph.CalculateVolume();
             GameObject sphObj = new GameObject(new Vector3(-60, 0, 0),
-                //new SphereControlBehaviour(),
-                new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour()]),
+                new SphereControlBehaviour(),
+                //new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour()]),
                 sph,
                 new RigidBody
                 {
                     Mass = sphMass,
                     InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(),
                     Gravity = true,
-                    Velocity = new Vector3(30, 0, 0),
+                    Velocity = new Vector3(3, 0, 0),
                     AngularVelocity = new Vector3(0.5f, 1f, 1.5f),
                 });
             sphObj.Position.Orientation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI);
-            gameObjects.Add(sphObj);
+            gameObjects.Add(sphObj);*/
 
             /*bool firstSphere = true;
             for (int i = 0; i < 10; i++)
@@ -235,12 +236,13 @@ namespace Frinkahedron.TestApp
                         for (int i = 0; i < 20; i++)
                         {
                             _scene.Update(gameState);
+                            gameState.Input.Clear();
                         }
                         var start = Stopwatch.GetTimestamp();
                         Draw();
                         Console.WriteLine($"Draw took {Stopwatch.GetElapsedTime(start).TotalMilliseconds:#0.000} ms");
 
-                        gameState.Input.Clear();
+                        //gameState.Input.Clear();
 
                         sw.Stop();
                         gameState.DeltaTime = (float)sw.Elapsed.TotalSeconds;
@@ -288,7 +290,7 @@ namespace Frinkahedron.TestApp
                 }
             }
             input.SetScrollDelta((int)snapshot.WheelDelta);
-            input.SetMousePosition(snapshot.MousePosition);
+            input.SetMousePosition(snapshot.MousePosition, new Vector2(_window.Width, _window.Height));
         }
 
         private void Draw()

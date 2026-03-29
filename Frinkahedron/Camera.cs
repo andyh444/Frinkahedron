@@ -71,6 +71,30 @@ namespace Frinkahedron
             ViewMatrix = CreateViewMatrix();
         }
 
+        public (Vector3 position, Vector3 direction) GetRay(Vector2 screenPosition)
+        {
+            // screen position should be in normalised device coordinates (ndc)
+            Vector4 nearClip = new Vector4(screenPosition.X, screenPosition.Y, 0.0f, 1.0f);
+            Vector4 farClip = new Vector4(screenPosition.X, screenPosition.Y, 1.0f, 1.0f);
+
+            _ = Matrix4x4.Invert(ProjectionMatrix, out var inverseProjection);
+            _ = Matrix4x4.Invert(ViewMatrix, out var inverseView);
+
+            Vector4 nearView = Vector4.Transform(nearClip, inverseProjection);
+            Vector4 farView = Vector4.Transform(farClip, inverseProjection);
+
+            // Perspective divide
+            nearView /= nearView.W;
+            farView /= farView.W;
+
+            Vector4 nearWorld = Vector4.Transform(nearView, inverseView);
+            Vector4 farWorld = Vector4.Transform(farView, inverseView);
+
+            Vector3 rayPosition = nearWorld.AsVector3();
+            Vector3 direction = Vector3.Normalize(farWorld.AsVector3() - rayPosition);
+            return (rayPosition, direction);
+        }
+
         private Matrix4x4 CreateViewMatrix()
         {
             return Matrix4x4.CreateLookAt(Position, Position + LookDirection, Vector3.UnitY);

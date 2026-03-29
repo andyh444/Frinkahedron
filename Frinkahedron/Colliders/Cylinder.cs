@@ -48,5 +48,11 @@ namespace Frinkahedron.Core.Colliders
             Matrix4x4 cap2Transform = Matrix4x4.CreateScale(Radius, 1, Radius) * Matrix4x4.CreateTranslation(0, -Height / 2, 0);
             renderer.DrawDisc(cap2Transform * position);
         }
+
+        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 result)
+        {
+            result = Vector3.Zero;
+            return false;
+        }
     }
 }

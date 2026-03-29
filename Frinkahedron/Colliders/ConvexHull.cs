@@ -69,6 +69,10 @@ namespace Frinkahedron.Core.Colliders
             throw new NotImplementedException();
         }
 
-        
+        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 result)
+        {
+            result = Vector3.Zero;
+            return false;
+        }
     }
 }

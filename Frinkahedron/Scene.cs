@@ -15,21 +15,33 @@ namespace Frinkahedron.Core
 
     public sealed class Scene
     {
+        private readonly List<GameObject> objects;
+        private readonly List<GameObject> toAdd;
+
         public Camera Camera { get; }
 
-        public IReadOnlyList<GameObject> Objects { get; }
+        public IReadOnlyList<GameObject> Objects => objects;
 
         public SceneLights SceneLights { get; }
 
         public Scene(Vector3 initialCameraPosition, Vector3 initialCameraDirection, IReadOnlyList<GameObject> objects)
         {
             Camera = Camera.CreatePerspectiveCamera(initialCameraPosition, initialCameraDirection);
-            Objects = objects;
+            this.objects = objects.ToList();
+            toAdd = new List<GameObject>();
             SceneLights = new SceneLights();
+        }
+
+        public void AddObject(GameObject obj)
+        {
+            toAdd.Add(obj);
         }
 
         public void Update(GameState gameState)
         {
+            objects.AddRange(toAdd);
+            toAdd.Clear();
+
             var start = Stopwatch.GetTimestamp();
             foreach (var obj in Objects)
             {

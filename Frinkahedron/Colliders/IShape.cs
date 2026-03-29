@@ -18,5 +18,7 @@ namespace Frinkahedron.Core.Colliders
         public float CalculateVolume();
 
         public AxisAlignedBoundingBox CalculateAABB(Position position);
+
+        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 result);
     }
 }

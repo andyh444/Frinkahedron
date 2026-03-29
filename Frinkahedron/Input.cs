@@ -38,7 +38,7 @@ namespace Frinkahedron.Core
         bool IsMouseButtonReleased(MouseButton button);
 
         /// <summary>
-        /// Gets the position of the mouse in normalised screen coordinates (between 0 and 1)
+        /// Gets the position of the mouse in normalised screen coordinates (between -1 and 1)
         /// </summary>
         /// <returns></returns>
         Vector2 GetMouseScreenPosition();
@@ -58,6 +58,7 @@ namespace Frinkahedron.Core
         private HashSet<MouseButton> mouseButtonsReleased = new HashSet<MouseButton>();
         private Vector2 mouseDelta;
         private Vector2 mouseScreenPosition;
+        private Vector2 mouseNdcPosition;
         private int mouseScrollDelta;
 
         public bool IsKeyDown(Key key) => keysDown.Contains(key);
@@ -107,11 +108,17 @@ namespace Frinkahedron.Core
 
         public Vector2 GetMouseScreenPosition() => mouseScreenPosition;
 
-        public void SetMousePosition(Vector2 screenPosition)
+        public Vector2 GetMouseNdcPosition() => mouseNdcPosition;
+
+        public void SetMousePosition(Vector2 screenPosition, Vector2 screenDimensions)
         {
             var old = mouseScreenPosition;
             mouseScreenPosition = screenPosition;
             mouseDelta = mouseScreenPosition - old;
+
+            mouseNdcPosition = new Vector2(
+                (2.0f * screenPosition.X) / screenDimensions.X - 1.0f,
+                1.0f - (2.0f * screenPosition.Y) / screenDimensions.Y); // flip Y
         }
 
         public void SetScrollDelta(int delta) => mouseScrollDelta = delta;

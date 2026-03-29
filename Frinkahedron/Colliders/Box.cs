@@ -113,6 +113,83 @@ namespace Frinkahedron.Core.Colliders
                     BoxFace.GetFace(centre, axes, halfDimensions, -axes[2]),
                 ];
         }
+
+        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 result)
+        {
+            result = Vector3.Zero;
+
+            Quaternion invRot = Quaternion.Inverse(position.Orientation);
+
+            // Transform ray into local space
+            Vector3 localOrigin = Vector3.Transform(rayPosition - position.Centre, invRot);
+            Vector3 localDir = Vector3.Transform(rayDirection, invRot);
+
+            // AABB bounds
+            Vector3 min = -Dimensions / 2;
+            Vector3 max = Dimensions / 2;
+
+            if (!RayAABB(localOrigin, localDir, min, max, out float t))
+            {
+                return false;
+            }
+
+            // Intersection point in local space
+            Vector3 localHit = localOrigin + localDir * t;
+
+            // Transform back to world space
+            result = Vector3.Transform(localHit, position.Orientation) + position.Centre;
+
+            return true;
+        }
+
+        private bool RayAABB(
+            Vector3 origin,
+            Vector3 dir,
+            Vector3 min,
+            Vector3 max,
+            out float t)
+        {
+            float tMin = 0.0f;
+            float tMax = float.MaxValue;
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (Math.Abs(dir[i]) < 1e-6f)
+                {
+                    // Ray parallel to slab
+                    if (origin[i] < min[i] || origin[i] > max[i])
+                    {
+                        t = 0;
+                        return false;
+                    }
+                }
+                else
+                {
+                    float ood = 1.0f / dir[i];
+                    float t1 = (min[i] - origin[i]) * ood;
+                    float t2 = (max[i] - origin[i]) * ood;
+
+                    if (t1 > t2)
+                    {
+                        float tmp = t1;
+                        t1 = t2;
+                        t2 = tmp;
+                    }
+
+                    tMin = Math.Max(tMin, t1);
+                    tMax = Math.Min(tMax, t2);
+
+                    if (tMin > tMax)
+                    {
+                        t = 0;
+                        return false;
+                    }
+                }
+            }
+
+            t = tMin;
+            return true;
+        }
     }
 
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Frinkahedron.Core.Colliders;
+using Frinkahedron.Core.Physics;
+using System;
 using System.Numerics;
 
 namespace Frinkahedron.Core
@@ -38,6 +40,53 @@ namespace Frinkahedron.Core
             Vector3 offset = Vector3.Transform(new Vector3(0, 0, -distance), rotation);
 
             gameState.Scene.Camera.SetValues(self.Position.Centre + offset, -offset);
+
+            
+        }
+    }
+
+    public class ImpulseOnClickBehaviour : Behaviour
+    {
+        public override void Update(GameObject self, GameState gameState)
+        {
+            if (gameState.Input.IsMouseButtonPressed(MouseButton.Left))
+            {
+                // doesn't belong here: move
+                (var rayPosition, var rayDirection) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
+
+                List<(GameObject, Vector3)> intersections = new List<(GameObject, Vector3)>();
+
+                foreach (var obj in gameState.Scene.Objects)
+                {
+                    if (obj.Collider?.RayIntersection(obj.Position, rayPosition, rayDirection, out Vector3 hitPoint) == true)
+                    {
+                        intersections.Add((obj, hitPoint));
+                        //obj.RigidBody?.ApplyImpulse(1 * rayDirection, hitPoint, obj.Position);
+
+                        /*Sphere sph = new Sphere(0.5f);
+                        float sphMass = 1 * sph.CalculateVolume();
+                        GameObject sphObj = new GameObject(hitPoint - rayDirection * sph.Radius * 2,
+                            null,
+                            sph,
+                            new RigidBody
+                            {
+                                Mass = sphMass,
+                                InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(),
+                                Gravity = true,
+                                Velocity = new Vector3(),
+                                AngularVelocity = new Vector3(),
+                            });
+                        sphObj.Position.Orientation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI);
+                        gameState.Scene.AddObject(sphObj);*/
+
+                        //break;
+                    }
+                }
+
+                (var closest, var closestHitPoint) = intersections.MinBy(x => Vector3.DistanceSquared(x.Item2, rayPosition));
+
+                closest.RigidBody?.ApplyImpulse(200 * rayDirection, closestHitPoint - closest.Position.Centre, closest.Position);
+            }
         }
     }
 
