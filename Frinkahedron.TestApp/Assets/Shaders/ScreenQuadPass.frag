@@ -73,6 +73,23 @@ vec4 applyMeanBlur(vec2 uv, int radius)
 	return colour / count;
 }
 
+vec4 applySepia(vec4 color, float strength)
+{
+    vec4 sep = vec4(
+        dot(color.rgb, vec3(0.393, 0.769, 0.189)),
+        dot(color.rgb, vec3(0.349, 0.686, 0.168)),
+        dot(color.rgb, vec3(0.272, 0.534, 0.131)),
+        1
+    );
+    return mix(color, sep, strength);
+}
+
+vec4 applyGreyscale(vec4 color)
+{
+    float avg = (color.r + color.g + color.b) / 3;
+    return vec4(avg, avg, avg, 1);
+}
+
 void main()
 {
 	// FXAA/FSAA
