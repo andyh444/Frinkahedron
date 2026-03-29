@@ -3,6 +3,7 @@ using Veldrid;
 using Frinkahedron.Core;
 using System.Runtime.CompilerServices;
 using Veldrid.SPIRV;
+using Frinkahedron.VeldridImplementation.RenderPasses;
 
 namespace Frinkahedron.VeldridImplementation
 {
