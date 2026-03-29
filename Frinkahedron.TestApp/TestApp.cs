@@ -49,7 +49,7 @@ namespace Frinkahedron.TestApp
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
             _scene = CreateScene();
-            _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice);
+            _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice, _window.Width, _window.Height);
 
             _warmupTask.Wait();
         }
@@ -298,6 +298,7 @@ namespace Frinkahedron.TestApp
             _graphicsResources.CommandList.Begin();
             _graphicsResources.ShadowRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
             _graphicsResources.MainRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
+            _graphicsResources.QuadRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
             _graphicsDevice.SwapBuffers();
             _graphicsResources.CommandList.End();
             _graphicsDevice.SubmitCommands(_graphicsResources.CommandList);
