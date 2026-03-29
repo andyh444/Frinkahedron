@@ -126,6 +126,9 @@ void main()
     vec4 albedo4 = texture(sampler2D(Texture, TextureSampler), fsin_texCoord);
     vec3 albedo = albedo4.xyz;
 
+    // albedo should already be in srgb, but just gamma boost to try and make the colours pop a bit more
+    albedo = pow(albedo, vec3(2.2));
+
     vec3 fragPos = fsin_worldPos.xyz;
 
     // in theory we should be able to calculate the tbn in the vertex shader and output it, but that makes the fragment colours go all screwy
