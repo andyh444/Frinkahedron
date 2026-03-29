@@ -39,16 +39,6 @@ namespace Frinkahedron.VeldridImplementation
             var model = SharpGLTF.Schema2.ModelRoot.Load(file);
             List<Entity> entities = new List<Entity>();
 
-            List<TextureInfo> textures = new List<TextureInfo>();
-            int index = 0;
-            foreach (var image in model.LogicalTextures)
-            {
-                using var stream = image.PrimaryImage.Content.Open();
-                textures.Add(TextureInfo.Create(factory, graphicsDevice, stream, index == 0)); // TODO: Albedo should be sRGB
-
-                index++;
-            }
-
             foreach (var mesh in model.LogicalMeshes)
             {
                 foreach (var primitive in mesh.Primitives)
@@ -81,8 +71,20 @@ namespace Frinkahedron.VeldridImplementation
                     TexMesh texMesh = new TexMesh(vertices, triangles.ToArray());
                     MeshInfo texMeshInfo = MeshInfo.Create(texMesh, graphicsDevice);
 
+                    var channels = primitive.Material.Channels;
+
+                    using var albedoStream = primitive.Material.FindChannel("BaseColor").Value.Texture.PrimaryImage.Content.Open();
+                    TextureInfo albedo = TextureInfo.Create(factory, graphicsDevice, albedoStream, true);
+
+                    using var metallicRoughnessStream = primitive.Material.FindChannel("MetallicRoughness").Value.Texture.PrimaryImage.Content.Open();
+                    TextureInfo metallicRoughness = TextureInfo.Create(factory, graphicsDevice, metallicRoughnessStream, false);
+
+                    using var normalStream = primitive.Material.FindChannel("Normal").Value.Texture.PrimaryImage.Content.Open();
+                    TextureInfo normalMap = TextureInfo.Create(factory, graphicsDevice, normalStream, false);
+
+
                     // TODO: Replace hardcoded texture indices
-                    entities.Add(new Entity(texMeshInfo, textures[0], textures[1], textures[2], Matrix4x4.Identity));
+                    entities.Add(new Entity(texMeshInfo, albedo, metallicRoughness, normalMap, Matrix4x4.Identity));
                 }
             }
 
