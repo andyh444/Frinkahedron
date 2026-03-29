@@ -8,14 +8,16 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
     {
         public required Shader[] Shaders { get; init; }
         public required Pipeline Pipeline { get; init; }
+        public required Framebuffer Framebuffer { get; init; }
         public required UniformBufferInfo ModelMatricesBufferInfo { get; init; }
         public required UniformBufferInfo CameraMatricesBufferInfo { get; init; }
         public required UniformBufferInfo LightMatricesBufferInfo { get; init; }
         public required LightingBufferInfo LightsBufferInfo { get; init; }
         public required UniformBufferInfo CameraBufferInfo { get; init; }
         public TextureInfo? ShadowMapTextureInfo { get; set; }
+        public required TextureInfo ColourTextureInfo { get; init; }
 
-        public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager)
+        public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager, TextureInfo colourTexture)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
@@ -26,6 +28,21 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 assetManager.GetShaderCode("MainRenderPass.frag"),
                 "main");
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
+
+            TextureDescription depthDescription = TextureDescription.Texture2D(
+                colourTexture.Texture.Width,
+                colourTexture.Texture.Height,
+                1,
+                1,
+                PixelFormat.D32_Float_S8_UInt,
+                TextureUsage.DepthStencil | TextureUsage.Sampled);
+            var depthTexture = TextureInfo.Create(factory, graphicsDevice, depthDescription);
+
+            var frameBuffer = factory.CreateFramebuffer(
+                new FramebufferDescription(
+                    colorTargets: [new FramebufferAttachmentDescription(colourTexture.Texture, 0)],
+                    depthTarget: new FramebufferAttachmentDescription(depthTexture.Texture, 0)
+                    ));
 
             var modelBufferInfo = UniformBufferInfo.Create<ModelMatrixInfo>(factory, "ModelMatrices", ShaderStages.Vertex);
             var cameraMatrixBufferInfo = UniformBufferInfo.Create<CameraMatrixInfo>(factory, "CameraMatrices", ShaderStages.Vertex);
@@ -55,7 +72,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 vertexLayouts: new VertexLayoutDescription[] { MeshInfo.GetVertexLayoutDescription() },
                 shaders: shaders);
 
-            pipelineDescription.Outputs = graphicsDevice.SwapchainFramebuffer.OutputDescription;
+            pipelineDescription.Outputs = frameBuffer.OutputDescription;
             pipelineDescription.ResourceLayouts = new[]
             {
                 modelBufferInfo.ResourceLayout,
@@ -74,11 +91,13 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             {
                 Shaders = shaders,
                 Pipeline = pipeline,
+                Framebuffer = frameBuffer,
                 ModelMatricesBufferInfo = modelBufferInfo,
                 CameraMatricesBufferInfo = cameraMatrixBufferInfo,
                 LightMatricesBufferInfo = lightMatrixBufferInfo,
                 LightsBufferInfo = lightsBufferInfo,
                 CameraBufferInfo = cameraBufferInfo,
+                ColourTextureInfo = colourTexture
             };
         }
 
@@ -99,7 +118,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
         public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene)
         {
 
-            commandList.SetFramebuffer(graphicsDevice.SwapchainFramebuffer);
+            commandList.SetFramebuffer(Framebuffer);
             commandList.ClearColorTarget(0, RgbaFloat.Black);
             commandList.ClearDepthStencil(1f);
             commandList.SetPipeline(Pipeline);

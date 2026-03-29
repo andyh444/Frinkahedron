@@ -20,15 +20,29 @@ namespace Frinkahedron.VeldridImplementation
 
         public required DirectionalShadowRenderPass ShadowRenderPass { get; init; }
 
-        public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice)
+        public required FullScreenQuadRenderPass QuadRenderPass { get; init; }
+
+        public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice, int screenWidth, int screenHeight)
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
             AssetManager assetManager = AssetManager.LoadAssets(factory, graphicsDevice, "Assets");
 
             // note mainrenderpass needs to be created before shadow render pass otherwise the textures don't get drawn
-            MainRenderPass mainRenderPass = MainRenderPass.Create(factory, graphicsDevice, assetManager);
+            TextureDescription depthDescription = TextureDescription.Texture2D(
+                (uint)screenWidth,
+                (uint)screenHeight,
+                1,
+                1,
+                PixelFormat.R32_G32_B32_A32_Float,
+                TextureUsage.RenderTarget | TextureUsage.Sampled);
+            var colourTexture = TextureInfo.Create(factory, graphicsDevice, depthDescription);
+
+            MainRenderPass mainRenderPass = MainRenderPass.Create(factory, graphicsDevice, assetManager, colourTexture);
             DirectionalShadowRenderPass directionalShadowRenderPass = DirectionalShadowRenderPass.Create(factory, graphicsDevice, assetManager);
             mainRenderPass.ShadowMapTextureInfo = directionalShadowRenderPass.DepthTexture;
+
+            FullScreenQuadRenderPass quadRenderPass = FullScreenQuadRenderPass.Create(factory, graphicsDevice, assetManager);
+            quadRenderPass.FullScreenTexture = colourTexture;
 
             return new GraphicsResources
             {
@@ -36,7 +50,8 @@ namespace Frinkahedron.VeldridImplementation
                 Primitives = Primitives.Create(graphicsDevice),
                 AssetManager = assetManager,
                 MainRenderPass = mainRenderPass,
-                ShadowRenderPass = directionalShadowRenderPass
+                ShadowRenderPass = directionalShadowRenderPass,
+                QuadRenderPass = quadRenderPass
             };
         }
 

@@ -23,6 +23,12 @@
     <None Update="Assets\Shaders\MainRenderPass.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Shaders\ScreenQuadPass.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Shaders\ScreenQuadPass.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\Shaders\ShadowPass.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

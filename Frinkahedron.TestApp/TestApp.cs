@@ -49,7 +49,7 @@ namespace Frinkahedron.TestApp
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
             _scene = CreateScene();
-            _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice);
+            _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice, windowCI.WindowWidth, windowCI.WindowHeight);
 
             _warmupTask.Wait();
         }
@@ -133,7 +133,7 @@ namespace Frinkahedron.TestApp
                     Mass = sphMass,
                     InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(),
                     Gravity = true,
-                    Velocity = new Vector3(30, 0, 0),
+                    Velocity = new Vector3(80, 0, 0),
                     AngularVelocity = new Vector3(0.5f, 1f, 1.5f),
                 });
             sphObj.Position.Orientation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI);
@@ -296,6 +296,7 @@ namespace Frinkahedron.TestApp
             _graphicsResources.CommandList.Begin();
             _graphicsResources.ShadowRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
             _graphicsResources.MainRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
+            _graphicsResources.QuadRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
             _graphicsDevice.SwapBuffers();
             _graphicsResources.CommandList.End();
             _graphicsDevice.SubmitCommands(_graphicsResources.CommandList);
