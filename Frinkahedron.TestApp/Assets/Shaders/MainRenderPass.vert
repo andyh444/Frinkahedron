@@ -5,12 +5,10 @@ layout(location = 1) in vec3 Normal;
 layout(location = 2) in vec2 TexCoord;
 layout(location = 3) in vec4 Tangent;
 
-layout(location = 0) out vec3 fsin_normal;
-layout(location = 1) out vec2 fsin_texCoord;
-layout(location = 2) out vec4 fsin_worldPos;
-layout(location = 3) out vec4 fsin_lightPos;
-layout(location = 4) out vec4 fsin_tangent;
-//layout(location = 4) out mat3 fsin_TBN; // TBN Matrix
+layout(location = 0) out vec2 fsin_texCoord;
+layout(location = 1) out vec4 fsin_worldPos;
+layout(location = 2) out vec4 fsin_lightPos;
+layout(location = 3) out mat3 fsin_TBN; // TBN Matrix
 
 layout(set = 0, binding = 0) uniform ModelMatrices
 {
@@ -37,15 +35,15 @@ void main()
 
     mat3 normalMatrix = mat3(transpose(inverse(model)));
 
-    fsin_normal = normalize(normalMatrix * Normal);
+    vec3 fsin_normal = normalize(normalMatrix * Normal);
     fsin_texCoord = TexCoord;
 
     vec3 txyz = Tangent.xyz;
-    fsin_tangent = vec4(normalize(normalMatrix * txyz), Tangent.w);
+    vec4 fsin_tangent = vec4(normalize(normalMatrix * txyz), Tangent.w);
 
-    /*vec3 txyz = Tangent.xyz;
-    vec3 T = normalize(normalMatrix * txyz);
+    vec3 worldTangentXyz = fsin_tangent.xyz;
+    vec3 T = normalize(normalMatrix * worldTangentXyz);
     vec3 B = cross(fsin_normal, T) * Tangent.w;
 
-    fsin_TBN = mat3(T, B, fsin_normal);*/
+    fsin_TBN = mat3(T, B, fsin_normal);
 }

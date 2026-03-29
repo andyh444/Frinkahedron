@@ -41,12 +41,10 @@ struct CameraInfo
     float _padding2;
 };
 
-layout(location = 0) in vec3 fsin_normal;
-layout(location = 1) in vec2 fsin_texCoord;
-layout(location = 2) in vec4 fsin_worldPos;
-layout(location = 3) in vec4 fsin_lightPos;
-layout(location = 4) in vec4 fsin_tangent;
-//layout(location = 4) in mat3 fsin_TBN; // TBN Matrix
+layout(location = 0) in vec2 fsin_texCoord;
+layout(location = 1) in vec4 fsin_worldPos;
+layout(location = 2) in vec4 fsin_lightPos;
+layout(location = 3) in mat3 fsin_TBN; // TBN Matrix
 
 layout(location = 0) out vec4 fsout_Color;
 
@@ -127,16 +125,12 @@ void main()
     vec3 albedo = albedo4.xyz;
 
     // albedo should already be in srgb, but just gamma boost to try and make the colours pop a bit more
-    albedo = pow(albedo, vec3(2.2));
+    //albedo = pow(albedo, vec3(2.2));
 
     vec3 fragPos = fsin_worldPos.xyz;
 
-    // in theory we should be able to calculate the tbn in the vertex shader and output it, but that makes the fragment colours go all screwy
-    vec3 bitangent = cross(fsin_normal, fsin_tangent.xyz) * fsin_tangent.w;
-    mat3 tbn = mat3(fsin_tangent.xyz, bitangent, fsin_normal);
-
     vec3 normalTS = texture(sampler2D(NormalMap, NormalSampler), fsin_texCoord).rgb * 2.0 - 1.0;
-    vec3 normal = normalize(tbn * normalTS);
+    vec3 normal = normalize(fsin_TBN * normalTS);
 
     vec3 viewDir = normalize(_CameraInfo.WorldPosition - fragPos);
 
