@@ -137,42 +137,38 @@ void main()
 
     vec3 viewDir = normalize(_CameraInfo.WorldPosition - fragPos);
 
-    //vec3 ambient = vec3(0.4);
-    vec3 diffuse = vec3(0.0);
-    vec3 specular = vec3(0.0);
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metallic);
 
-    // TODO: Get these from material
-    float specularPower = 64.0; // aka shininess
-    float specularStrength = 0.5;
+    vec3 Lo = vec3(0.0);
 
-    // point lights
     for (int i = 0; i < _PointLights.NumActiveLights; i++)
     {
         PointLightInfo pli = _PointLights.PointLights[i];
 
         vec3 lightDir = normalize(pli.Position - fragPos);
+        vec3 halfDir = normalize(lightDir + viewDir);
         float distance = length(pli.Position - fragPos);
-
         float attenuation = clamp(1.0 - (distance / pli.Range), 0.0, 1.0);
         attenuation *= attenuation;
+        vec3 radiance = pli.Colour * attenuation;
 
-        float diff = max(dot(normal, lightDir), 0.0);
-        diffuse += diff * attenuation * pli.Colour;
+        float NDF = DistributionGGX(normal, halfDir, roughness);
+        float G = GeometrySmith(normal, viewDir, lightDir, roughness);
+        vec3 F = fresnelSchlick(max(dot(halfDir, viewDir), 0.0), F0);
 
-        vec3 halfDir = normalize(lightDir + viewDir);
-        float spec = pow(max(dot(normal, halfDir), 0.0), specularPower);
-        specular += specularStrength * spec * attenuation * pli.Colour;
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metallic;
+
+        vec3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0) + 0.0001;
+        vec3 specular = numerator / denominator;
+
+        float NdotL = max(dot(normal, lightDir), 0.0);
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
 
-    float shadow = 0;
-
-    vec3 F0 = vec3(0.04); 
-    F0 = mix(F0, albedo, metallic);
-
-    // reflectance equation
-    vec3 Lo = vec3(0.0);
-
-    // directional light
     if (_DirectionalLight.Enabled > 0)
     {
         vec3 lightDir = normalize(-_DirectionalLight.Direction);
@@ -186,8 +182,7 @@ void main()
         float shadow = 0.0;
         float bias = 0.0001;
 
-        // TODO: Get textureSize() working
-        vec2 texelSize = 1.0 / vec2(4096, 4096);//textureSize(shadowMap);
+        vec2 texelSize = 1.0 / textureSize(sampler2D(ShadowMap, ShadowMapSampler), 0);
         for(int x = -1; x <= 1; ++x)
         {
             for(int y = -1; y <= 1; ++y)
@@ -197,10 +192,6 @@ void main()
             }    
         }
         shadow /= 9.0;
-
-        //float closestDepth = texture(sampler2D(ShadowMap, ShadowMapSampler), projCoords.xy).r;
-
-        //shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
         if (projCoords.x < 0.0
             || projCoords.x > 1.0
@@ -233,9 +224,6 @@ void main()
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));  
-   
-    // do this to avoid screwiness
-    color += diffuse + specular;
 
     fsout_Color = vec4(color, albedo4.a);
 }
