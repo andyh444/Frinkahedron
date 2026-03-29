@@ -15,7 +15,7 @@ namespace Frinkahedron.VeldridImplementation
         {
             Texture texture = factory.CreateTexture(textureDescription);
             TextureView textureView = factory.CreateTextureView(texture);
-            Sampler sampler = graphicsDevice.Aniso4xSampler;
+            Sampler sampler = graphicsDevice.LinearSampler;
             var textureLayout = GetResourceLayout(factory);
 
             ResourceSet textureSet = factory.CreateResourceSet(
@@ -34,15 +34,15 @@ namespace Frinkahedron.VeldridImplementation
             };
         }
 
-        public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice, Stream stream)
+        public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice, Stream stream, bool srgb)
         {
-            var ist = new ImageSharpTexture(stream);
+            var ist = new ImageSharpTexture(stream, true, srgb);
             return GetTextureInfo(factory, graphicsDevice, ist);
         }
 
-        public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice, string filePath)
+        public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice, string filePath, bool srgb)
         {
-            var ist = new ImageSharpTexture(filePath);
+            var ist = new ImageSharpTexture(filePath, true, srgb);
             return GetTextureInfo(factory, graphicsDevice, ist);
         }
 

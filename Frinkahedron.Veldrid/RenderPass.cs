@@ -202,6 +202,7 @@ namespace Frinkahedron.VeldridImplementation
                 lightMatrixBufferInfo.ResourceLayout,
                 TextureInfo.GetResourceLayout(factory),
                 TextureInfo.GetResourceLayout(factory),
+                TextureInfo.GetResourceLayout(factory),
             };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 

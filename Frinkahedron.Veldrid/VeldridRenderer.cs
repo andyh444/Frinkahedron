@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
@@ -29,17 +30,20 @@ namespace Frinkahedron.VeldridImplementation
 
         public void DrawCuboid(Matrix4x4 transform)
         {
-            DrawMesh(primitives.CubeInfo, transform, "woodencontainer", "NeutralNormalMap");
+            //DrawMesh(primitives.CubeInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
+
+            var model = assets.GetModel("crate");
+            DrawEntity(model.Entities[0], Matrix4x4.CreateScale(1f / 8f) * transform);
         }
 
         public void DrawCylinder(Matrix4x4 transform)
         {
-            DrawMesh(primitives.CylinderInfo, transform, "woodencontainer", "NeutralNormalMap");
+            DrawMesh(primitives.CylinderInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
         }
 
         public void DrawDisc(Matrix4x4 transform)
         {
-            DrawMesh(primitives.DiscInfo, transform, "woodencontainer", "NeutralNormalMap");
+            DrawMesh(primitives.DiscInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
         }
 
         public void DrawEllipsoid(Matrix4x4 transform)
@@ -47,19 +51,24 @@ namespace Frinkahedron.VeldridImplementation
             //DrawMesh(primitives.SphereInfo, transform, "football");
 
             var model = assets.GetModel("bowlingball");
-            DrawMesh(model.Entities[0].Mesh, transform, model.Entities[0].ColourTexture, model.Entities[0].NormalMap);
+            DrawEntity(model.Entities[0], transform);
         }
 
-        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID, string normalID)
+        private void DrawEntity(Entity entity, Matrix4x4 transform)
+        {
+            DrawMesh(entity.Mesh, transform, entity.ColourTexture, entity.NormalMap, entity.MetallicRoughnessMap);
+        }
+        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID, string normalID, string metallicRoughnessID)
         {
             DrawMesh(
-                meshInfo,
-                transform,
-                texturesEnabled ? assets.GetTexture(textureID) : null,
-                texturesEnabled ? assets.GetTexture(normalID) : null);
+            meshInfo,
+            transform,
+            texturesEnabled ? assets.GetTexture(textureID) : null,
+            texturesEnabled ? assets.GetTexture(normalID) : null,
+                texturesEnabled ? assets.GetTexture(metallicRoughnessID) : null);
         }
 
-        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, TextureInfo? albedo, TextureInfo? normalMap)
+        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, TextureInfo? albedo, TextureInfo? normalMap, TextureInfo? metallicRoughnessMap)
         {
             ModelMatrixInfo modelInfo = new ModelMatrixInfo
             {
@@ -74,6 +83,10 @@ namespace Frinkahedron.VeldridImplementation
                 if (normalMap is not null)
                 {
                     commandList.SetGraphicsResourceSet(7, normalMap.ResourceSet);
+                }
+                if (metallicRoughnessMap is not null)
+                {
+                    commandList.SetGraphicsResourceSet(8, metallicRoughnessMap.ResourceSet);
                 }
             }
             commandList.UpdateBuffer(matricesBuffer, 0, ref modelInfo);

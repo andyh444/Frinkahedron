@@ -22,7 +22,7 @@ namespace Frinkahedron.VeldridImplementation
             foreach (string path in Directory.EnumerateFiles(Path.Combine(assetsFolder, "Textures"), "*.png"))
             {
                 string key = Path.GetFileNameWithoutExtension(path);
-                textures.Add(key, TextureInfo.Create(factory, graphicsDevice, path));
+                textures.Add(key, TextureInfo.Create(factory, graphicsDevice, path, !key.Contains("Map")));
             }
 
             Dictionary<string, byte[]> shaders = new Dictionary<string, byte[]>();
@@ -36,6 +36,7 @@ namespace Frinkahedron.VeldridImplementation
 
             Dictionary<string, Model> models = new Dictionary<string, Model>();
             models.Add("bowlingball", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\bowling_ball\scene.gltf"));
+            models.Add("crate", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\simple_classic_crate\scene.gltf"));
             return new AssetManager(textures, shaders, models);
         }
 

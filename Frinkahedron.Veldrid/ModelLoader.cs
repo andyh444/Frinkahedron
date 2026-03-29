@@ -9,11 +9,12 @@ using Veldrid;
 
 namespace Frinkahedron.VeldridImplementation
 {
-    public class Entity(MeshInfo mesh, TextureInfo colourTexture, TextureInfo normalMap, Matrix4x4 transform) : IDisposable
+    public class Entity(MeshInfo mesh, TextureInfo colourTexture, TextureInfo metallicRoughnessMap, TextureInfo normalMap, Matrix4x4 transform) : IDisposable
     {
         public MeshInfo Mesh { get; } = mesh;
 
         public TextureInfo ColourTexture { get; } = colourTexture;
+        public TextureInfo MetallicRoughnessMap { get; } = metallicRoughnessMap;
         public TextureInfo NormalMap { get; } = normalMap;
 
         public Matrix4x4 Transform { get; } = transform;
@@ -39,10 +40,13 @@ namespace Frinkahedron.VeldridImplementation
             List<Entity> entities = new List<Entity>();
 
             List<TextureInfo> textures = new List<TextureInfo>();
+            int index = 0;
             foreach (var image in model.LogicalTextures)
             {
                 using var stream = image.PrimaryImage.Content.Open();
-                textures.Add(TextureInfo.Create(factory, graphicsDevice, stream));
+                textures.Add(TextureInfo.Create(factory, graphicsDevice, stream, index == 0)); // TODO: Albedo should be sRGB
+
+                index++;
             }
 
             foreach (var mesh in model.LogicalMeshes)
@@ -77,7 +81,8 @@ namespace Frinkahedron.VeldridImplementation
                     TexMesh texMesh = new TexMesh(vertices, triangles.ToArray());
                     MeshInfo texMeshInfo = MeshInfo.Create(texMesh, graphicsDevice);
 
-                    entities.Add(new Entity(texMeshInfo, textures[0], textures[2], Matrix4x4.Identity));
+                    // TODO: Replace hardcoded texture indices
+                    entities.Add(new Entity(texMeshInfo, textures[0], textures[1], textures[2], Matrix4x4.Identity));
                 }
             }
 

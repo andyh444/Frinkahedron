@@ -71,7 +71,7 @@ namespace Frinkahedron.TestApp
             Random r = Random.Shared;
 
             gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
-                new OrbitalCameraMouseBehaviour(),
+                null,//new OrbitalCameraMouseBehaviour(),
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
 
@@ -125,7 +125,8 @@ namespace Frinkahedron.TestApp
             Sphere sph = new Sphere(4);
             float sphMass = 10 * sph.CalculateVolume();
             GameObject sphObj = new GameObject(new Vector3(-60, 0, 0),
-                new SphereControlBehaviour(),
+                //new SphereControlBehaviour(),
+                new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour()]),
                 sph,
                 new RigidBody
                 {
