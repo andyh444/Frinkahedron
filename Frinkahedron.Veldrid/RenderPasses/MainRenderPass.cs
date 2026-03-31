@@ -4,6 +4,7 @@ using Veldrid.SPIRV;
 
 namespace Frinkahedron.VeldridImplementation.RenderPasses
 {
+
     public sealed class MainRenderPass : IRenderPass
     {
         public required Shader[] Shaders { get; init; }
@@ -15,9 +16,8 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
         public required LightingBufferInfo LightsBufferInfo { get; init; }
         public required UniformBufferInfo CameraBufferInfo { get; init; }
         public TextureInfo? ShadowMapTextureInfo { get; set; }
-        public required TextureInfo ColourTextureInfo { get; init; }
 
-        public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager, TextureInfo colourTexture)
+        public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager, Framebuffer frameBuffer)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
@@ -28,21 +28,6 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 assetManager.GetShaderCode("MainRenderPass.frag"),
                 "main");
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
-
-            TextureDescription depthDescription = TextureDescription.Texture2D(
-                colourTexture.Texture.Width,
-                colourTexture.Texture.Height,
-                1,
-                1,
-                PixelFormat.D32_Float_S8_UInt,
-                TextureUsage.DepthStencil | TextureUsage.Sampled);
-            var depthTexture = TextureInfo.Create(factory, graphicsDevice, depthDescription);
-
-            var frameBuffer = factory.CreateFramebuffer(
-                new FramebufferDescription(
-                    colorTargets: [new FramebufferAttachmentDescription(colourTexture.Texture, 0)],
-                    depthTarget: new FramebufferAttachmentDescription(depthTexture.Texture, 0)
-                    ));
 
             var modelBufferInfo = UniformBufferInfo.Create<ModelMatrixInfo>(factory, "ModelMatrices", ShaderStages.Vertex);
             var cameraMatrixBufferInfo = UniformBufferInfo.Create<CameraMatrixInfo>(factory, "CameraMatrices", ShaderStages.Vertex);
@@ -97,7 +82,6 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 LightMatricesBufferInfo = lightMatrixBufferInfo,
                 LightsBufferInfo = lightsBufferInfo,
                 CameraBufferInfo = cameraBufferInfo,
-                ColourTextureInfo = colourTexture
             };
         }
 

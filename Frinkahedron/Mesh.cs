@@ -8,6 +8,20 @@ using System.Threading.Tasks;
 
 namespace Frinkahedron.Core
 {
+    public struct ColourVertex
+    {
+        public Vector3 Position;
+        public Vector4 Colour;
+
+        public ColourVertex(Vector3 position, Vector4 colour)
+        {
+            Position = position;
+            Colour = colour;
+        }
+
+        public static uint SizeInBytes => sizeof(float) * (3 + 4);
+    }
+
     public struct TexVertex
     {
         public Vector3 Position;
@@ -34,6 +48,14 @@ namespace Frinkahedron.Core
         public static uint SizeInBytes => sizeof(ushort) * 3;
     }
 
+    public readonly struct IndexLine(ushort index1, ushort index2)
+    {
+        public readonly ushort Index1 = index1;
+        public readonly ushort Index2 = index2;
+
+        public static uint SizeInBytes => sizeof(ushort) * 2;
+    }
+
     public sealed class BasicMesh(Vector3[] vertices, IndexTriangle[] indexTriangles)
     {
         public Vector3[] Vertices { get; } = vertices;
@@ -45,5 +67,12 @@ namespace Frinkahedron.Core
         public TexVertex[] Vertices { get; } = vertices;
 
         public IndexTriangle[] Triangles { get; } = indices;
+    }
+
+    public sealed class WireframeMesh(ColourVertex[] vertices, IndexLine[] indices)
+    {
+        public ColourVertex[] Vertices { get; } = vertices;
+
+        public IndexLine[] Indices { get; } = indices;
     }
 }
