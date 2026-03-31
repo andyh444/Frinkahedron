@@ -38,7 +38,10 @@ namespace Frinkahedron.VeldridImplementation
 
         public void DrawCylinder(Matrix4x4 transform)
         {
-            DrawMesh(primitives.CylinderInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
+            //DrawMesh(primitives.CylinderInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
+
+            var model = assets.GetModel("tincan");
+            DrawEntity(model.Entities[0], Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(1 / 0.053f, 1 / 0.158f, 1 / 0.053f) * transform);
         }
 
         public void DrawDisc(Matrix4x4 transform)

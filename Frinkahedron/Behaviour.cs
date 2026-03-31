@@ -85,7 +85,7 @@ namespace Frinkahedron.Core
 
                 (var closest, var closestHitPoint) = intersections.MinBy(x => Vector3.DistanceSquared(x.Item2, rayPosition));
 
-                closest.RigidBody?.ApplyImpulse(200 * rayDirection, closestHitPoint - closest.Position.Centre, closest.Position);
+                closest.RigidBody?.ApplyImpulse(20 * rayDirection, closestHitPoint - closest.Position.Centre, closest.Position);
             }
         }
     }

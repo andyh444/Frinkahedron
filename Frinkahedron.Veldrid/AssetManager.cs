@@ -37,6 +37,7 @@ namespace Frinkahedron.VeldridImplementation
             Dictionary<string, Model> models = new Dictionary<string, Model>();
             models.Add("bowlingball", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\bowling_ball\scene.gltf"));
             models.Add("crate", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\simple_classic_crate\scene.gltf"));
+            models.Add("tincan", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\tin_can_damaged\scene.gltf"));
             return new AssetManager(textures, shaders, models);
         }
 

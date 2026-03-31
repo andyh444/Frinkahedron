@@ -71,7 +71,7 @@ namespace Frinkahedron.TestApp
             Random r = Random.Shared;
 
             gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
-                new CompositeBehaviour([new OrbitalCameraMouseBehaviour(),
+                new CompositeBehaviour([/*new OrbitalCameraMouseBehaviour(),*/
                     new ImpulseOnClickBehaviour()]),
                 new Box(new Vector3(100, 10, 100)),
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
@@ -103,10 +103,20 @@ namespace Frinkahedron.TestApp
                 new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
 
             gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 0, MathF.PI / 5);
-            
 
+            Cylinder cyl = new Cylinder(1, 2.5f);
+            float mass = 1 * cyl.CalculateVolume();
+            GameObject obj = new GameObject(new Vector3(0, -13, 0),
+                new OrbitalCameraMouseBehaviour(),
+                cyl,
+                new RigidBody {
+                    Mass = mass,
+                    InverseInertia = cyl.CalculateFilledInertia(mass).GetInverse(),
+                    Gravity = true,
+                    Material = new PhysicsMaterial(0.0f, 0.8f) });
+            gameObjects.Add(obj);
 
-            for (int k = -1; k <= 2; k++)
+            /*for (int k = -1; k <= 2; k++)
             {
                 for (int j = -4; j < 4; j++)
                 {
@@ -121,7 +131,7 @@ namespace Frinkahedron.TestApp
                         gameObjects.Add(obj);
                     }
                 }
-            }
+            }*/
 
             /*Sphere sph = new Sphere(4);
             float sphMass = 10 * sph.CalculateVolume();
@@ -206,9 +216,9 @@ namespace Frinkahedron.TestApp
             //gameObjects.Add(new GameObject(new Vector3(1, 0, 0), new ContinuousRotationBehaviour(-0.5f, 0.1f, 0.3f), new SphereCollider(0.5f)));
 
             var scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), gameObjects);
-            //scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
-            //scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
-            //scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
 
             scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
 
