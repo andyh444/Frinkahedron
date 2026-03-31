@@ -139,7 +139,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);
             commandList.UpdateBuffer(CameraBufferInfo.DeviceBuffer, 0, ref cameraInfo);
 
-            VeldridRenderer renderer = new VeldridRenderer(graphicsResources.Primitives, ModelMatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, true);
+            VeldridRenderContext renderer = new VeldridRenderContext(graphicsResources.Primitives, ModelMatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, true);
             scene.Draw(renderer);
         }
     }

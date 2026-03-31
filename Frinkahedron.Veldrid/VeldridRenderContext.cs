@@ -11,7 +11,7 @@ using Veldrid;
 
 namespace Frinkahedron.VeldridImplementation
 {
-    public sealed class VeldridRenderer : IRenderer
+    public sealed class VeldridRenderContext : IRenderContext
     {
         private readonly Primitives primitives;
         private readonly DeviceBuffer matricesBuffer;
@@ -19,7 +19,7 @@ namespace Frinkahedron.VeldridImplementation
         private readonly AssetManager assets;
         private readonly bool texturesEnabled;
 
-        public VeldridRenderer(Primitives primitives, DeviceBuffer modelMatrixBuffer, CommandList commandList, AssetManager assets, bool texturesEnabled)
+        public VeldridRenderContext(Primitives primitives, DeviceBuffer modelMatrixBuffer, CommandList commandList, AssetManager assets, bool texturesEnabled)
         {
             this.primitives = primitives;
             this.matricesBuffer = modelMatrixBuffer;

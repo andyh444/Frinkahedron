@@ -67,7 +67,7 @@ namespace Frinkahedron.Core.Colliders
             return cylinderVolume + sphereVolume;
         }
 
-        public void Draw(IRenderer renderer, Matrix4x4 position)
+        public void Draw(IRenderContext renderer, Matrix4x4 position)
         {
             Matrix4x4 cylinderScale = Matrix4x4.CreateScale(Radius, PointToPointLength, Radius);
             renderer.DrawCylinder(cylinderScale * position);

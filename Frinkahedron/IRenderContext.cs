@@ -2,7 +2,7 @@
 
 namespace Frinkahedron.Core
 {
-    public interface IRenderer
+    public interface IRenderContext
     {
         public void DrawCuboid(Matrix4x4 transform);
 
@@ -13,7 +13,7 @@ namespace Frinkahedron.Core
         public void DrawDisc(Matrix4x4 transform);
     }
 
-    public class DummyRenderer : IRenderer
+    public class DummyRenderContext : IRenderContext
     {
         public void DrawCuboid(Matrix4x4 transform)
         {

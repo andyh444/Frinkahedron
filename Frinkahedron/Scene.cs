@@ -131,7 +131,7 @@ namespace Frinkahedron.Core
             Console.WriteLine($"Integration: {20 * integrationTime.TotalMilliseconds:#0.000} ms, Calculate AABB: {20 * calculateAABBTime.TotalMilliseconds:#0.000}, AABB Pairs: {20 * aabbTime.TotalMilliseconds:#0.000} ms, Collision: {20 * collisionTime.TotalMilliseconds:#0.000} ms, Resolution: {20 * resolutionTime.TotalMilliseconds:#0.000} ms, Inertia: {20 * inverseInertiaTime.TotalMilliseconds:#0.000} ms");
         }
 
-        public void Draw(IRenderer renderer)
+        public void Draw(IRenderContext renderer)
         {
             foreach (var obj in Objects)
             {

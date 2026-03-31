@@ -20,7 +20,7 @@ namespace Frinkahedron.Core
             RigidBody?.IntegratePosition(gameState.DeltaTime, Position);
         }
 
-        public void Draw(IRenderer renderer)
+        public void Draw(IRenderContext renderer)
         {
             Collider?.Draw(renderer, Position.ToMatrix());
         }

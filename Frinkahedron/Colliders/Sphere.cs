@@ -27,7 +27,7 @@ namespace Frinkahedron.Core.Colliders
             return (4f / 3f) * Radius * Radius * Radius;
         }
 
-        public void Draw(IRenderer renderer, Matrix4x4 position)
+        public void Draw(IRenderContext renderer, Matrix4x4 position)
         {
             Matrix4x4 scale = Matrix4x4.CreateScale(Radius);
             renderer.DrawEllipsoid(scale * position);

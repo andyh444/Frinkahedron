@@ -64,7 +64,7 @@ namespace Frinkahedron.Core.Colliders
             throw new NotImplementedException();
         }
 
-        public void Draw(IRenderer renderer, Matrix4x4 position)
+        public void Draw(IRenderContext renderer, Matrix4x4 position)
         {
             throw new NotImplementedException();
         }

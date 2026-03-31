@@ -107,7 +107,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
             commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
 
-            VeldridRenderer renderer = new VeldridRenderer(
+            VeldridRenderContext renderer = new VeldridRenderContext(
                 graphicsResources.Primitives,
                 ModelMatricesBufferInfo.DeviceBuffer,
                 commandList,

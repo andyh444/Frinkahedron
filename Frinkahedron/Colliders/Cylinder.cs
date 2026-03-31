@@ -37,7 +37,7 @@ namespace Frinkahedron.Core.Colliders
             return MathF.PI * Radius * Radius * Height;
         }
 
-        public void Draw(IRenderer renderer, Matrix4x4 position)
+        public void Draw(IRenderContext renderer, Matrix4x4 position)
         {
             Matrix4x4 scale = Matrix4x4.CreateScale(Radius, Height, Radius);
             renderer.DrawCylinder(scale * position);

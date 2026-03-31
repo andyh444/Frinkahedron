@@ -45,7 +45,7 @@ namespace Frinkahedron.Core.Colliders
             cornersSpan[7] = new Vector3(-hd.X, -hd.Y, -hd.Z);
         }
 
-        public void Draw(IRenderer renderer, Matrix4x4 position)
+        public void Draw(IRenderContext renderer, Matrix4x4 position)
         {
             Matrix4x4 scale = Matrix4x4.CreateScale(Dimensions);
             renderer.DrawCuboid(scale * position);

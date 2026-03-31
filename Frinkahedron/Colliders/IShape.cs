@@ -11,7 +11,7 @@ namespace Frinkahedron.Core.Colliders
 {
     public interface IShape
     {
-        public void Draw(IRenderer renderer, Matrix4x4 position);
+        public void Draw(IRenderContext renderer, Matrix4x4 position);
 
         public DiagonalMatrix3x3 CalculateFilledInertia(float mass);
 
