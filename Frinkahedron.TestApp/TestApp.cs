@@ -64,45 +64,36 @@ namespace Frinkahedron.TestApp
             }
         }
 
+        private GameObject CreateBigBox(Vector3 position, Quaternion orientation, bool first = false)
+        {
+            Box box = new Box(new Vector3(100, 10, 100));
+            var obj = new GameObject(position,
+                !first ? null : new CompositeBehaviour([/*new OrbitalCameraMouseBehaviour(),*/
+                    new ImpulseOnClickBehaviour()]),
+                box,
+                new Core.Physics.RigidBody {
+                    Mass = float.PositiveInfinity,
+                    InverseInertia = new DiagonalMatrix3x3(),
+                    Gravity = false,
+                    Material = new PhysicsMaterial(0, 0.8f)
+                },
+                new ModelRenderable("crate", Matrix4x4.CreateScale(1f / 8f) * Matrix4x4.CreateScale(box.Dimensions)));
+            
+            obj.Position.Orientation = orientation;
+            return obj;
+        }
+
         private Scene CreateScene()
         {
             List<GameObject> gameObjects = new List<GameObject>();
 
             Random r = Random.Shared;
 
-            gameObjects.Add(new GameObject(new Vector3(0, -20, 0),
-                new CompositeBehaviour([/*new OrbitalCameraMouseBehaviour(),*/
-                    new ImpulseOnClickBehaviour()]),
-                new Box(new Vector3(100, 10, 100)),
-                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
-
-            gameObjects.Add(new GameObject(new Vector3(0, 10, 93),
-                null,
-                new Box(new Vector3(100, 10, 100)),
-                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
-
-            gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, -MathF.PI / 5, 0);
-
-            gameObjects.Add(new GameObject(new Vector3(0, 10, -93),
-                null,
-                new Box(new Vector3(100, 10, 100)),
-                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
-
-            gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0);
-
-            gameObjects.Add(new GameObject(new Vector3(-93, 10, 0),
-                null,
-                new Box(new Vector3(100, 10, 100)),
-                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
-
-            gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 0, -MathF.PI / 5);
-
-            gameObjects.Add(new GameObject(new Vector3(93, 10, 0),
-                null,
-                new Box(new Vector3(100, 10, 100)),
-                new Core.Physics.RigidBody { Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Gravity = false, Material = new PhysicsMaterial(0, 0.8f) }));
-
-            gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(0, 0, MathF.PI / 5);
+            gameObjects.Add(CreateBigBox(new Vector3(0, -20, 0), Quaternion.Identity, true));
+            gameObjects.Add(CreateBigBox(new Vector3(0, 10, 93), Quaternion.CreateFromYawPitchRoll(0, -MathF.PI / 5, 0)));
+            gameObjects.Add(CreateBigBox(new Vector3(0, 10, -93), Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0)));
+            gameObjects.Add(CreateBigBox(new Vector3(-93, 10, 0), Quaternion.CreateFromYawPitchRoll(0, 0, -MathF.PI / 5)));
+            gameObjects.Add(CreateBigBox(new Vector3(93, 10, 0), Quaternion.CreateFromYawPitchRoll(0, 0, MathF.PI / 5)));
 
             Cylinder cyl = new Cylinder(1, 2.5f);
             float mass = 1 * cyl.CalculateVolume();
@@ -113,7 +104,8 @@ namespace Frinkahedron.TestApp
                     Mass = mass,
                     InverseInertia = cyl.CalculateFilledInertia(mass).GetInverse(),
                     Gravity = true,
-                    Material = new PhysicsMaterial(0.0f, 0.8f) });
+                    Material = new PhysicsMaterial(0.0f, 0.8f) },
+                new ModelRenderable("tincan", Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(1 / 0.053f, 1 / 0.158f, 1 / 0.053f) * Matrix4x4.CreateScale(cyl.Radius, cyl.Height, cyl.Radius)));
             gameObjects.Add(obj);
 
             /*for (int k = -1; k <= 2; k++)
@@ -305,10 +297,14 @@ namespace Frinkahedron.TestApp
 
         private void Draw()
         {
+            VeldridRenderContext context = new VeldridRenderContext();
+            _scene.Draw(context);
+
             _graphicsResources.CommandList.Begin();
-            _graphicsResources.ShadowRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
-            _graphicsResources.MainRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
-            _graphicsResources.QuadRenderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene);
+            foreach (var renderPass in _graphicsResources.RenderPasses)
+            {
+                renderPass.RenderScene(_graphicsDevice, _graphicsResources.CommandList, _graphicsResources, _scene, context.DrawInstructions);
+            }
             _graphicsDevice.SwapBuffers();
             _graphicsResources.CommandList.End();
             _graphicsDevice.SubmitCommands(_graphicsResources.CommandList);

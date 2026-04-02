@@ -13,55 +13,64 @@ namespace Frinkahedron.VeldridImplementation
 {
     public sealed class VeldridRenderContext : IRenderContext
     {
-        private readonly Primitives primitives;
-        private readonly DeviceBuffer matricesBuffer;
-        private readonly CommandList commandList;
-        private readonly AssetManager assets;
-        private readonly bool texturesEnabled;
-
-        public VeldridRenderContext(Primitives primitives, DeviceBuffer modelMatrixBuffer, CommandList commandList, AssetManager assets, bool texturesEnabled)
+        public readonly struct DrawInstruction
         {
-            this.primitives = primitives;
-            this.matricesBuffer = modelMatrixBuffer;
-            this.commandList = commandList;
-            this.assets = assets;
-            this.texturesEnabled = texturesEnabled;
+            public required string ModelID { get; init; }
+            public required Matrix4x4 Transform { get; init; }
+        };
+
+        private readonly List<DrawInstruction> drawInstructions;
+
+        public IReadOnlyList<DrawInstruction> DrawInstructions => drawInstructions;
+
+        public VeldridRenderContext()
+        {
+            drawInstructions = new List<DrawInstruction>();
         }
 
         public void DrawCuboid(Matrix4x4 transform)
         {
             //DrawMesh(primitives.CubeInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
 
-            var model = assets.GetModel("crate");
-            DrawEntity(model.Entities[0], Matrix4x4.CreateScale(1f / 8f) * transform);
+            //var model = assets.GetModel("crate");
+            //DrawEntity(model.Entities[0], Matrix4x4.CreateScale(1f / 8f) * transform);
         }
 
         public void DrawCylinder(Matrix4x4 transform)
         {
             //DrawMesh(primitives.CylinderInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
 
-            var model = assets.GetModel("tincan");
-            DrawEntity(model.Entities[0], Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(1 / 0.053f, 1 / 0.158f, 1 / 0.053f) * transform);
+            //var model = assets.GetModel("tincan");
+            //DrawEntity(model.Entities[0], Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(1 / 0.053f, 1 / 0.158f, 1 / 0.053f) * transform);
         }
 
         public void DrawDisc(Matrix4x4 transform)
         {
-            DrawMesh(primitives.DiscInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
+           // DrawMesh(primitives.DiscInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
         }
 
         public void DrawEllipsoid(Matrix4x4 transform)
         {
-            //DrawMesh(primitives.SphereInfo, transform, "football");
-
-            var model = assets.GetModel("bowlingball");
-            DrawEntity(model.Entities[0], transform);
+            //DrawMesh(primitives.SphereInfo, transform, "football", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
         }
 
-        private void DrawEntity(Entity entity, Matrix4x4 transform)
+        public void DrawModel(string modelID, Matrix4x4 transform)
+        {
+            drawInstructions.Add(new DrawInstruction
+            {
+                ModelID = modelID,
+                Transform = transform
+            });
+            //var model = assets.GetModel(modelID);
+            //DrawEntity(model.Entities[0], transform); // TODO: All entities
+        }
+
+        /*private void DrawEntity(Entity entity, Matrix4x4 transform)
         {
             DrawMesh(entity.Mesh, transform, entity.ColourTexture, entity.NormalMap, entity.MetallicRoughnessMap);
-        }
-        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID, string normalID, string metallicRoughnessID)
+        }*/
+
+        /*private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID, string normalID, string metallicRoughnessID)
         {
             DrawMesh(
             meshInfo,
@@ -69,9 +78,9 @@ namespace Frinkahedron.VeldridImplementation
             texturesEnabled ? assets.GetTexture(textureID) : null,
             texturesEnabled ? assets.GetTexture(normalID) : null,
                 texturesEnabled ? assets.GetTexture(metallicRoughnessID) : null);
-        }
+        }*/
 
-        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, TextureInfo? albedo, TextureInfo? normalMap, TextureInfo? metallicRoughnessMap)
+        /*private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, TextureInfo? albedo, TextureInfo? normalMap, TextureInfo? metallicRoughnessMap)
         {
             ModelMatrixInfo modelInfo = new ModelMatrixInfo
             {
@@ -94,6 +103,6 @@ namespace Frinkahedron.VeldridImplementation
             }
             commandList.UpdateBuffer(matricesBuffer, 0, ref modelInfo);
             meshInfo.Draw(commandList);
-        }
+        }*/
     }
 }

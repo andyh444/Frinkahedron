@@ -3,6 +3,7 @@ using System.Numerics;
 using Veldrid;
 using Veldrid.SPIRV;
 using Vulkan;
+using static Frinkahedron.VeldridImplementation.VeldridRenderContext;
 
 namespace Frinkahedron.VeldridImplementation.RenderPasses
 {
@@ -90,7 +91,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             };
         }
 
-        public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene)
+        public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene, IReadOnlyList<DrawInstruction> sceneDrawInstructions)
         {
             commandList.SetFramebuffer(graphicsDevice.SwapchainFramebuffer);
             commandList.ClearColorTarget(0, RgbaFloat.Black);

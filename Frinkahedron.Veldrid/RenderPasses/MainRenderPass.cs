@@ -1,6 +1,8 @@
 ﻿using Frinkahedron.Core;
+using System.Numerics;
 using Veldrid;
 using Veldrid.SPIRV;
+using static Frinkahedron.VeldridImplementation.VeldridRenderContext;
 
 namespace Frinkahedron.VeldridImplementation.RenderPasses
 {
@@ -99,7 +101,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             CameraBufferInfo.Dispose();
         }
 
-        public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene)
+        public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene, IReadOnlyList<DrawInstruction> sceneDrawInstructions)
         {
 
             commandList.SetFramebuffer(Framebuffer);
@@ -139,8 +141,41 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             commandList.UpdateBuffer(LightsBufferInfo.DirectionalLightBuffer, 0, ref directionalLight);
             commandList.UpdateBuffer(CameraBufferInfo.DeviceBuffer, 0, ref cameraInfo);
 
-            VeldridRenderContext renderer = new VeldridRenderContext(graphicsResources.Primitives, ModelMatricesBufferInfo.DeviceBuffer, commandList, graphicsResources.AssetManager, true);
-            scene.Draw(renderer);
+            foreach (var instruction in sceneDrawInstructions)
+            {
+                DoDrawInstruction(instruction, commandList, graphicsResources.AssetManager);
+            }
+        }
+
+        private void DoDrawInstruction(DrawInstruction drawInstruction, CommandList commandList, AssetManager assetManager)
+        {
+            var model = assetManager.GetModel(drawInstruction.ModelID);
+            foreach (var entity in model.Entities)
+            {
+                DrawMesh(entity.Mesh, entity.Transform * drawInstruction.Transform, entity.ColourTexture, entity.NormalMap, entity.MetallicRoughnessMap, commandList);
+            }
+        }
+
+        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, TextureInfo? albedo, TextureInfo? normalMap, TextureInfo? metallicRoughnessMap, CommandList commandList)
+        {
+            ModelMatrixInfo modelInfo = new ModelMatrixInfo
+            {
+                Model = transform,
+            };
+            if (albedo is not null)
+            {
+                commandList.SetGraphicsResourceSet(2, albedo.ResourceSet);
+            }
+            if (normalMap is not null)
+            {
+                commandList.SetGraphicsResourceSet(7, normalMap.ResourceSet);
+            }
+            if (metallicRoughnessMap is not null)
+            {
+                commandList.SetGraphicsResourceSet(8, metallicRoughnessMap.ResourceSet);
+            }
+            commandList.UpdateBuffer(ModelMatricesBufferInfo.DeviceBuffer, 0, ref modelInfo);
+            meshInfo.Draw(commandList);
         }
     }
 }

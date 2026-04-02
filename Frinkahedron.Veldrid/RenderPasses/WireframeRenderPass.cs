@@ -1,6 +1,7 @@
 ﻿using Frinkahedron.Core;
 using Veldrid;
 using Veldrid.SPIRV;
+using static Frinkahedron.VeldridImplementation.VeldridRenderContext;
 
 namespace Frinkahedron.VeldridImplementation.RenderPasses
 {
@@ -64,7 +65,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             throw new NotImplementedException();
         }
 
-        public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene)
+        public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene, IReadOnlyList<DrawInstruction> sceneDrawInstructions)
         {
             throw new NotImplementedException();
         }

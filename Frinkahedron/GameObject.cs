@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Frinkahedron.Core
 {
-    public sealed class GameObject(Vector3 position, Behaviour? behaviour = null, IShape? colliderShape = null, RigidBody? rigidBody = null)
+    public sealed class GameObject(Vector3 position, Behaviour? behaviour = null, IShape? colliderShape = null, RigidBody? rigidBody = null, IRenderable? renderable = null)
     {
         public Position Position { get; } = new Position(position, Quaternion.Identity);
 
@@ -14,6 +14,8 @@ namespace Frinkahedron.Core
 
         public RigidBody? RigidBody { get; } = rigidBody;
 
+        public IRenderable? Renderable { get; } = renderable;
+
         public void Update(GameState gameState)
         {
             Behaviour?.Update(this, gameState);
@@ -22,7 +24,8 @@ namespace Frinkahedron.Core
 
         public void Draw(IRenderContext renderer)
         {
-            Collider?.Draw(renderer, Position.ToMatrix());
+            //Collider?.Draw(renderer, Position.ToMatrix());
+            Renderable?.Render(renderer, Position.ToMatrix());
         }
     }
 }

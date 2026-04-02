@@ -1,6 +1,8 @@
 ﻿using Frinkahedron.Core;
+using System.Numerics;
 using Veldrid;
 using Veldrid.SPIRV;
+using static Frinkahedron.VeldridImplementation.VeldridRenderContext;
 
 namespace Frinkahedron.VeldridImplementation.RenderPasses
 {
@@ -83,7 +85,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             };
         }
 
-        public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene)
+        public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene, IReadOnlyList<DrawInstruction> sceneDrawInstructions)
         {
             if (scene.SceneLights.DirectionalLight is null)
             {
@@ -107,13 +109,29 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
             commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
 
-            VeldridRenderContext renderer = new VeldridRenderContext(
-                graphicsResources.Primitives,
-                ModelMatricesBufferInfo.DeviceBuffer,
-                commandList,
-                graphicsResources.AssetManager,
-                false);
-            scene.Draw(renderer);
+            foreach (var instruction in sceneDrawInstructions)
+            {
+                DoDrawInstruction(instruction, commandList, graphicsResources.AssetManager);
+            }
+        }
+
+        private void DoDrawInstruction(DrawInstruction drawInstruction, CommandList commandList, AssetManager assetManager)
+        {
+            var model = assetManager.GetModel(drawInstruction.ModelID);
+            foreach (var entity in model.Entities)
+            {
+                DrawMesh(entity.Mesh, entity.Transform * drawInstruction.Transform, commandList);
+            }
+        }
+
+        private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, CommandList commandList)
+        {
+            ModelMatrixInfo modelInfo = new ModelMatrixInfo
+            {
+                Model = transform,
+            };
+            commandList.UpdateBuffer(ModelMatricesBufferInfo.DeviceBuffer, 0, ref modelInfo);
+            meshInfo.Draw(commandList);
         }
 
         public void Dispose()

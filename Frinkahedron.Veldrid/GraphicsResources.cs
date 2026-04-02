@@ -22,6 +22,8 @@ namespace Frinkahedron.VeldridImplementation
 
         public required FullScreenQuadRenderPass QuadRenderPass { get; init; }
 
+        public IEnumerable<IRenderPass> RenderPasses => [ShadowRenderPass, MainRenderPass, QuadRenderPass];
+
         public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice, int screenWidth, int screenHeight)
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
