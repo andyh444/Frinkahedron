@@ -24,8 +24,10 @@ namespace Frinkahedron.Core
 
         public void Draw(IRenderContext renderer)
         {
-            //Collider?.Draw(renderer, Position.ToMatrix());
             Renderable?.Render(renderer, Position.ToMatrix());
+#if DEBUG
+            Collider?.Draw(renderer, Position.ToMatrix());
+#endif
         }
     }
 }

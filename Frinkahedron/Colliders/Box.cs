@@ -48,7 +48,7 @@ namespace Frinkahedron.Core.Colliders
         public void Draw(IRenderContext renderer, Matrix4x4 position)
         {
             Matrix4x4 scale = Matrix4x4.CreateScale(Dimensions);
-            renderer.DrawCuboid(scale * position);
+            renderer.DrawPrimitiveWireframe(Primitive.Box, scale * position);
         }
 
         public AxisAlignedBoundingBox CalculateAABB(Position position)

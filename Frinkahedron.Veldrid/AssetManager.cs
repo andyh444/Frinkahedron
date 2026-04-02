@@ -35,9 +35,10 @@ namespace Frinkahedron.VeldridImplementation
             }
 
             Dictionary<string, Model> models = new Dictionary<string, Model>();
-            models.Add("bowlingball", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\bowling_ball\scene.gltf"));
-            models.Add("crate", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\simple_classic_crate\scene.gltf"));
-            models.Add("tincan", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\tin_can_damaged\scene.gltf"));
+            models.Add("bowlingball", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\bowling_ball\scene.gltf", textures["white"]));
+            models.Add("crate", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\simple_classic_crate\scene.gltf", textures["white"]));
+            models.Add("tincan", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\tin_can_damaged\scene.gltf", textures["white"]));
+            models.Add("car", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\old_rusty_car\scene.gltf", textures["white"]));
             return new AssetManager(textures, shaders, models);
         }
 

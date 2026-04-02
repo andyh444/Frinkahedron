@@ -13,9 +13,17 @@ namespace Frinkahedron.VeldridImplementation
 {
     public sealed class VeldridRenderContext : IRenderContext
     {
+        public enum InstructionType
+        {
+            Model,
+            Primitive
+        }
+
         public readonly struct DrawInstruction
         {
-            public required string ModelID { get; init; }
+            public required InstructionType InstructionType { get; init; }
+            public string ModelID { get; init; }
+            public Primitive Primitive { get; init; }
             public required Matrix4x4 Transform { get; init; }
         };
 
@@ -28,81 +36,24 @@ namespace Frinkahedron.VeldridImplementation
             drawInstructions = new List<DrawInstruction>();
         }
 
-        public void DrawCuboid(Matrix4x4 transform)
-        {
-            //DrawMesh(primitives.CubeInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
-
-            //var model = assets.GetModel("crate");
-            //DrawEntity(model.Entities[0], Matrix4x4.CreateScale(1f / 8f) * transform);
-        }
-
-        public void DrawCylinder(Matrix4x4 transform)
-        {
-            //DrawMesh(primitives.CylinderInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
-
-            //var model = assets.GetModel("tincan");
-            //DrawEntity(model.Entities[0], Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(1 / 0.053f, 1 / 0.158f, 1 / 0.053f) * transform);
-        }
-
-        public void DrawDisc(Matrix4x4 transform)
-        {
-           // DrawMesh(primitives.DiscInfo, transform, "woodencontainer", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
-        }
-
-        public void DrawEllipsoid(Matrix4x4 transform)
-        {
-            //DrawMesh(primitives.SphereInfo, transform, "football", "NeutralNormalMap", "NeutralMetallicRoughnessMap");
-        }
-
         public void DrawModel(string modelID, Matrix4x4 transform)
         {
             drawInstructions.Add(new DrawInstruction
             {
+                InstructionType = InstructionType.Model,
                 ModelID = modelID,
                 Transform = transform
             });
-            //var model = assets.GetModel(modelID);
-            //DrawEntity(model.Entities[0], transform); // TODO: All entities
         }
 
-        /*private void DrawEntity(Entity entity, Matrix4x4 transform)
+        public void DrawPrimitiveWireframe(Primitive primitive, Matrix4x4 transform)
         {
-            DrawMesh(entity.Mesh, transform, entity.ColourTexture, entity.NormalMap, entity.MetallicRoughnessMap);
-        }*/
-
-        /*private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, string textureID, string normalID, string metallicRoughnessID)
-        {
-            DrawMesh(
-            meshInfo,
-            transform,
-            texturesEnabled ? assets.GetTexture(textureID) : null,
-            texturesEnabled ? assets.GetTexture(normalID) : null,
-                texturesEnabled ? assets.GetTexture(metallicRoughnessID) : null);
-        }*/
-
-        /*private void DrawMesh(MeshInfo meshInfo, Matrix4x4 transform, TextureInfo? albedo, TextureInfo? normalMap, TextureInfo? metallicRoughnessMap)
-        {
-            ModelMatrixInfo modelInfo = new ModelMatrixInfo
+            drawInstructions.Add(new DrawInstruction
             {
-                Model = transform,
-            };
-            if (texturesEnabled)
-            {
-                if (albedo is not null)
-                {
-                    commandList.SetGraphicsResourceSet(2, albedo.ResourceSet);
-                }
-                if (normalMap is not null)
-                {
-                    commandList.SetGraphicsResourceSet(7, normalMap.ResourceSet);
-                }
-                if (metallicRoughnessMap is not null)
-                {
-                    commandList.SetGraphicsResourceSet(8, metallicRoughnessMap.ResourceSet);
-                }
-            }
-            commandList.UpdateBuffer(matricesBuffer, 0, ref modelInfo);
-            meshInfo.Draw(commandList);
-        }*/
+                InstructionType = InstructionType.Primitive,
+                Primitive = primitive,
+                Transform = transform
+            });
+        }
     }
 }

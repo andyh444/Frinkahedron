@@ -70,14 +70,14 @@ namespace Frinkahedron.Core.Colliders
         public void Draw(IRenderContext renderer, Matrix4x4 position)
         {
             Matrix4x4 cylinderScale = Matrix4x4.CreateScale(Radius, PointToPointLength, Radius);
-            renderer.DrawCylinder(cylinderScale * position);
+            //renderer.DrawCylinder(cylinderScale * position);
 
             Matrix4x4 sphereScale = Matrix4x4.CreateScale(Radius);
             Matrix4x4 sphere1Translation = Matrix4x4.CreateTranslation(0, 0.5f * PointToPointLength, 0);
             Matrix4x4 sphere2Translation = Matrix4x4.CreateTranslation(0, -0.5f * PointToPointLength, 0);
 
-            renderer.DrawEllipsoid(sphereScale * sphere1Translation * position);
-            renderer.DrawEllipsoid(sphereScale * sphere2Translation * position);
+            //renderer.DrawEllipsoid(sphereScale * sphere1Translation * position);
+            //renderer.DrawEllipsoid(sphereScale * sphere2Translation * position);
         }
 
         public AxisAlignedBoundingBox CalculateAABB(Position position)

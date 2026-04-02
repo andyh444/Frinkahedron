@@ -10,6 +10,7 @@ namespace Frinkahedron.VeldridImplementation
         public required MeshInfo SphereInfo { get; init; }
         public required MeshInfo CylinderInfo { get; init; }
         public required MeshInfo DiscInfo { get; init; }
+        public required WireframeInfo CubeWireframeInfo { get; init; }
 
         public static Primitives Create(GraphicsDevice graphicsDevice)
         {
@@ -18,12 +19,15 @@ namespace Frinkahedron.VeldridImplementation
             var cylinderInfo = MeshInfo.Create(CreateUnitCylinderMesh(24, new RgbaFloat(0.5f, 0, 0.5f, 1).ToVector4(), new RgbaFloat(0.5f, 0, 0.5f, 1).ToVector4()), graphicsDevice);
             var discInfo = MeshInfo.Create(CreateUnitDiscMesh(24), graphicsDevice);
 
+            var cubeWireInfo = WireframeInfo.Create(CreateUnitWireframeCube(RgbaFloat.White), graphicsDevice);
+
             return new Primitives
             {
                 CubeInfo = cubeInfo,
                 SphereInfo = sphereInfo,
                 CylinderInfo = cylinderInfo,
-                DiscInfo = discInfo
+                DiscInfo = discInfo,
+                CubeWireframeInfo = cubeWireInfo,
             };
         }
 
@@ -49,6 +53,45 @@ namespace Frinkahedron.VeldridImplementation
 
             return new Mesh(quadVertices, quadIndices);
         }*/
+
+        private static WireframeMesh CreateUnitWireframeCube(RgbaFloat colour)
+        {
+            Vector4 c = colour.ToVector4();
+            ColourVertex[] vertices = new ColourVertex[]
+            {
+                // Front
+                new ColourVertex(new Vector3(-0.5f,  0.5f,  0.5f), c),
+                new ColourVertex(new Vector3( 0.5f,  0.5f,  0.5f), c),
+                new ColourVertex(new Vector3( 0.5f, -0.5f,  0.5f), c), 
+                new ColourVertex(new Vector3(-0.5f, -0.5f,  0.5f), c),
+
+                // Back
+                new ColourVertex(new Vector3(-0.5f,  0.5f, -0.5f), c),
+                new ColourVertex(new Vector3( 0.5f,  0.5f, -0.5f), c),
+                new ColourVertex(new Vector3( 0.5f, -0.5f, -0.5f), c),
+                new ColourVertex(new Vector3(-0.5f, -0.5f, -0.5f), c),
+            };
+
+            IndexLine[] indices = new IndexLine[]
+            {
+                new IndexLine(0, 1),
+                new IndexLine(1, 2),
+                new IndexLine(2, 3),
+                new IndexLine(3, 0),
+
+                new IndexLine(4, 5),
+                new IndexLine(5, 6),
+                new IndexLine(6, 7),
+                new IndexLine(7, 4),
+
+                new IndexLine(0, 4),
+                new IndexLine(1, 5),
+                new IndexLine(2, 6),
+                new IndexLine(3, 7),
+            };
+
+            return new WireframeMesh(vertices, indices);
+        }
 
         private static TexMesh CreateUnitCubeMesh()
         {

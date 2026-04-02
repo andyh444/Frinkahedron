@@ -17,7 +17,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
         public required UniformBufferInfo CameraMatricesBufferInfo { get; init; }
 
-        public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager, Framebuffer frameBuffer)
+        public static WireframeRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager, Framebuffer frameBuffer)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
@@ -51,7 +51,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             //pipelineDescription.ResourceLayouts = System.Array.Empty<ResourceLayout>();
 
             pipelineDescription.ShaderSet = new ShaderSetDescription(
-                vertexLayouts: new VertexLayoutDescription[] { MeshInfo.GetVertexLayoutDescription() },
+                vertexLayouts: new VertexLayoutDescription[] { WireframeInfo.GetVertexLayoutDescription() },
                 shaders: shaders);
 
             pipelineDescription.Outputs = frameBuffer.OutputDescription;
@@ -62,17 +62,64 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
-            throw new NotImplementedException();
+            return new WireframeRenderPass
+            {
+                Shaders = shaders,
+                Framebuffer = frameBuffer,
+                Pipeline = pipeline,
+                ModelMatricesBufferInfo = modelBufferInfo,
+                CameraMatricesBufferInfo = cameraMatrixBufferInfo,
+            };
         }
 
         public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene, IReadOnlyList<DrawInstruction> sceneDrawInstructions)
         {
-            throw new NotImplementedException();
+            commandList.SetFramebuffer(Framebuffer);
+            //commandList.ClearColorTarget(0, RgbaFloat.Black);
+            //commandList.ClearDepthStencil(1f);
+            commandList.SetPipeline(Pipeline);
+            commandList.SetGraphicsResourceSet(0, ModelMatricesBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(1, CameraMatricesBufferInfo.ResourceSet);
+            
+            CameraMatrixInfo cameraMatrixInfo = new CameraMatrixInfo
+            {
+                Projection = scene.Camera.ProjectionMatrix,
+                View = scene.Camera.ViewMatrix,
+            };
+
+            commandList.UpdateBuffer(CameraMatricesBufferInfo.DeviceBuffer, 0, ref cameraMatrixInfo);
+
+            foreach (var instruction in sceneDrawInstructions)
+            {
+                if (instruction.InstructionType is InstructionType.Primitive)
+                {
+                    DoDrawInstruction(instruction, commandList, graphicsResources, graphicsResources.AssetManager);
+                }
+            }
+        }
+
+        private void DoDrawInstruction(DrawInstruction instruction, CommandList commandList, GraphicsResources graphicsResources, AssetManager assetManager)
+        {
+            if (instruction.Primitive is Primitive.Box)
+            {
+                ModelMatrixInfo modelInfo = new ModelMatrixInfo
+                {
+                    Model = instruction.Transform,
+                };
+                commandList.UpdateBuffer(ModelMatricesBufferInfo.DeviceBuffer, 0, ref modelInfo);
+                graphicsResources.Primitives.CubeWireframeInfo.Draw(commandList);
+            }
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            foreach (var shader in Shaders)
+            {
+                shader.Dispose();
+            }
+            Pipeline.Dispose();
+            ModelMatricesBufferInfo.Dispose();
+            CameraMatricesBufferInfo.Dispose();
         }
     }
 }

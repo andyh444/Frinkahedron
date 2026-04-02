@@ -95,35 +95,36 @@ namespace Frinkahedron.TestApp
             gameObjects.Add(CreateBigBox(new Vector3(-93, 10, 0), Quaternion.CreateFromYawPitchRoll(0, 0, -MathF.PI / 5)));
             gameObjects.Add(CreateBigBox(new Vector3(93, 10, 0), Quaternion.CreateFromYawPitchRoll(0, 0, MathF.PI / 5)));
 
-            Cylinder cyl = new Cylinder(1, 2.5f);
-            float mass = 1 * cyl.CalculateVolume();
-            GameObject obj = new GameObject(new Vector3(0, -13, 0),
-                new OrbitalCameraMouseBehaviour(),
-                cyl,
+            Box carBox = new Box(new Vector3(2.7f, 1.8f, 6.7f));
+            float carMass = 1 * carBox.CalculateVolume();
+            GameObject carObj = new GameObject(new Vector3(-30, -13, 0),
+                new CompositeBehaviour([new CarCameraFollowBehaviour(), new CarBehaviour()]),
+                carBox,
                 new RigidBody {
-                    Mass = mass,
-                    InverseInertia = cyl.CalculateFilledInertia(mass).GetInverse(),
+                    Mass = carMass,
+                    InverseInertia = carBox.CalculateFilledInertia(carMass).GetInverse(),
                     Gravity = true,
-                    Material = new PhysicsMaterial(0.0f, 0.8f) },
-                new ModelRenderable("tincan", Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(1 / 0.053f, 1 / 0.158f, 1 / 0.053f) * Matrix4x4.CreateScale(cyl.Radius, cyl.Height, cyl.Radius)));
-            gameObjects.Add(obj);
+                    Material = new PhysicsMaterial(0.2f, 0.8f) },
+                new ModelRenderable("car", Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(0.01f) * Matrix4x4.CreateTranslation(0, -1, 0.2f)));
+            gameObjects.Add(carObj);
 
-            /*for (int k = -1; k <= 2; k++)
+            for (int k = -1; k <= 1; k++)
             {
                 for (int j = -4; j < 4; j++)
                 {
-                    for (int i = 0; i < 7; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         Box box = new Box(new Vector3(1, 2, 1));
                         float mass = 1 * box.CalculateVolume();
                         GameObject obj = new GameObject(new Vector3(k * 1.01f, -14 + i * 2, j * 1.01f),
                             null,
                             box,
-                            new RigidBody { Mass = mass, InverseInertia = box.CalculateFilledInertia(mass).GetInverse(), Gravity = true, Material = new PhysicsMaterial(0.0f, 0.8f) });
+                            new RigidBody { Mass = mass, InverseInertia = box.CalculateFilledInertia(mass).GetInverse(), Gravity = true, Material = new PhysicsMaterial(0.0f, 0.8f) },
+                            new ModelRenderable("crate", Matrix4x4.CreateScale(box.Dimensions / 8f)));
                         gameObjects.Add(obj);
                     }
                 }
-            }*/
+            }
 
             /*Sphere sph = new Sphere(4);
             float sphMass = 10 * sph.CalculateVolume();

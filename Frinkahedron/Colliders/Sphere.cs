@@ -30,7 +30,7 @@ namespace Frinkahedron.Core.Colliders
         public void Draw(IRenderContext renderer, Matrix4x4 position)
         {
             Matrix4x4 scale = Matrix4x4.CreateScale(Radius);
-            renderer.DrawEllipsoid(scale * position);
+            //renderer.DrawEllipsoid(scale * position);
         }
 
         public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 result)

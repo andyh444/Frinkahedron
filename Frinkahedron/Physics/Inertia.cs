@@ -39,9 +39,10 @@ namespace Frinkahedron.Core.Physics
 
         public static DiagonalMatrix3x3 CalculateFilledCylinderInertia(float radius, float height, float mass)
         {
-            float iz = 0.5f * mass * radius * radius;
+            // in our case, the neutral cylinder is oriented along the y-axis
+            float iy = 0.5f * mass * radius * radius;
             float ix = TWELFTH * mass * (3 * radius * radius * height * height);
-            float iy = ix;
+            float iz = ix;
             return new DiagonalMatrix3x3(new Vector3(ix, iy, iz));
         }
     }

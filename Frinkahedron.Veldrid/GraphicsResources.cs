@@ -22,7 +22,9 @@ namespace Frinkahedron.VeldridImplementation
 
         public required FullScreenQuadRenderPass QuadRenderPass { get; init; }
 
-        public IEnumerable<IRenderPass> RenderPasses => [ShadowRenderPass, MainRenderPass, QuadRenderPass];
+        public required WireframeRenderPass WireframeRenderPass { get; init; }
+
+        public IEnumerable<IRenderPass> RenderPasses => [ShadowRenderPass, MainRenderPass, WireframeRenderPass, QuadRenderPass];
 
         public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice, int screenWidth, int screenHeight)
         {
@@ -58,6 +60,8 @@ namespace Frinkahedron.VeldridImplementation
             DirectionalShadowRenderPass directionalShadowRenderPass = DirectionalShadowRenderPass.Create(factory, graphicsDevice, assetManager);
             mainRenderPass.ShadowMapTextureInfo = directionalShadowRenderPass.DepthTexture;
 
+            WireframeRenderPass wireframeRenderPass = WireframeRenderPass.Create(factory, graphicsDevice, assetManager, mainFrameBuffer);
+
             FullScreenQuadRenderPass quadRenderPass = FullScreenQuadRenderPass.Create(factory, graphicsDevice, assetManager);
             quadRenderPass.FullScreenTexture = colourTexture;
 
@@ -68,6 +72,7 @@ namespace Frinkahedron.VeldridImplementation
                 AssetManager = assetManager,
                 MainRenderPass = mainRenderPass,
                 ShadowRenderPass = directionalShadowRenderPass,
+                WireframeRenderPass = wireframeRenderPass,
                 QuadRenderPass = quadRenderPass
             };
         }

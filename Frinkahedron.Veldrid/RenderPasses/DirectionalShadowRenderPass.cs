@@ -111,7 +111,10 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
             foreach (var instruction in sceneDrawInstructions)
             {
-                DoDrawInstruction(instruction, commandList, graphicsResources.AssetManager);
+                if (instruction.InstructionType is InstructionType.Model)
+                {
+                    DoDrawInstruction(instruction, commandList, graphicsResources.AssetManager);
+                }
             }
         }
 

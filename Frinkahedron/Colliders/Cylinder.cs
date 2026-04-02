@@ -40,7 +40,7 @@ namespace Frinkahedron.Core.Colliders
         public void Draw(IRenderContext renderer, Matrix4x4 position)
         {
             Matrix4x4 scale = Matrix4x4.CreateScale(Radius, Height, Radius);
-            renderer.DrawCylinder(scale * position);
+            //renderer.DrawCylinder(scale * position);
 
             //Matrix4x4 cap1Transform = Matrix4x4.CreateScale(-Radius, 1, Radius) * Matrix4x4.CreateTranslation(0, Height / 2, 0);
             //renderer.DrawDisc(cap1Transform * position);
