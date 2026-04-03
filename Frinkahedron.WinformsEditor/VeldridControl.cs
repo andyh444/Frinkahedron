@@ -82,7 +82,7 @@ namespace Frinkahedron.WinformsEditor
             sb.AddBasicCar();
             sb.AddCrateTower(new Vector3(0, -14, 0));
 
-            var scene = sb.ToScene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), (float)Height / Width);
+            var scene = sb.ToScene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), (float)Width / Height);
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));

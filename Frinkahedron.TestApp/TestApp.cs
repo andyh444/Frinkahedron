@@ -46,7 +46,7 @@ namespace Frinkahedron.TestApp
                 SyncToVerticalBlank = true
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
-            _scene = CreateScene((float)_window.Height / _window.Width);
+            _scene = CreateScene((float)_window.Width / _window.Height);
             _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice, _window.Width, _window.Height);
 
             _warmupTask.Wait();
@@ -90,7 +90,7 @@ namespace Frinkahedron.TestApp
                     UpdateInput(gameState.Input, inputSnapshot);
                     if (gameState.Input.IsKeyPressed(Core.Key.R))
                     {
-                        _scene = CreateScene((float)_window.Height / _window.Width);
+                        _scene = CreateScene((float)_window.Width / _window.Height);
                         gameState = new GameState(0.01f, _scene);
                     }
                     else
