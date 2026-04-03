@@ -73,6 +73,30 @@ vec4 applyMeanBlur(vec2 uv, int radius)
 	return colour / count;
 }
 
+vec4 applyPixellation(vec2 uv, int radius)
+{
+    vec2 texSize = textureSize(sampler2D(Texture, TextureSampler), 0);
+    vec2 texelSize = 1.0 / texSize;
+	vec4 colour = vec4(0);
+	int count = 0;
+
+    // Snap to block center
+    vec2 pixelCoord = uv * texSize;
+    vec2 blockCoord = floor(pixelCoord / float(radius)) * float(radius);
+    vec2 baseUV = blockCoord / texSize;
+
+	for (int i = -radius; i <= radius; i++)
+	{
+		for (int j = -radius; j <= radius; j++)
+		{
+        vec2 offset = vec2(i, j) * texelSize;
+			colour += texture(sampler2D(Texture, TextureSampler), baseUV + offset);
+			count += 1;
+		}
+	}
+	return colour / count;
+}
+
 vec4 applySepia(vec4 color, float strength)
 {
     vec4 sep = vec4(
@@ -92,6 +116,6 @@ vec4 applyGreyscale(vec4 color)
 
 void main()
 {
-	// FXAA/FSAA
     fsout_colour = vec4(applyFXAA(fsin_texCoord), 1);
+    //fsout_colour = applyPixellation(fsin_texCoord, 4);
 }
