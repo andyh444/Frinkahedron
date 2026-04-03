@@ -24,9 +24,11 @@ namespace Frinkahedron.Core
 
         public SceneLights SceneLights { get; }
 
-        public Scene(Vector3 initialCameraPosition, Vector3 initialCameraDirection, IReadOnlyList<GameObject> objects)
+        public int TicksPerUpdate { get; set; } = 20;
+
+        public Scene(Vector3 initialCameraPosition, Vector3 initialCameraDirection, float cameraAspectRatio, IReadOnlyList<GameObject> objects)
         {
-            Camera = Camera.CreatePerspectiveCamera(initialCameraPosition, initialCameraDirection);
+            Camera = Camera.CreatePerspectiveCamera(initialCameraPosition, initialCameraDirection, cameraAspectRatio);
             this.objects = objects.ToList();
             toAdd = new List<GameObject>();
             SceneLights = new SceneLights();
@@ -39,21 +41,22 @@ namespace Frinkahedron.Core
 
         public void Update(GameState gameState)
         {
-            objects.AddRange(toAdd);
-            toAdd.Clear();
-
-            var start = Stopwatch.GetTimestamp();
-            foreach (var obj in Objects)
+            gameState.DeltaTime /= TicksPerUpdate;
+            for (int i = 0; i < TicksPerUpdate; i++)
             {
-                obj.Update(gameState);
+                objects.AddRange(toAdd);
+                toAdd.Clear();
+
+                foreach (var obj in Objects)
+                {
+                    obj.Update(gameState);
+                }
+                ResolveAllCollisions();
             }
-            TimeSpan integrationTime = Stopwatch.GetElapsedTime(start);
+        }
 
-            TimeSpan collisionTime = TimeSpan.Zero;
-            TimeSpan resolutionTime = TimeSpan.Zero;
-            TimeSpan inverseInertiaTime = TimeSpan.Zero;
-
-            start = Stopwatch.GetTimestamp();
+        private void ResolveAllCollisions()
+        {
             WorldRigidBody[] worldRigidBodies = new WorldRigidBody[Objects.Count];
             int index = 0;
             for (int i = 0; i < Objects.Count; i++)
@@ -65,9 +68,6 @@ namespace Frinkahedron.Core
                     worldRigidBodies[index++] = new WorldRigidBody(obj.Position, obj.RigidBody, obj.Collider);
                 }
             }
-
-            TimeSpan calculateAABBTime = Stopwatch.GetElapsedTime(start);
-            start = Stopwatch.GetTimestamp();
 
             ConcurrentBag<(int, int)> collisionPairs = new ConcurrentBag<(int, int)>();
             //for (int i = 0; i < aabbs.Count; i++)
@@ -85,8 +85,6 @@ namespace Frinkahedron.Core
                 }
             });
 
-            TimeSpan aabbTime = Stopwatch.GetElapsedTime(start);
-
             foreach ((var indexA, var indexB) in collisionPairs)
             {
                 var object1 = worldRigidBodies[indexA];
@@ -94,41 +92,8 @@ namespace Frinkahedron.Core
 
                 RigidBody.ResolveCollision(
                     in object1,
-                    in object2,
-                    ref collisionTime,
-                    ref inverseInertiaTime,
-                    ref resolutionTime);
+                    in object2);
             }
-
-            // resolve collisions
-            /*for (int i = 0; i < Objects.Count; i++)
-            {
-                var object1 = Objects[i];
-                if (object1.Collider is not null
-                    && object1.RigidBody is not null)
-                {
-                    for (int j = i + 1; j < Objects.Count; j++)
-                    {
-                        var object2 = Objects[j];
-                        if (object2.Collider is not null
-                            && object2.RigidBody is not null)
-                        {
-                            RigidBody.ResolveCollision(
-                                object1.Position,
-                                object1.Collider,
-                                object1.RigidBody,
-                                object2.Position,
-                                object2.Collider,
-                                object2.RigidBody,
-                                ref collisionTime,
-                                ref resolutionTime,
-                                ref inverseInertiaTime);
-                        }
-                    }
-                }
-            }*/
-
-            Console.WriteLine($"Integration: {20 * integrationTime.TotalMilliseconds:#0.000} ms, Calculate AABB: {20 * calculateAABBTime.TotalMilliseconds:#0.000}, AABB Pairs: {20 * aabbTime.TotalMilliseconds:#0.000} ms, Collision: {20 * collisionTime.TotalMilliseconds:#0.000} ms, Resolution: {20 * resolutionTime.TotalMilliseconds:#0.000} ms, Inertia: {20 * inverseInertiaTime.TotalMilliseconds:#0.000} ms");
         }
 
         public void Draw(IRenderContext renderer)

@@ -21,12 +21,12 @@ namespace Frinkahedron
             ViewMatrix = CreateViewMatrix();
         }
 
-        public static Camera CreatePerspectiveCamera(Vector3 initialPosition, Vector3 initialDirection)
+        public static Camera CreatePerspectiveCamera(Vector3 initialPosition, Vector3 initialDirection, float screenAspectRatio)
         {
             return new Camera(
                 initialPosition,
                 initialDirection,
-                CreatePerspective(MathF.PI / 4, 1.777777f, 0.1f, 1000f));
+                CreatePerspective(MathF.PI / 4, screenAspectRatio, 0.1f, 1000f));
         }
 
         public static Camera CreateOrthoCamera(Vector3 initialPosition, Vector3 initialDirection)

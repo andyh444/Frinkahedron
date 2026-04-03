@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Frinkahedron.TestApp\SceneBuilder_Extensions.cs" Link="SceneBuilder_Extensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\Frinkahedron.TestApp\Assets\Textures\football.png" Link="Assets\Textures\football.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Frinkahedron.TestApp\Assets\Textures\NeutralMetallicRoughnessMap.png" Link="Assets\Textures\NeutralMetallicRoughnessMap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Frinkahedron.TestApp\Assets\Textures\NeutralNormalMap.png" Link="Assets\Textures\NeutralNormalMap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Frinkahedron.TestApp\Assets\Textures\white.png" Link="Assets\Textures\white.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Frinkahedron.TestApp\Assets\Textures\woodencontainer.png" Link="Assets\Textures\woodencontainer.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Frinkahedron.Veldrid\Frinkahedron.VeldridImplementation.csproj" />
+    <ProjectReference Include="..\Frinkahedron\Frinkahedron.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Assets\Shaders\" />
+    <Folder Include="Assets\Textures\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\MainRenderPass.frag" Link="Assets\Shaders\MainRenderPass.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\MainRenderPass.vert" Link="Assets\Shaders\MainRenderPass.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\ScreenQuadPass.frag" Link="Assets\Shaders\ScreenQuadPass.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\ScreenQuadPass.vert" Link="Assets\Shaders\ScreenQuadPass.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\ShadowPass.frag" Link="Assets\Shaders\ShadowPass.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\ShadowPass.vert" Link="Assets\Shaders\ShadowPass.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\WireframePass.frag" Link="Assets\Shaders\WireframePass.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\WireframePass.vert" Link="Assets\Shaders\WireframePass.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

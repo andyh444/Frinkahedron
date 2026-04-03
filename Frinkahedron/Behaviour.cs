@@ -47,11 +47,24 @@ namespace Frinkahedron.Core
 
     public class CarCameraFollowBehaviour : Behaviour
     {
+        public float yawOverride = 0;
+        public float pitchOverride = 0;
+        public float sensitivity = 1f;
+        public float minPitch = -0.45f * MathF.PI;
+        public float maxPitch = 0.45f * MathF.PI;
+
         public override void Update(GameObject self, GameState gameState)
         {
             Vector3 currentDirection = gameState.Scene.Camera.LookDirection;
+            if (gameState.Input.IsMouseButtonDown(MouseButton.Right))
+            {
+                var rotation = Quaternion.CreateFromYawPitchRoll(yawOverride, pitchOverride, 0f);
+                currentDirection = Vector3.Transform(currentDirection, rotation);
+            }
+            float currentSpeed = self.RigidBody.Velocity.Length();
+
             Vector3 targetDirection;
-            if (MathF.Abs(self.RigidBody.Velocity.Length()) > 1)
+            if (MathF.Abs(currentSpeed) > 1)
             {
                 targetDirection = Vector3.Normalize(self.RigidBody.Velocity);
             }
@@ -62,7 +75,28 @@ namespace Frinkahedron.Core
             Vector3 right = Vector3.Cross(Vector3.UnitY, targetDirection);
             targetDirection = Vector3.Transform(targetDirection, Quaternion.CreateFromAxisAngle(right, MathF.PI / 16));
 
-            Vector3 newDirection = Vector3.Lerp(currentDirection, targetDirection, 0.005f);
+            float stiffness = Math.Clamp(currentSpeed * currentSpeed, 0.1f, 20f) * gameState.DeltaTime;
+            if (gameState.Input.IsMouseButtonDown(MouseButton.Right))
+            {
+                Vector2 delta = gameState.Input.GetMouseDelta();
+                yawOverride += delta.X * sensitivity * gameState.DeltaTime;
+                pitchOverride -= delta.Y * sensitivity * gameState.DeltaTime;
+                pitchOverride = Math.Clamp(pitchOverride, minPitch, maxPitch);
+                var rotation = Quaternion.CreateFromYawPitchRoll(-yawOverride, -pitchOverride, 0f);
+
+                targetDirection = Vector3.Transform(targetDirection, rotation);
+                stiffness = 1f;
+            }
+            else
+            {
+                yawOverride = 0f;
+                pitchOverride = 0f;
+            }
+
+            Vector3 newDirection = Vector3.Lerp(currentDirection, targetDirection, Math.Clamp(stiffness, 0f, 1f));
+
+            
+
             gameState.Scene.Camera.SetValues(self.Position.Centre - 25 * newDirection + 1 * Vector3.UnitY, newDirection);
         }
     }
@@ -71,8 +105,8 @@ namespace Frinkahedron.Core
     {
         const float ACCEL_FORCE = 40f;
         const float MAX_SPEED = 500f;
-        const float DRAG = 0f;
         const float LATERAL_FRICTION = 8f;
+        const float HANDBRAKE_LATERAL_FRICTION = 0.5f;
         const float STEER_SPEED = 25.5f;
 
         public override void Update(GameObject self, GameState gameState)
@@ -84,16 +118,13 @@ namespace Frinkahedron.Core
             // Input
             int accelInput = 0;
             int steerInput = 0;
+            bool handbrakeOn = false;
 
             if (gameState.Input.IsKeyDown(Key.W)) accelInput += 1;
             if (gameState.Input.IsKeyDown(Key.S)) accelInput -= 1;
             if (gameState.Input.IsKeyDown(Key.A)) steerInput -= 1;
             if (gameState.Input.IsKeyDown(Key.D)) steerInput += 1;
-
-            if (accelInput == 0 && steerInput == 0)
-            {
-                return;
-            }
+            handbrakeOn = gameState.Input.IsKeyDown(Key.Space);
 
             Vector3? groundNormal = GetGroundNormal(self, gameState.Scene);
             if (groundNormal is null)
@@ -123,16 +154,13 @@ namespace Frinkahedron.Core
             forwardSpeed = Math.Clamp(forwardSpeed, -MAX_SPEED, MAX_SPEED);
 
             // --- Apply lateral friction (kills sideways sliding) ---
-            lateralSpeed *= MathF.Exp(-LATERAL_FRICTION * dt);
+            float lateralFriction = handbrakeOn ? HANDBRAKE_LATERAL_FRICTION : LATERAL_FRICTION;
+            lateralSpeed *= MathF.Exp(-lateralFriction * dt);
 
             // --- Rebuild velocity ---
-            Vector3 planarVelocity = forward * forwardSpeed + right * lateralSpeed;
-            velocity = planarVelocity + groundNormal.Value * verticalSpeed;
-
-            // --- Apply drag ---
-            velocity *= MathF.Exp(-DRAG * dt);
-
-            rb.Velocity = velocity;
+            rb.Velocity = forward * forwardSpeed
+                + right * lateralSpeed
+                + groundNormal.Value * verticalSpeed;
 
             // --- Steering (based on forward speed) ---
             float speedFactor = forwardSpeed / MAX_SPEED;
@@ -143,20 +171,11 @@ namespace Frinkahedron.Core
                 var steerQuat = Quaternion.CreateFromAxisAngle(groundNormal.Value, steerAmount);
                 self.Position.Orientation = Quaternion.Normalize(self.Position.Orientation * steerQuat);
             }
-
-            /*Vector3 currentUp = Vector3.Transform(Vector3.UnitY, self.Position.Orientation);
-
-            Quaternion align = Quaternion.CreateFromAxisAngle(
-                Vector3.Normalize(Vector3.Cross(currentUp, groundNormal.Value)),
-                MathF.Acos(Math.Clamp(Vector3.Dot(currentUp, groundNormal.Value), -1f, 1f)) * 0.1f // smoothing
-            );
-
-            self.Position.Orientation = Quaternion.Normalize(align * self.Position.Orientation);*/
         }
 
         private Vector3? GetGroundNormal(GameObject self, Scene scene)
         {
-            const float MAX_DIST = 1f;
+            const float MAX_DIST = 2f;
 
             var dimensions = (self.Collider as Box).Dimensions;
             Vector3 point1 = self.Position.ToWorld(new Vector3(0, 0, dimensions.Z / 2));
@@ -165,6 +184,13 @@ namespace Frinkahedron.Core
 
             Vector3 down = Vector3.Transform(-Vector3.UnitY, self.Position.Orientation);
 
+            bool r1 = false;
+            bool r2 = false;
+            bool r3 = false;
+            Vector3 hitPoint1 = default;
+            Vector3 hitPoint2 = default;
+            Vector3 hitPoint3 = default;
+
             foreach (var obj in scene.Objects)
             {
                 if (obj == self
@@ -172,20 +198,20 @@ namespace Frinkahedron.Core
                 {
                     continue;
                 }
-                bool r1 = obj.Collider.RayIntersection(obj.Position, point1, down, out Vector3 hitPoint1);
-                bool r2 = obj.Collider.RayIntersection(obj.Position, point2, down, out Vector3 hitPoint2);
-                bool r3 = obj.Collider.RayIntersection(obj.Position, point3, down, out Vector3 hitPoint3);
-
-                if (r1
-                    && r2
-                    && r3
-                    && Vector3.Distance(point1, hitPoint1) < MAX_DIST
-                    && Vector3.Distance(point2, hitPoint2) < MAX_DIST
-                    && Vector3.Distance(point3, hitPoint3) < MAX_DIST)
-                {
-                    return Vector3.Normalize(Vector3.Cross(hitPoint3 - hitPoint2, hitPoint3 - hitPoint1));
-                }
+                r1 = r1 || obj.Collider.RayIntersection(obj.Position, point1, down, out hitPoint1);
+                r2 = r2 || obj.Collider.RayIntersection(obj.Position, point2, down, out hitPoint2);
+                r3 = r3 || obj.Collider.RayIntersection(obj.Position, point3, down, out hitPoint3);
             }
+            if (r1
+                && r2
+                && r3
+                && Vector3.Distance(point1, hitPoint1) < MAX_DIST
+                && Vector3.Distance(point2, hitPoint2) < MAX_DIST
+                && Vector3.Distance(point3, hitPoint3) < MAX_DIST)
+            {
+                return Vector3.Normalize(Vector3.Cross(hitPoint3 - hitPoint2, hitPoint3 - hitPoint1));
+            }
+
             return null;
         }
     }

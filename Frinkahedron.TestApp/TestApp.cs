@@ -39,16 +39,14 @@ namespace Frinkahedron.TestApp
                 WindowTitle = "Frinkahedron Test App"
             };
             _window = VeldridStartup.CreateWindow(ref windowCI);
-            
             GraphicsDeviceOptions options = new GraphicsDeviceOptions
             {
                 PreferStandardClipSpaceYDirection = true,
                 PreferDepthRangeZeroToOne = true,
-                SwapchainDepthFormat = PixelFormat.D32_Float_S8_UInt,
                 SyncToVerticalBlank = true
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
-            _scene = CreateScene();
+            _scene = CreateScene((float)_window.Height / _window.Width);
             _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice, _window.Width, _window.Height);
 
             _warmupTask.Wait();
@@ -56,7 +54,7 @@ namespace Frinkahedron.TestApp
 
         private void Warmup()
         {
-            Scene scene = CreateScene();
+            Scene scene = CreateScene(1600f / 900f);
             GameState gameState = new GameState(0.01f, scene);
             for (int i = 0; i < 100; i++)
             {
@@ -64,155 +62,17 @@ namespace Frinkahedron.TestApp
             }
         }
 
-        private GameObject CreateBigBox(Vector3 position, Quaternion orientation, bool first = false)
+        private Scene CreateScene(float aspectRatio)
         {
-            Box box = new Box(new Vector3(100, 10, 100));
-            var obj = new GameObject(position,
-                !first ? null : new CompositeBehaviour([/*new OrbitalCameraMouseBehaviour(),*/
-                    new ImpulseOnClickBehaviour()]),
-                box,
-                new Core.Physics.RigidBody {
-                    Mass = float.PositiveInfinity,
-                    InverseInertia = new DiagonalMatrix3x3(),
-                    Gravity = false,
-                    Material = new PhysicsMaterial(0, 0.8f)
-                },
-                new ModelRenderable("crate", Matrix4x4.CreateScale(1f / 8f) * Matrix4x4.CreateScale(box.Dimensions)));
-            
-            obj.Position.Orientation = orientation;
-            return obj;
-        }
+            SceneBuilder sb = new SceneBuilder();
+            sb.AddBigBoxes();
+            sb.AddBasicCar();
+            sb.AddCrateTower(new Vector3(0, -14, 0));
 
-        private Scene CreateScene()
-        {
-            List<GameObject> gameObjects = new List<GameObject>();
-
-            Random r = Random.Shared;
-
-            gameObjects.Add(CreateBigBox(new Vector3(0, -20, 0), Quaternion.Identity, true));
-            gameObjects.Add(CreateBigBox(new Vector3(0, 10, 93), Quaternion.CreateFromYawPitchRoll(0, -MathF.PI / 5, 0)));
-            gameObjects.Add(CreateBigBox(new Vector3(0, 10, -93), Quaternion.CreateFromYawPitchRoll(0, MathF.PI / 5, 0)));
-            gameObjects.Add(CreateBigBox(new Vector3(-93, 10, 0), Quaternion.CreateFromYawPitchRoll(0, 0, -MathF.PI / 5)));
-            gameObjects.Add(CreateBigBox(new Vector3(93, 10, 0), Quaternion.CreateFromYawPitchRoll(0, 0, MathF.PI / 5)));
-
-            Box carBox = new Box(new Vector3(2.7f, 1.8f, 6.7f));
-            float carMass = 1 * carBox.CalculateVolume();
-            GameObject carObj = new GameObject(new Vector3(-30, -13, 0),
-                new CompositeBehaviour([new CarCameraFollowBehaviour(), new CarBehaviour()]),
-                carBox,
-                new RigidBody {
-                    Mass = carMass,
-                    InverseInertia = carBox.CalculateFilledInertia(carMass).GetInverse(),
-                    Gravity = true,
-                    Material = new PhysicsMaterial(0.2f, 0.8f) },
-                new ModelRenderable("car", Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(0.01f) * Matrix4x4.CreateTranslation(0, -1, 0.2f)));
-            gameObjects.Add(carObj);
-
-            for (int k = -1; k <= 1; k++)
-            {
-                for (int j = -4; j < 4; j++)
-                {
-                    for (int i = 0; i < 5; i++)
-                    {
-                        Box box = new Box(new Vector3(1, 2, 1));
-                        float mass = 1 * box.CalculateVolume();
-                        GameObject obj = new GameObject(new Vector3(k * 1.01f, -14 + i * 2, j * 1.01f),
-                            null,
-                            box,
-                            new RigidBody { Mass = mass, InverseInertia = box.CalculateFilledInertia(mass).GetInverse(), Gravity = true, Material = new PhysicsMaterial(0.0f, 0.8f) },
-                            new ModelRenderable("crate", Matrix4x4.CreateScale(box.Dimensions / 8f)));
-                        gameObjects.Add(obj);
-                    }
-                }
-            }
-
-            /*Sphere sph = new Sphere(4);
-            float sphMass = 10 * sph.CalculateVolume();
-            GameObject sphObj = new GameObject(new Vector3(-60, 0, 0),
-                new SphereControlBehaviour(),
-                //new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour()]),
-                sph,
-                new RigidBody
-                {
-                    Mass = sphMass,
-                    InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(),
-                    Gravity = true,
-                    Velocity = new Vector3(3, 0, 0),
-                    AngularVelocity = new Vector3(0.5f, 1f, 1.5f),
-                });
-            sphObj.Position.Orientation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI);
-            gameObjects.Add(sphObj);*/
-
-            /*bool firstSphere = true;
-            for (int i = 0; i < 10; i++)
-            {
-                IShape collider;
-                float density;
-                var rand = r.NextSingle();
-                Behaviour? behaviour = null;
-                //if (rand > 0.7f)
-                //{
-                //    float radius = r.NextSingle(1.5f, 2.5f);
-                //    collider = new Sphere(radius);
-                //    density = 10f;
-                //    if (firstSphere)
-                //    {
-                //        //behaviour = new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour { distance = 15f}]);
-                //        firstSphere = false;
-                //        density = 50f;
-                //    }
-                //}
-                //else if (rand > 0.45f)
-                //{
-                //    float radius = r.NextSingle(1.5f, 2.5f);
-                //    float length = r.NextSingle(2.5f, 5.5f);
-                //    density = 1f;
-                //    collider = new Capsule(length, radius);
-                //}
-                //else
-                //{
-                //    Vector3 dimensions = new Vector3(r.NextSingle(1f, 3f), r.NextSingle(1f, 3f), r.NextSingle(1f, 9f));
-                //    collider = new Box(dimensions);
-                //    density = 1f;
-                //}
-
-
-                collider = new Cylinder(r.NextSingle(1f, 3f), r.NextSingle(4f, 10f));
-                density = 1;
-
-                float volume = collider.CalculateVolume();
-                float mass = density * volume;
-
-                var inertia = collider.CalculateFilledInertia(mass);
-
-                gameObjects.Add(new GameObject(
-                    new Vector3(0, r.NextSingle(20f, 35f), r.NextSingle(-130f, 130f)),
-                    behaviour,
-                    collider,
-                    new Core.Physics.RigidBody
-                    {
-                        Mass = mass,
-                        InverseInertia = inertia.GetInverse(),
-                        Gravity = true,
-                        Velocity = r.NextSingle(0f, 20f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-0f, 0f)),
-                        AngularVelocity = r.NextSingle(0f, 6f) * new Vector3(r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f), r.NextSingle(-1f, 1f)),
-                        Material = new PhysicsMaterial(0.1f, 0.8f)
-                    }));
-
-                gameObjects.Last().Position.Orientation = Quaternion.CreateFromYawPitchRoll(r.NextSingle(0, 0.15f * MathF.PI), r.NextSingle(0, 0.15f * MathF.PI), r.NextSingle(0, 0.15f * MathF.PI));
-            }*/
-
-
-
-
-            //gameObjects.Add(new GameObject(new Vector3(-1, 0, 0), new CompositeBehaviour([new ContinuousRotationBehaviour(0.1f, 0.4f, 0.2f), new OrbitalCameraMouseBehaviour()]), new BoxCollider(new Vector3(1, 1.25f, 1.5f))));
-            //gameObjects.Add(new GameObject(new Vector3(1, 0, 0), new ContinuousRotationBehaviour(-0.5f, 0.1f, 0.3f), new SphereCollider(0.5f)));
-
-            var scene = new Scene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), gameObjects);
+            var scene = sb.ToScene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), aspectRatio);
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
             scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
-
             scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
 
             return scene;
@@ -230,25 +90,16 @@ namespace Frinkahedron.TestApp
                     UpdateInput(gameState.Input, inputSnapshot);
                     if (gameState.Input.IsKeyPressed(Core.Key.R))
                     {
-                        _scene = CreateScene();
+                        _scene = CreateScene((float)_window.Height / _window.Width);
                         gameState = new GameState(0.01f, _scene);
                     }
                     else
                     {
-                        gameState.DeltaTime /= 20;
-                        for (int i = 0; i < 20; i++)
-                        {
-                            _scene.Update(gameState);
-                            gameState.Input.Clear();
-                        }
-                        var start = Stopwatch.GetTimestamp();
+                        _scene.Update(gameState);
                         Draw();
-                        Console.WriteLine($"Draw took {Stopwatch.GetElapsedTime(start).TotalMilliseconds:#0.000} ms");
-
-                        //gameState.Input.Clear();
 
                         sw.Stop();
-                        gameState.DeltaTime = (float)sw.Elapsed.TotalSeconds;
+                        gameState.DeltaTime = MathF.Min((float)sw.Elapsed.TotalSeconds, 0.1f);
                         sw.Restart();
                     }
                 }

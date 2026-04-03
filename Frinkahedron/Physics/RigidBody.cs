@@ -72,13 +72,8 @@ namespace Frinkahedron.Core.Physics
 
         public static bool ResolveCollision(
             in WorldRigidBody worldBodyA,
-            in WorldRigidBody worldBodyB,
-            ref TimeSpan collisionTime,
-            ref TimeSpan inverseInertiaTime,
-            ref TimeSpan resolutionTime)
+            in WorldRigidBody worldBodyB)
         {
-            var start = Stopwatch.GetTimestamp();
-
             var positionA = worldBodyA.Position;
             var positionB = worldBodyB.Position;
             var bodyA = worldBodyA.RigidBody;
@@ -100,16 +95,9 @@ namespace Frinkahedron.Core.Physics
                 return false;
             }
 
-            collisionTime += Stopwatch.GetElapsedTime(start);
-            start = Stopwatch.GetTimestamp();
-
             float inverseMassSum = inverseMassA + inverseMassB;
             var inverseInertiaA = worldBodyA.InverseWorldInertia;
             var inverseInertiaB = worldBodyB.InverseWorldInertia;
-
-            inverseInertiaTime += Stopwatch.GetElapsedTime(start);
-            start = Stopwatch.GetTimestamp();
-
 
             Vector3 normal = manifold.Normal;
             float penetration = manifold.Penetration;
@@ -183,7 +171,6 @@ namespace Frinkahedron.Core.Physics
             positionA.Centre += inverseMassA * correction;
             positionB.Centre -= inverseMassB * correction;
 
-            resolutionTime += Stopwatch.GetElapsedTime(start);
             return true;
         }
 
