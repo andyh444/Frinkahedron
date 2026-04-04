@@ -11,13 +11,13 @@ namespace Frinkahedron.WinformsEditor
 {
     internal sealed class UserControlInputListener : IDisposable
     {
-        private readonly UserControl control;
+        private readonly Control control;
         private List<MouseButtons> mouseButtonsDown; 
         private List<MouseButtons> mouseButtonsUp;
         private Vector2 currentMousePosition;
         private int currentMouseDelta;
 
-        public UserControlInputListener(UserControl control)
+        public UserControlInputListener(Control control)
         {
             mouseButtonsDown = new List<MouseButtons>();
             mouseButtonsUp = new List<MouseButtons>();
