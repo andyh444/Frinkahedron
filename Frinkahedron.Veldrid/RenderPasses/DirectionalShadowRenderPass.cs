@@ -15,7 +15,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
         public required Framebuffer Framebuffer { get; init; }
         public required TextureInfo DepthTexture { get; init; }
 
-        public static DirectionalShadowRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager)
+        public static DirectionalShadowRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, IAssetManager assetManager)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
@@ -118,7 +118,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             }
         }
 
-        private void DoDrawInstruction(DrawInstruction drawInstruction, CommandList commandList, AssetManager assetManager)
+        private void DoDrawInstruction(DrawInstruction drawInstruction, CommandList commandList, IAssetManager assetManager)
         {
             var model = assetManager.GetModel(drawInstruction.ModelID);
             foreach (var entity in model.Entities)

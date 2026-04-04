@@ -14,6 +14,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using Veldrid;
 
 namespace Frinkahedron.WinformsEditor
@@ -23,11 +24,17 @@ namespace Frinkahedron.WinformsEditor
         private GraphicsDevice? graphicsDevice;
         private GraphicsResources? graphicsResources;
         private Scene? scene;
+        private InMemoryAssetManager? assetManager;
+        private GameState? gameState;
+        private GameObject? currentObj;
+        private Matrix4x4 currentTransform;
+        private IShape? currentShape;
+        private readonly UserControlInputListener userControlInputListener;
 
         public VeldridControl()
         {
             InitializeComponent();
-            //DoubleBuffered = true;
+            userControlInputListener = new UserControlInputListener(this);
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -38,9 +45,85 @@ namespace Frinkahedron.WinformsEditor
                 return;
             }
             graphicsDevice = CreateGraphicsDevice();
-            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height);
-            scene = CreateScene();
+            assetManager = new InMemoryAssetManager();
+            assetManager.AddShadersFromFolder("Assets\\Shaders");
+            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager);
+
+            scene = new Scene(new Vector3(), Vector3.UnitZ, (float)Width / Height, []);
+            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(1)), new Vector3(1));
+            scene.CollisionsEnabled = false;
+
+            gameState = new GameState(0.001f, scene);
             timer1.Enabled = true;
+            currentTransform = Matrix4x4.Identity;
+        }
+
+        public void LoadModel(string fileName)
+        {
+            Model? model = null;
+            //try
+            {
+                model = ModelLoader.LoadModel(graphicsDevice.ResourceFactory, graphicsDevice, fileName, null);
+            }
+            //catch (Exception ex)
+            {
+            //    MessageBox.Show($"Failed to load model: {ex.Message}");
+            }
+            if (model is not null)
+            {
+                SetModel(Path.GetFileNameWithoutExtension(fileName), model);
+            }
+        }
+
+        public void UpdateTransform(Matrix4x4 transform)
+        {
+            currentTransform = transform;
+            if (currentObj is not null)
+            {
+                GameObject obj = new GameObject(new Vector3(),
+                    behaviour: currentObj.Behaviour,
+                    colliderShape: currentObj.Collider,
+                    rigidBody: null,
+                    renderable: new ModelRenderable((currentObj.Renderable as ModelRenderable).ModelID, currentTransform));
+
+                SetObject(obj);
+            }
+        }
+
+        public void UpdateCollider(IShape shape)
+        {
+            currentShape = shape;
+            if (currentObj is not null)
+            {
+                GameObject obj = new GameObject(new Vector3(),
+                    behaviour: currentObj.Behaviour,
+                    colliderShape: currentShape,
+                    rigidBody: null,
+                    renderable: currentObj.Renderable);
+
+                SetObject(obj);
+            }
+        }
+
+        public void SetModel(string name, Model model)
+        {
+            assetManager.AddModel(name, model);
+            GameObject obj = new GameObject(new Vector3(),
+                behaviour: new OrbitalCameraMouseBehaviour(),
+                colliderShape: currentShape,
+                rigidBody: null,
+                renderable: new ModelRenderable(name, currentTransform));
+            SetObject(obj);
+        }
+
+        public void SetObject(GameObject obj)
+        {
+            if (currentObj is not null)
+            {
+                scene.RemoveObject(currentObj);
+            }
+            currentObj = obj;
+            scene.AddObject(obj);
         }
 
         private GraphicsDevice CreateGraphicsDevice()
@@ -59,9 +142,10 @@ namespace Frinkahedron.WinformsEditor
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            GameState gameState = new GameState(timer1.Interval * 0.001f, scene);
-            scene.Update(gameState);
+            userControlInputListener.UpdateInput(gameState.Input);
 
+            gameState.DeltaTime = timer1.Interval * 0.001f;
+            scene.Update(gameState);
             VeldridRenderContext context = new VeldridRenderContext();
             scene.Draw(context);
 
@@ -73,22 +157,6 @@ namespace Frinkahedron.WinformsEditor
             graphicsDevice.SwapBuffers();
             graphicsResources.CommandList.End();
             graphicsDevice.SubmitCommands(graphicsResources.CommandList);
-        }
-
-        private Scene CreateScene()
-        {
-            SceneBuilder sb = new SceneBuilder();
-            sb.AddBigBoxes();
-            sb.AddBasicCar();
-            sb.AddCrateTower(new Vector3(0, -14, 0));
-
-            var scene = sb.ToScene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), (float)Width / Height);
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
-            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
-
-            return scene;
         }
     }
 }

@@ -41,6 +41,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.Black;
             Name = "VeldridControl";
             Size = new Size(421, 398);
             ResumeLayout(false);

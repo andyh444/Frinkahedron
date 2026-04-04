@@ -19,7 +19,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
         public required UniformBufferInfo CameraBufferInfo { get; init; }
         public TextureInfo? ShadowMapTextureInfo { get; set; }
 
-        public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager, Framebuffer frameBuffer)
+        public static MainRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, IAssetManager assetManager, Framebuffer frameBuffer)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
@@ -150,7 +150,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             }
         }
 
-        private void DoDrawInstruction(DrawInstruction drawInstruction, CommandList commandList, AssetManager assetManager)
+        private void DoDrawInstruction(DrawInstruction drawInstruction, CommandList commandList, IAssetManager assetManager)
         {
             var model = assetManager.GetModel(drawInstruction.ModelID);
             foreach (var entity in model.Entities)

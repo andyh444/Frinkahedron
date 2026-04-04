@@ -17,6 +17,7 @@ namespace Frinkahedron.Core
     {
         private readonly List<GameObject> objects;
         private readonly List<GameObject> toAdd;
+        private readonly HashSet<GameObject> toRemove;
 
         public Camera Camera { get; }
 
@@ -26,11 +27,14 @@ namespace Frinkahedron.Core
 
         public int TicksPerUpdate { get; set; } = 20;
 
+        public bool CollisionsEnabled { get; set; } = true;
+
         public Scene(Vector3 initialCameraPosition, Vector3 initialCameraDirection, float cameraAspectRatio, IReadOnlyList<GameObject> objects)
         {
             Camera = Camera.CreatePerspectiveCamera(initialCameraPosition, initialCameraDirection, cameraAspectRatio);
             this.objects = objects.ToList();
             toAdd = new List<GameObject>();
+            toRemove = new HashSet<GameObject>();
             SceneLights = new SceneLights();
         }
 
@@ -39,19 +43,35 @@ namespace Frinkahedron.Core
             toAdd.Add(obj);
         }
 
+        public void RemoveObject(GameObject obj)
+        {
+            toRemove.Add(obj);
+        }
+
         public void Update(GameState gameState)
         {
             gameState.DeltaTime /= TicksPerUpdate;
             for (int i = 0; i < TicksPerUpdate; i++)
             {
+                if (toRemove.Count > 0)
+                {
+                    objects.RemoveAll(toRemove.Contains);
+                    toRemove.Clear();
+                }
+
                 objects.AddRange(toAdd);
                 toAdd.Clear();
+
 
                 foreach (var obj in Objects)
                 {
                     obj.Update(gameState);
                 }
-                ResolveAllCollisions();
+                if (CollisionsEnabled)
+                {
+                    ResolveAllCollisions();
+                }
+                gameState.Input.Clear();
             }
         }
 

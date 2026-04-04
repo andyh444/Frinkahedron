@@ -25,7 +25,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
         public TextureInfo? FullScreenTexture { get; set; }
 
-        public static FullScreenQuadRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager)
+        public static FullScreenQuadRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, IAssetManager assetManager)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,

@@ -14,9 +14,11 @@ namespace Frinkahedron.Core
 
     public class ModelRenderable(string modelID, Matrix4x4 modelTransform) : IRenderable
     {
+        public string ModelID { get; } = modelID;
+
         public void Render(IRenderContext renderContext, Matrix4x4 worldTransform)
         {
-            renderContext.DrawModel(modelID, modelTransform *  worldTransform);
+            renderContext.DrawModel(ModelID, modelTransform *  worldTransform);
         }
     }
 }

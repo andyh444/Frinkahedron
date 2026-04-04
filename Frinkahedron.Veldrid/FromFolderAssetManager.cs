@@ -3,20 +3,20 @@ using Veldrid;
 
 namespace Frinkahedron.VeldridImplementation
 {
-    public sealed class AssetManager : IDisposable
+    public sealed class FromFolderAssetManager : IAssetManager
     {
         private readonly IReadOnlyDictionary<string, TextureInfo> textures;
         private readonly IReadOnlyDictionary<string, byte[]> shaders;
         private readonly IReadOnlyDictionary<string, Model> models;
 
-        private AssetManager(IReadOnlyDictionary<string, TextureInfo> textures, IReadOnlyDictionary<string, byte[]> shaders, IReadOnlyDictionary<string, Model> models)
+        private FromFolderAssetManager(IReadOnlyDictionary<string, TextureInfo> textures, IReadOnlyDictionary<string, byte[]> shaders, IReadOnlyDictionary<string, Model> models)
         {
             this.textures = textures;
             this.shaders = shaders;
             this.models = models;
         }
 
-        public static AssetManager LoadAssets(ResourceFactory factory, GraphicsDevice graphicsDevice, string assetsFolder)
+        public static FromFolderAssetManager LoadAssets(ResourceFactory factory, GraphicsDevice graphicsDevice, string assetsFolder)
         {
             Dictionary<string, TextureInfo> textures = new Dictionary<string, TextureInfo>();
             foreach (string path in Directory.EnumerateFiles(Path.Combine(assetsFolder, "Textures"), "*.png"))
@@ -39,17 +39,17 @@ namespace Frinkahedron.VeldridImplementation
             models.Add("crate", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\simple_classic_crate\scene.gltf", textures["white"]));
             models.Add("tincan", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\tin_can_damaged\scene.gltf", textures["white"]));
             models.Add("car", ModelLoader.LoadModel(factory, graphicsDevice, @"C:\Users\Andy\Downloads\old_rusty_car\scene.gltf", textures["white"]));
-            return new AssetManager(textures, shaders, models);
+            return new FromFolderAssetManager(textures, shaders, models);
         }
 
-        internal Model GetModel(string name) => models[name];
+        public Model GetModel(string name) => models[name];
 
-        internal TextureInfo GetTexture(string v)
+        public TextureInfo GetTexture(string v)
         {
             return textures[v];
         }
 
-        internal byte[] GetShaderCode(string v)
+        public byte[] GetShaderCode(string v)
         {
             return shaders[v];
         }

@@ -17,7 +17,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
         public required UniformBufferInfo CameraMatricesBufferInfo { get; init; }
 
-        public static WireframeRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, AssetManager assetManager, Framebuffer frameBuffer)
+        public static WireframeRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, IAssetManager assetManager, Framebuffer frameBuffer)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
@@ -98,7 +98,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             }
         }
 
-        private void DoDrawInstruction(DrawInstruction instruction, CommandList commandList, GraphicsResources graphicsResources, AssetManager assetManager)
+        private void DoDrawInstruction(DrawInstruction instruction, CommandList commandList, GraphicsResources graphicsResources, IAssetManager assetManager)
         {
             if (instruction.Primitive is Primitive.Box)
             {

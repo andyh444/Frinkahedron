@@ -103,7 +103,7 @@ namespace Frinkahedron.Core
             keysReleased.Clear();
             mouseButtonsPressed.Clear();
             mouseButtonsReleased.Clear();
-            //mouseScrollDelta = 0;
+            mouseScrollDelta = 0;
         }
 
         public Vector2 GetMouseScreenPosition() => mouseScreenPosition;

@@ -14,7 +14,7 @@ namespace Frinkahedron.VeldridImplementation
         
         public required Primitives Primitives { get; init; }
 
-        public required AssetManager AssetManager { get; init; }
+        public required IAssetManager AssetManager { get; init; }
 
         public required MainRenderPass MainRenderPass { get; init; }
 
@@ -26,11 +26,10 @@ namespace Frinkahedron.VeldridImplementation
 
         public IEnumerable<IRenderPass> RenderPasses => [ShadowRenderPass, MainRenderPass, WireframeRenderPass, QuadRenderPass];
 
-        public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice, int screenWidth, int screenHeight)
+        public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice, int screenWidth, int screenHeight, IAssetManager assetManager)
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
-            AssetManager assetManager = AssetManager.LoadAssets(factory, graphicsDevice, "Assets");
-
+            
             // note mainrenderpass needs to be created before shadow render pass otherwise the textures don't get drawn
             TextureDescription colourDescription = TextureDescription.Texture2D(
                 (uint)screenWidth,
@@ -81,7 +80,6 @@ namespace Frinkahedron.VeldridImplementation
         {
             CommandList.Dispose();
             Primitives.Dispose();
-            AssetManager.Dispose();
             MainRenderPass.Dispose();
             ShadowRenderPass.Dispose();
         }

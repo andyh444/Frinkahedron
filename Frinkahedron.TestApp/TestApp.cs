@@ -25,6 +25,7 @@ namespace Frinkahedron.TestApp
         private GraphicsResources _graphicsResources;
         private Scene _scene;
         private Task _warmupTask;
+        private IAssetManager _assetManager;
 
         public TestApp()
         {
@@ -47,7 +48,8 @@ namespace Frinkahedron.TestApp
             };
             _graphicsDevice = VeldridStartup.CreateGraphicsDevice(_window, options);
             _scene = CreateScene((float)_window.Width / _window.Height);
-            _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice, _window.Width, _window.Height);
+            _assetManager = FromFolderAssetManager.LoadAssets(_graphicsDevice.ResourceFactory, _graphicsDevice, "Assets");
+            _graphicsResources = GraphicsResources.CreateResources(_graphicsDevice, _window.Width, _window.Height, _assetManager);
 
             _warmupTask.Wait();
         }

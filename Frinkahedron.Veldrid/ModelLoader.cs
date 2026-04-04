@@ -43,17 +43,25 @@ namespace Frinkahedron.VeldridImplementation
             var model = SharpGLTF.Schema2.ModelRoot.Load(file);
             List<Entity> entities = new List<Entity>();
 
-            foreach (var mesh in model.LogicalMeshes.Take(2))
+            foreach (var mesh in model.LogicalMeshes)
             {
                 foreach (var primitive in mesh.Primitives)
                 {
-
+                    if (primitive.DrawPrimitiveType != SharpGLTF.Schema2.PrimitiveType.TRIANGLES)
+                    {
+                        continue;
+                    }
 
                     SharpGLTF.Memory.IAccessorArray<Vector3> positions = primitive.GetVertexAccessor("POSITION").AsVector3Array();
-                    SharpGLTF.Memory.IAccessorArray<Vector3> normals = primitive.GetVertexAccessor("NORMAL").AsVector3Array();
-                    SharpGLTF.Memory.IAccessorArray<Vector2> uvs = primitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array();
                     SharpGLTF.Memory.IAccessorArray<uint> indices = primitive.GetIndexAccessor().AsIndicesArray();
-                    var tangents = primitive.GetVertexAccessor("TANGENT")?.AsVector4Array().ToArray()
+
+                    var normals = primitive.GetVertexAccessor("NORMAL")?.AsVector3Array()
+                        ?? GenerateNormals(positions, indices);
+
+                    var uvs = primitive.GetVertexAccessor("TEXCOORD_0")?.AsVector2Array()
+                        ?? ((IReadOnlyList<Vector2>)new Vector2[positions.Count]);
+                    
+                    var tangents = primitive.GetVertexAccessor("TANGENT")?.AsVector4Array()
                         ?? GenerateTangents(positions, normals, uvs, indices);
 
                     TexVertex[] vertices = new TexVertex[positions.Count];
@@ -102,7 +110,7 @@ namespace Frinkahedron.VeldridImplementation
 
         }
 
-        private static Vector4[] GenerateTangents(
+        private static IReadOnlyList<Vector4> GenerateTangents(
             IReadOnlyList<Vector3> vertices,
             IReadOnlyList<Vector3> normals,
             IReadOnlyList<Vector2> uvs,
@@ -179,6 +187,50 @@ namespace Frinkahedron.VeldridImplementation
                 tangents[i] = new Vector4(tangent.X, tangent.Y, tangent.Z, w);
             }
             return tangents;
+        }
+
+        public static IReadOnlyList<Vector3> GenerateNormals(IReadOnlyList<Vector3> positions, IReadOnlyList<uint> indices)
+        {
+            Vector3[] normals = new Vector3[positions.Count];
+
+            // Initialize normals to zero
+            for (int i = 0; i < normals.Length; i++)
+                normals[i] = Vector3.Zero;
+
+            // Iterate over each triangle
+            for (int i = 0; i < indices.Count; i += 3)
+            {
+                int i0 = (int)indices[i];
+                int i1 = (int)indices[i + 1];
+                int i2 = (int)indices[i + 2];
+
+                Vector3 v0 = positions[i0];
+                Vector3 v1 = positions[i1];
+                Vector3 v2 = positions[i2];
+
+                // Compute edges
+                Vector3 edge1 = v1 - v0;
+                Vector3 edge2 = v2 - v0;
+
+                // Face normal (not normalized yet → weighted by triangle area)
+                Vector3 faceNormal = Vector3.Cross(edge1, edge2);
+
+                // Accumulate to each vertex
+                normals[i0] += faceNormal;
+                normals[i1] += faceNormal;
+                normals[i2] += faceNormal;
+            }
+
+            // Normalize all normals
+            for (int i = 0; i < normals.Length; i++)
+            {
+                if (normals[i] != Vector3.Zero)
+                    normals[i] = Vector3.Normalize(normals[i]);
+                else
+                    normals[i] = Vector3.UnitY; // fallback (arbitrary)
+            }
+
+            return normals;
         }
     }
 }
