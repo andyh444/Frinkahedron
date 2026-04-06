@@ -1,5 +1,4 @@
 ﻿using Frinkahedron.Core.Physics;
-using System.Diagnostics;
 using System.Numerics;
 
 namespace Frinkahedron.Core.Colliders
@@ -71,13 +70,22 @@ namespace Frinkahedron.Core.Colliders
                 bestNormal = -bestNormal;
             }
 
-            var contactPoints = CalculateContactPoints(boxA, positionA, axesA, boxB, positionB, axesB, bestNormal, bestPenetration);
-            if (contactPoints.Length == 0)
+            // Pick the reference face from whichever box has a face most aligned
+            // with the collision normal. This avoids degenerate clipping when the
+            // normal is nearly parallel to all faces of the first box.
+            float bestAlignA = MaxAbsDot(axesA, bestNormal);
+            float bestAlignB = MaxAbsDot(axesB, bestNormal);
+
+            Vector3[] contactPoints;
+            if (bestAlignA >= bestAlignB)
             {
-                // when it fails, doing the same thing in reverse often seems to just do the trick
-                // TODO: Get rid of the need for this
+                contactPoints = CalculateContactPoints(boxA, positionA, axesA, boxB, positionB, axesB, bestNormal, bestPenetration);
+            }
+            else
+            {
                 contactPoints = CalculateContactPoints(boxB, positionB, axesB, boxA, positionA, axesA, -bestNormal, bestPenetration);
             }
+
             return new CollisionManifold(contactPoints, bestNormal, bestPenetration);
         }
 
@@ -93,7 +101,7 @@ namespace Frinkahedron.Core.Colliders
         {
             const float DEPTH_THRESHOLD = 1e-3f;
 
-            BoxFace faceA = BoxFace.GetFace(positionA.Centre, axesA, boxA.Dimensions / 2, -normal); // note, this was originally +normal and faceB was -normal
+            BoxFace faceA = BoxFace.GetFace(positionA.Centre, axesA, boxA.Dimensions / 2, -normal);
             BoxFace faceB = BoxFace.GetFace(positionB.Centre, axesB, boxB.Dimensions / 2, normal);
 
             var intersection = ClipFaces(faceA, faceB);
@@ -107,15 +115,10 @@ namespace Frinkahedron.Core.Colliders
                 float depth = Vector3.Dot(faceA.Centre - p, normal);
                 depths[i] = depth;
 
-                if (depth <= DEPTH_THRESHOLD) // this was swapped when the normals were the other way around
+                if (depth <= DEPTH_THRESHOLD)
                 {
                     contactCount++;
-                    //contacts.Add((p, depth));
                 }
-            }
-            if (contactCount == 0)
-            {
-                //Debugger.Break();
             }
             if (contactCount <= 4)
             {
@@ -311,6 +314,20 @@ namespace Frinkahedron.Core.Colliders
                 }
             }
             return true;
+        }
+
+        private static float MaxAbsDot(Span<Vector3> axes, Vector3 direction)
+        {
+            float best = 0f;
+            foreach (var axis in axes)
+            {
+                float d = MathF.Abs(Vector3.Dot(axis, direction));
+                if (d > best)
+                {
+                    best = d;
+                }
+            }
+            return best;
         }
     }
 }
