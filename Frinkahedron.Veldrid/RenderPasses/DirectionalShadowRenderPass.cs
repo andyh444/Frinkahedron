@@ -121,9 +121,13 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
         private void DoDrawInstruction(DrawInstruction drawInstruction, CommandList commandList, IAssetManager assetManager)
         {
             var model = assetManager.GetModel(drawInstruction.ModelID);
+            int index = 0;
             foreach (var entity in model.Entities)
             {
-                DrawMesh(entity.Mesh, entity.Transform * drawInstruction.Transform, commandList);
+                if (drawInstruction.EnabledEntities is null || drawInstruction.EnabledEntities[index++])
+                {
+                    DrawMesh(entity.Mesh, entity.Transform * drawInstruction.Transform, commandList);
+                }
             }
         }
 

@@ -26,16 +26,25 @@ namespace Frinkahedron.WinformsEditor
 
             if (ofd.ShowDialog(this) == DialogResult.OK)
             {
-                veldridControl1.LoadModel(ofd.FileName);
+                veldridControl1.LoadModel(ofd.FileName, out var model);
                 var template = veldridControl1.GetGameObjectTemplate();
                 if (template.Renderable is ModelRenderableTemplate mrt)
                 {
                     mrt.ModelID = Path.GetFileNameWithoutExtension(ofd.FileName);
+                    mrt.EnabledEntities = null;
                 }
                 else
                 {
                     template.Renderable = new ModelRenderableTemplate { ModelID = Path.GetFileNameWithoutExtension(ofd.FileName) };
                 }
+                checkedListBox1.ItemCheck -= checkedListBox1_ItemCheck;
+                checkedListBox1.Items.Clear();
+                for (int i = 0; i < model.Entities.Count; i++)
+                {
+                    var index = checkedListBox1.Items.Add($"Entity {i + 1}");
+                    checkedListBox1.SetItemChecked(index, true);
+                }
+                checkedListBox1.ItemCheck += checkedListBox1_ItemCheck;
                 veldridControl1.GameObjectTemplateUpdated();
             }
         }
@@ -51,6 +60,28 @@ namespace Frinkahedron.WinformsEditor
         {
             var template = veldridControl1.GetGameObjectTemplate();
             template.Collider = e;
+            veldridControl1.GameObjectTemplateUpdated();
+        }
+
+        private void checkedListBox1_ItemCheck(object? sender, ItemCheckEventArgs e)
+        {
+            bool[] enabledEntities = new bool[checkedListBox1.Items.Count];
+            for (int i = 0; i < enabledEntities.Length; i++)
+            {
+                if (e.Index == i)
+                {
+                    enabledEntities[i] = e.NewValue == CheckState.Checked;
+                }
+                else
+                {
+                    enabledEntities[i] = checkedListBox1.GetItemChecked(i);
+                }
+            }
+            var template = veldridControl1.GetGameObjectTemplate();
+            if (template.Renderable is ModelRenderableTemplate mrt)
+            {
+                mrt.EnabledEntities = enabledEntities;
+            }
             veldridControl1.GameObjectTemplateUpdated();
         }
     }

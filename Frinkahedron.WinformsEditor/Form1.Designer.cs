@@ -32,6 +32,7 @@
             loadButton = new Button();
             transformControl1 = new TransformControl();
             colliderControl1 = new ColliderControl();
+            checkedListBox1 = new CheckedListBox();
             SuspendLayout();
             // 
             // veldridControl1
@@ -68,11 +69,21 @@
             colliderControl1.TabIndex = 3;
             colliderControl1.ColliderChanged += colliderControl1_ColliderChanged;
             // 
+            // checkedListBox1
+            // 
+            checkedListBox1.FormattingEnabled = true;
+            checkedListBox1.Location = new Point(5, 380);
+            checkedListBox1.Name = "checkedListBox1";
+            checkedListBox1.Size = new Size(161, 292);
+            checkedListBox1.TabIndex = 4;
+            checkedListBox1.ItemCheck += checkedListBox1_ItemCheck;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1109, 689);
+            Controls.Add(checkedListBox1);
             Controls.Add(colliderControl1);
             Controls.Add(transformControl1);
             Controls.Add(loadButton);
@@ -88,5 +99,6 @@
         private Button loadButton;
         private TransformControl transformControl1;
         private ColliderControl colliderControl1;
+        private CheckedListBox checkedListBox1;
     }
 }

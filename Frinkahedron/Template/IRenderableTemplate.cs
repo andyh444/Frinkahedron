@@ -15,7 +15,9 @@ namespace Frinkahedron.Core.Template
 
         public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
 
-        public IRenderable ToRenderable() => new ModelRenderable(ModelID, Transform);
+        public bool[]? EnabledEntities { get; set; }
+
+        public IRenderable ToRenderable() => new ModelRenderable(ModelID, Transform, EnabledEntities);
 
         public void TrySetTransform(Matrix4x4 newTransform)
         {

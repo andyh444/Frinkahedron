@@ -55,16 +55,20 @@ namespace Frinkahedron.WinformsEditor
             graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager);
 
             scene = new Scene(new Vector3(), Vector3.UnitZ, (float)Width / Height, []);
-            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(1)), new Vector3(1));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
+            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
+
             scene.CollisionsEnabled = false;
 
             gameState = new GameState(0.001f, scene);
             timer1.Enabled = true;
         }
 
-        public void LoadModel(string fileName)
+        public void LoadModel(string fileName, out Model? model)
         {
-            Model? model = null;
+            model = null;
             //try
             {
                 model = ModelLoader.LoadModel(graphicsDevice.ResourceFactory, graphicsDevice, fileName, null);
@@ -86,6 +90,7 @@ namespace Frinkahedron.WinformsEditor
 
         private void SetCurrentObject(GameObject obj)
         {
+            // TODO: This can be called multiple times in a single frame which is problematic as the objects don't get removed/added til the end of the frame
             if (currentObj is not null)
             {
                 scene.RemoveObject(currentObj);

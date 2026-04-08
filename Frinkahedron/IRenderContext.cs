@@ -14,12 +14,12 @@ namespace Frinkahedron.Core
     {
         public void DrawPrimitiveWireframe(Primitive primitive, Matrix4x4 transform);
 
-        public void DrawModel(string modelID, Matrix4x4 transform);
+        public void DrawModel(string modelID, Matrix4x4 transform, bool[]? enabledEntities);
     }
 
     public class DummyRenderContext : IRenderContext
     {
-        public void DrawModel(string modelID, Matrix4x4 transform)
+        public void DrawModel(string modelID, Matrix4x4 transform, bool[]? enabledEntities)
         {
         }
 
