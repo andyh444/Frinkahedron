@@ -56,13 +56,13 @@
             // 
             transformControl1.Location = new Point(12, 47);
             transformControl1.Name = "transformControl1";
-            transformControl1.Size = new Size(145, 111);
+            transformControl1.Size = new Size(145, 188);
             transformControl1.TabIndex = 2;
             transformControl1.TransformChanged += transformControl1_TransformChanged;
             // 
             // colliderControl1
             // 
-            colliderControl1.Location = new Point(5, 186);
+            colliderControl1.Location = new Point(5, 286);
             colliderControl1.Name = "colliderControl1";
             colliderControl1.Size = new Size(161, 79);
             colliderControl1.TabIndex = 3;

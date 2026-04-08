@@ -26,26 +26,17 @@ namespace Frinkahedron.WinformsEditor
             float yRot = (float)yRotationInput.Value * MathF.PI / 180;
             float zRot = (float)zRotationInput.Value * MathF.PI / 180;
 
+            float xTrans = (float)xTranslationInput.Value;
+            float yTrans = (float)yTranslationInput.Value;
+            float zTrans = (float)zTranslationInput.Value;
+
             Quaternion rotation = Quaternion.CreateFromYawPitchRoll(yRot, xRot, zRot);
-            return Matrix4x4.CreateScale((float)scaleInput.Value) * Matrix4x4.CreateFromQuaternion(rotation);
+            return Matrix4x4.CreateScale((float)scaleInput.Value)
+                * Matrix4x4.CreateFromQuaternion(rotation)
+                * Matrix4x4.CreateTranslation(xTrans, yTrans, zTrans);
         }
 
-        private void xRotationInput_ValueChanged(object sender, EventArgs e)
-        {
-            TransformChanged?.Invoke(this, CalculateTransform());
-        }
-
-        private void yRotationInput_ValueChanged(object sender, EventArgs e)
-        {
-            TransformChanged?.Invoke(this, CalculateTransform());
-        }
-
-        private void zRotationInput_ValueChanged(object sender, EventArgs e)
-        {
-            TransformChanged?.Invoke(this, CalculateTransform());
-        }
-
-        private void scaleInput_ValueChanged(object sender, EventArgs e)
+        private void input_ValueChanged(object sender, EventArgs e)
         {
             TransformChanged?.Invoke(this, CalculateTransform());
         }
