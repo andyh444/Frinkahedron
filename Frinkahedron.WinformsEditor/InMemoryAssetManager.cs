@@ -37,6 +37,8 @@ namespace Frinkahedron.WinformsEditor
             }
         }
 
+        public bool HasModel(string name) => models.ContainsKey(name);
+
         public void AddModel(string name, Model model) => models[name] = model;
 
         public Model GetModel(string name) => models[name];

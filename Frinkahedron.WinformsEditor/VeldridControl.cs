@@ -2,6 +2,7 @@
 using Frinkahedron.Core.Colliders;
 using Frinkahedron.Core.Maths;
 using Frinkahedron.Core.Physics;
+using Frinkahedron.Core.Template;
 using Frinkahedron.TestApp;
 using Frinkahedron.VeldridImplementation;
 using System;
@@ -26,16 +27,20 @@ namespace Frinkahedron.WinformsEditor
         private Scene? scene;
         private InMemoryAssetManager? assetManager;
         private GameState? gameState;
+        private GameObjectTemplate gameObjectTemplate;
         private GameObject? currentObj;
-        private Matrix4x4 currentTransform;
-        private IShape? currentShape;
+        private OrbitalCameraMouseBehaviour behaviour;
         private readonly UserControlInputListener userControlInputListener;
 
         public VeldridControl()
         {
             InitializeComponent();
             userControlInputListener = new UserControlInputListener(this);
+            gameObjectTemplate = new GameObjectTemplate();
+            behaviour = new OrbitalCameraMouseBehaviour();
         }
+
+        public GameObjectTemplate GetGameObjectTemplate() => gameObjectTemplate;
 
         protected override void OnHandleCreated(EventArgs e)
         {
@@ -55,7 +60,6 @@ namespace Frinkahedron.WinformsEditor
 
             gameState = new GameState(0.001f, scene);
             timer1.Enabled = true;
-            currentTransform = Matrix4x4.Identity;
         }
 
         public void LoadModel(string fileName)
@@ -71,52 +75,16 @@ namespace Frinkahedron.WinformsEditor
             }
             if (model is not null)
             {
-                SetModel(Path.GetFileNameWithoutExtension(fileName), model);
+                assetManager.AddModel(Path.GetFileNameWithoutExtension(fileName), model);
             }
         }
 
-        public void UpdateTransform(Matrix4x4 transform)
+        public void GameObjectTemplateUpdated()
         {
-            currentTransform = transform;
-            if (currentObj is not null)
-            {
-                GameObject obj = new GameObject(new Vector3(),
-                    behaviour: currentObj.Behaviour,
-                    colliderShape: currentObj.Collider,
-                    rigidBody: null,
-                    renderable: new ModelRenderable((currentObj.Renderable as ModelRenderable).ModelID, currentTransform));
-
-                SetObject(obj);
-            }
+            SetCurrentObject(gameObjectTemplate.ToGameObject(new Vector3(), [behaviour]));
         }
 
-        public void UpdateCollider(IShape shape)
-        {
-            currentShape = shape;
-            if (currentObj is not null)
-            {
-                GameObject obj = new GameObject(new Vector3(),
-                    behaviour: currentObj.Behaviour,
-                    colliderShape: currentShape,
-                    rigidBody: null,
-                    renderable: currentObj.Renderable);
-
-                SetObject(obj);
-            }
-        }
-
-        public void SetModel(string name, Model model)
-        {
-            assetManager.AddModel(name, model);
-            GameObject obj = new GameObject(new Vector3(),
-                behaviour: new OrbitalCameraMouseBehaviour(),
-                colliderShape: currentShape,
-                rigidBody: null,
-                renderable: new ModelRenderable(name, currentTransform));
-            SetObject(obj);
-        }
-
-        public void SetObject(GameObject obj)
+        private void SetCurrentObject(GameObject obj)
         {
             if (currentObj is not null)
             {
@@ -154,9 +122,9 @@ namespace Frinkahedron.WinformsEditor
             {
                 renderPass.RenderScene(graphicsDevice, graphicsResources.CommandList, graphicsResources, scene, context.DrawInstructions);
             }
-            graphicsDevice.SwapBuffers();
             graphicsResources.CommandList.End();
             graphicsDevice.SubmitCommands(graphicsResources.CommandList);
+            graphicsDevice.SwapBuffers();
         }
     }
 }

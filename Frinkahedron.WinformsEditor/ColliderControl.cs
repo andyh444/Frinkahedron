@@ -1,4 +1,5 @@
 ﻿using Frinkahedron.Core.Colliders;
+using Frinkahedron.Core.Template;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +14,7 @@ namespace Frinkahedron.WinformsEditor
 {
     public partial class ColliderControl : UserControl
     {
-        public event EventHandler<IShape>? ColliderChanged;
+        public event EventHandler<IShapeTemplate>? ColliderChanged;
 
         public ColliderControl()
         {
@@ -26,7 +27,7 @@ namespace Frinkahedron.WinformsEditor
             float yDim = (float)yDimensionInput.Value;
             float zDim = (float)zDimensionInput.Value;
 
-            Box box = new Box(new System.Numerics.Vector3(xDim, yDim, zDim));
+            BoxTemplate box = new BoxTemplate { Dimensions = new System.Numerics.Vector3(xDim, yDim, zDim) };
             ColliderChanged?.Invoke(this, box);
         }
     }
