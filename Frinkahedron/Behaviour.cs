@@ -53,60 +53,129 @@ namespace Frinkahedron.Core
         public float minPitch = -0.45f * MathF.PI;
         public float maxPitch = 0.45f * MathF.PI;
 
+        private float? _smoothedYaw = null;
+        private float _smoothedPitch = 0f;
+        private float _baseDistance = 25f;
+        private float _maxDistance = 35f;
+        private float _heightOffset = 3f;
+        private float _tiltAngle = MathF.PI / 24f;
+        private float _speedThreshold = 3f;
+        private float _reverseTransitionSpeed = 8f;
+
         public override void Update(GameObject self, GameState gameState)
         {
-            Vector3 currentDirection = gameState.Scene.Camera.LookDirection;
-            if (gameState.Input.IsMouseButtonDown(MouseButton.Right))
-            {
-                var rotation = Quaternion.CreateFromYawPitchRoll(yawOverride, pitchOverride, 0f);
-                currentDirection = Vector3.Transform(currentDirection, rotation);
-            }
+            float dt = gameState.DeltaTime;
+            Vector3 carForward = Vector3.Transform(Vector3.UnitZ, self.Position.Orientation);
             float currentSpeed = self.RigidBody.Velocity.Length();
+            float forwardSpeed = Vector3.Dot(self.RigidBody.Velocity, carForward);
 
+            // --- Determine target direction ---
             Vector3 targetDirection;
-            if (MathF.Abs(currentSpeed) > 1)
+            if (currentSpeed > _speedThreshold)
             {
-                targetDirection = Vector3.Normalize(self.RigidBody.Velocity);
+                // Use velocity direction, but only flip to reverse at a higher threshold
+                // to avoid jittery transitions
+                Vector3 velocityDir = Vector3.Normalize(self.RigidBody.Velocity);
+
+                if (forwardSpeed < -_reverseTransitionSpeed)
+                {
+                    // Clearly reversing: look backward
+                    targetDirection = velocityDir;
+                }
+                else if (forwardSpeed < 0)
+                {
+                    // Transitioning to reverse: stick with car forward to avoid sudden flip
+                    targetDirection = carForward;
+                }
+                else
+                {
+                    targetDirection = velocityDir;
+                }
             }
             else
             {
-                targetDirection = Vector3.Transform(Vector3.UnitZ, self.Position.Orientation);
+                // At low speed, use car's forward orientation
+                targetDirection = carForward;
             }
-            Vector3 right = Vector3.Cross(Vector3.UnitY, targetDirection);
-            targetDirection = Vector3.Transform(targetDirection, Quaternion.CreateFromAxisAngle(right, MathF.PI / 16));
 
-            float stiffness = Math.Clamp(currentSpeed * currentSpeed, 0.1f, 20f) * gameState.DeltaTime;
+            // --- Decompose target into yaw and pitch ---
+            float targetYaw = MathF.Atan2(targetDirection.X, targetDirection.Z);
+            float targetPitch = -_tiltAngle; // subtle downward tilt
+
+            // --- Mouse override ---
             if (gameState.Input.IsMouseButtonDown(MouseButton.Right))
             {
                 Vector2 delta = gameState.Input.GetMouseDelta();
-                yawOverride += delta.X * sensitivity * gameState.DeltaTime;
-                pitchOverride -= delta.Y * sensitivity * gameState.DeltaTime;
+                yawOverride += delta.X * sensitivity * dt;
+                pitchOverride -= delta.Y * sensitivity * dt;
                 pitchOverride = Math.Clamp(pitchOverride, minPitch, maxPitch);
-                var rotation = Quaternion.CreateFromYawPitchRoll(-yawOverride, -pitchOverride, 0f);
+                targetYaw -= yawOverride;
+                targetPitch -= pitchOverride;
+            }
+            else
+            {
+                // Smoothly decay overrides back to zero
+                yawOverride *= MathF.Exp(-5f * dt);
+                pitchOverride *= MathF.Exp(-5f * dt);
+                if (MathF.Abs(yawOverride) < 0.001f) yawOverride = 0f;
+                if (MathF.Abs(pitchOverride) < 0.001f) pitchOverride = 0f;
+            }
 
-                targetDirection = Vector3.Transform(targetDirection, rotation);
+            // --- Compute stiffness using a smoother curve ---
+            float stiffness;
+            if (gameState.Input.IsMouseButtonDown(MouseButton.Right))
+            {
                 stiffness = 1f;
             }
             else
             {
-                yawOverride = 0f;
-                pitchOverride = 0f;
+                // Smooth ramp: speed / (speed + k), reaches ~0.5 at speed=k
+                float normalizedSpeed = currentSpeed / (currentSpeed + 10f);
+                stiffness = Math.Clamp(normalizedSpeed * 4f * dt, 0.02f * dt, 1f);
             }
 
-            Vector3 newDirection = Vector3.Lerp(currentDirection, targetDirection, Math.Clamp(stiffness, 0f, 1f));
+            // --- Initialize on first frame ---
+            if (_smoothedYaw is null)
+            {
+                _smoothedYaw = targetYaw;
+                _smoothedPitch = targetPitch;
+            }
 
-            
+            // --- Interpolate yaw using angular shortest-path ---
+            float yawDiff = targetYaw - _smoothedYaw.Value;
+            // Wrap to [-PI, PI] so the camera always takes the short way around
+            yawDiff = MathF.IEEERemainder(yawDiff, 2f * MathF.PI);
+            _smoothedYaw += yawDiff * Math.Clamp(stiffness, 0f, 1f);
 
-            gameState.Scene.Camera.SetValues(self.Position.Centre - 25 * newDirection + 1 * Vector3.UnitY, newDirection);
+            // --- Interpolate pitch linearly ---
+            _smoothedPitch += (targetPitch - _smoothedPitch) * Math.Clamp(stiffness, 0f, 1f);
+
+            // --- Reconstruct direction from yaw/pitch ---
+            Vector3 newDirection = new Vector3(
+                MathF.Cos(_smoothedPitch) * MathF.Sin(_smoothedYaw.Value),
+                MathF.Sin(_smoothedPitch),
+                MathF.Cos(_smoothedPitch) * MathF.Cos(_smoothedYaw.Value)
+            );
+            newDirection = Vector3.Normalize(newDirection);
+
+            // --- Distance varies with speed ---
+            float speedRatio = Math.Clamp(currentSpeed / 100f, 0f, 1f);
+            float distance = float.Lerp(_baseDistance, _maxDistance, speedRatio);
+
+            gameState.Scene.Camera.SetValues(
+                self.Position.Centre - distance * newDirection + _heightOffset * Vector3.UnitY,
+                newDirection);
         }
     }
 
     public class CarBehaviour : Behaviour
     {
-        const float ACCEL_FORCE = 40f;
-        const float MAX_SPEED = 500f;
+        const float ACCEL_FORCE = 80f;
+        const float MAX_SPEED = 800f;
         const float LATERAL_FRICTION = 8f;
-        const float HANDBRAKE_LATERAL_FRICTION = 0.5f;
+        const float HANDBRAKE_LATERAL_FRICTION = 1.5f;
+        const float HANDBRAKE_FORWARD_DRAG = 3f;
+        const float HANDBRAKE_STEER_SPEED = 75f;
         const float STEER_SPEED = 25.5f;
 
         public override void Update(GameObject self, GameState gameState)
@@ -148,12 +217,24 @@ namespace Frinkahedron.Core
             float verticalSpeed = Vector3.Dot(velocity, groundNormal.Value);
 
             // --- Apply acceleration ---
-            forwardSpeed += accelInput * ACCEL_FORCE * dt;
+            if (!handbrakeOn)
+            {
+                forwardSpeed += accelInput * ACCEL_FORCE * dt;
+            }
+            else
+            {
+                // Handbrake locks rear wheels: apply forward drag to simulate braking
+                forwardSpeed *= MathF.Exp(-HANDBRAKE_FORWARD_DRAG * dt);
+
+                // Still allow a small amount of throttle input to power through drifts
+                forwardSpeed += accelInput * ACCEL_FORCE * 0.3f * dt;
+            }
 
             // Clamp max speed
             forwardSpeed = Math.Clamp(forwardSpeed, -MAX_SPEED, MAX_SPEED);
 
-            // --- Apply lateral friction (kills sideways sliding) ---
+            // --- Apply lateral friction ---
+            // Handbrake reduces grip, allowing the car to slide sideways (drift)
             float lateralFriction = handbrakeOn ? HANDBRAKE_LATERAL_FRICTION : LATERAL_FRICTION;
             lateralSpeed *= MathF.Exp(-lateralFriction * dt);
 
@@ -164,7 +245,8 @@ namespace Frinkahedron.Core
 
             // --- Steering (based on forward speed) ---
             float speedFactor = forwardSpeed / MAX_SPEED;
-            float steerAmount = steerInput * STEER_SPEED * speedFactor * dt;
+            var steerSpeed = handbrakeOn ? HANDBRAKE_STEER_SPEED : STEER_SPEED;
+            float steerAmount = steerInput * steerSpeed * speedFactor * dt;
 
             if (Math.Abs(forwardSpeed) > 0.1f)
             {
