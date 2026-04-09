@@ -59,6 +59,9 @@ namespace Frinkahedron.TestApp
         {
             Box carBox = new Box(new Vector3(2.7f, 1.8f, 6.7f));
             float carMass = 1 * carBox.CalculateVolume();
+
+            var transform = Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(0.01f) * Matrix4x4.CreateTranslation(0, -1, 0.2f);
+
             GameObject carObj = new GameObject(new Vector3(-30, -13, 0),
                 new CompositeBehaviour([new CarCameraFollowBehaviour(), new CarBehaviour()]),
                 carBox,
@@ -69,7 +72,10 @@ namespace Frinkahedron.TestApp
                     Gravity = true,
                     Material = new PhysicsMaterial(0.2f, 0.8f)
                 },
-                new ModelRenderable("car", Matrix4x4.CreateRotationX(-MathF.PI / 2) * Matrix4x4.CreateScale(0.01f) * Matrix4x4.CreateTranslation(0, -1, 0.2f)));
+                new CompositeRenderable([
+                    new ModelEntityRenderable("car", 0, transform),
+                    new ModelEntityRenderable("car", 1, transform),
+                    ]));
             sceneBuilder.AddObject(carObj);
         }
 

@@ -16,6 +16,7 @@ namespace Frinkahedron.VeldridImplementation
         public enum InstructionType
         {
             Model,
+            ModelEntity,
             Primitive
         }
 
@@ -23,7 +24,7 @@ namespace Frinkahedron.VeldridImplementation
         {
             public required InstructionType InstructionType { get; init; }
             public string ModelID { get; init; }
-            public bool[]? EnabledEntities { get; init; }
+            public int EntityIndex { get; init; }
             public Primitive Primitive { get; init; }
             public required Matrix4x4 Transform { get; init; }
         };
@@ -37,13 +38,23 @@ namespace Frinkahedron.VeldridImplementation
             drawInstructions = new List<DrawInstruction>();
         }
 
-        public void DrawModel(string modelID, Matrix4x4 transform, bool[]? enabledEntities)
+        public void DrawModel(string modelID, Matrix4x4 transform)
         {
             drawInstructions.Add(new DrawInstruction
             {
                 InstructionType = InstructionType.Model,
                 ModelID = modelID,
-                EnabledEntities = enabledEntities,
+                Transform = transform
+            });
+        }
+
+        public void DrawModelEntity(string modelID, int entityIndex, Matrix4x4 transform)
+        {
+            drawInstructions.Add(new DrawInstruction
+            {
+                InstructionType = InstructionType.ModelEntity,
+                EntityIndex = entityIndex,
+                ModelID = modelID,
                 Transform = transform
             });
         }

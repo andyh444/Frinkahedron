@@ -4,6 +4,7 @@ namespace Frinkahedron.Core
 {
     public enum Primitive
     {
+        None,
         Box,
         Ellipsoid,
         Cylinder,
@@ -14,12 +15,18 @@ namespace Frinkahedron.Core
     {
         public void DrawPrimitiveWireframe(Primitive primitive, Matrix4x4 transform);
 
-        public void DrawModel(string modelID, Matrix4x4 transform, bool[]? enabledEntities);
+        public void DrawModel(string modelID, Matrix4x4 transform);
+
+        public void DrawModelEntity(string modelID, int entityIndex, Matrix4x4 transform);
     }
 
     public class DummyRenderContext : IRenderContext
     {
-        public void DrawModel(string modelID, Matrix4x4 transform, bool[]? enabledEntities)
+        public void DrawModel(string modelID, Matrix4x4 transform)
+        {
+        }
+
+        public void DrawModelEntity(string modelID, int entityIndex, Matrix4x4 transform)
         {
         }
 

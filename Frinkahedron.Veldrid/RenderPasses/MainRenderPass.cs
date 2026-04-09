@@ -147,19 +147,21 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 {
                     DoDrawInstruction(instruction, commandList, graphicsResources.AssetManager);
                 }
+                else if (instruction.InstructionType is InstructionType.ModelEntity)
+                {
+                    var model = graphicsResources.AssetManager.GetModel(instruction.ModelID);
+                    var entity = model.Entities[instruction.EntityIndex];
+                    DrawMesh(entity.Mesh, instruction.Transform, entity.ColourTexture, entity.NormalMap, entity.MetallicRoughnessMap, commandList);
+                }
             }
         }
 
         private void DoDrawInstruction(DrawInstruction drawInstruction, CommandList commandList, IAssetManager assetManager)
         {
             var model = assetManager.GetModel(drawInstruction.ModelID);
-            int index = 0;
             foreach (var entity in model.Entities)
             {
-                if (drawInstruction.EnabledEntities is null || drawInstruction.EnabledEntities[index++])
-                {
-                    DrawMesh(entity.Mesh, entity.Transform * drawInstruction.Transform, entity.ColourTexture, entity.NormalMap, entity.MetallicRoughnessMap, commandList);
-                }
+                DrawMesh(entity.Mesh, entity.Transform * drawInstruction.Transform, entity.ColourTexture, entity.NormalMap, entity.MetallicRoughnessMap, commandList);
             }
         }
 
