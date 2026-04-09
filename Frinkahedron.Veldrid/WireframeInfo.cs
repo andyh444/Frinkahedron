@@ -26,7 +26,7 @@ namespace Frinkahedron.VeldridImplementation
         public static WireframeInfo Create(WireframeMesh mesh, GraphicsDevice graphicsDevice)
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
-            var vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Vertices.Length * TexVertex.SizeInBytes, BufferUsage.VertexBuffer));
+            var vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Vertices.Length * ColourVertex.SizeInBytes, BufferUsage.VertexBuffer));
             var indexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Indices.Length * IndexLine.SizeInBytes, BufferUsage.IndexBuffer));
 
             graphicsDevice.UpdateBuffer(vertexBuffer, 0, mesh.Vertices);

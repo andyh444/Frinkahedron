@@ -50,6 +50,7 @@ namespace Frinkahedron.Core
 
         public void Update(GameState gameState)
         {
+            float originalDeltaTime = gameState.DeltaTime;
             gameState.DeltaTime /= TicksPerUpdate;
             for (int i = 0; i < TicksPerUpdate; i++)
             {
@@ -73,6 +74,7 @@ namespace Frinkahedron.Core
                 }
                 gameState.Input.Clear();
             }
+            gameState.DeltaTime = originalDeltaTime;
         }
 
         private void ResolveAllCollisions()
@@ -91,7 +93,7 @@ namespace Frinkahedron.Core
 
             ConcurrentBag<(int, int)> collisionPairs = new ConcurrentBag<(int, int)>();
             //for (int i = 0; i < aabbs.Count; i++)
-            Parallel.For(0, worldRigidBodies.Length, i =>
+            Parallel.For(0, index, i =>
             {
                 ref var bodyA = ref worldRigidBodies[i];
                 for (int j = i + 1; j < worldRigidBodies.Length; j++)

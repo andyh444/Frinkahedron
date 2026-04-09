@@ -24,7 +24,7 @@ namespace Frinkahedron.Core.Colliders
 
         public float CalculateVolume()
         {
-            return (4f / 3f) * Radius * Radius * Radius;
+            return (4f / 3f) * MathF.PI * Radius * Radius * Radius;
         }
 
         public void Draw(IRenderContext renderer, Matrix4x4 position)

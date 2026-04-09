@@ -40,7 +40,7 @@ namespace Frinkahedron.Core.Colliders
             float Ihem_perp = (83f / 320f) * hemisphereMass * r2;
 
             // Apply parallel axis theorem
-            float Iaxis_shift = Ihem_axis + hemisphereMass * d * d;
+            float Iaxis_shift = Ihem_axis;
             float Iperp_shift = Ihem_perp + hemisphereMass * d * d;
 
             i2 += 2f * Iaxis_shift;

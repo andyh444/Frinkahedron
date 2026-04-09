@@ -41,7 +41,7 @@ namespace Frinkahedron.Core.Physics
         {
             // in our case, the neutral cylinder is oriented along the y-axis
             float iy = 0.5f * mass * radius * radius;
-            float ix = TWELFTH * mass * (3 * radius * radius * height * height);
+            float ix = TWELFTH * mass * (3 * radius * radius + height * height);
             float iz = ix;
             return new DiagonalMatrix3x3(new Vector3(ix, iy, iz));
         }
