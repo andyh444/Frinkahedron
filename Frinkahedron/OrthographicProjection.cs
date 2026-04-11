@@ -2,51 +2,65 @@
 
 namespace Frinkahedron
 {
-    public class OrthographicProjection(float width, float aspectRatio, float near, float far) : IProjection
+    public class OrthographicProjection : IProjection
     {
+        private float width;
+        private float aspectRatio;
+        private float near;
+        private float far;
+
         public Matrix4x4 Matrix { get; private set; }
 
         public ProjectionType ProjectionType => ProjectionType.Orthographic;
 
         public float Width
         {
-            get;
+            get => width;
             set
             {
-                field = value;
+                width = value;
                 UpdateMatrix();
             }
-        } = width;
+        }
 
         public float AspectRatio
         {
-            get;
+            get => aspectRatio;
             set
             {
-                field = value;
+                aspectRatio = value;
                 UpdateMatrix();
             }
-        } = aspectRatio;
+        }
 
         public float Near
         {
-            get;
+            get => near;
             set
             {
-                field = value;
+                near = value;
                 UpdateMatrix();
             }
-        } = near;
+        }
 
         public float Far
         {
-            get;
+            get => far;
             set
             {
-                field = value;
+                far = value;
                 UpdateMatrix();
             }
-        } = far;
+        }
+
+        public OrthographicProjection(float width, float aspectRatio, float near, float far)
+        {
+            this.width = width;
+            this.aspectRatio = aspectRatio;
+            this.near = near;
+            this.far = far;
+            UpdateMatrix();
+        }
 
         private void UpdateMatrix()
         {

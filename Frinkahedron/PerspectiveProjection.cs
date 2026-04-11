@@ -2,51 +2,65 @@
 
 namespace Frinkahedron
 {
-    public class PerspectiveProjection(float fov, float aspectRatio, float near, float far) : IProjection
+    public class PerspectiveProjection : IProjection
     {
+        private float foV;
+        private float aspectRatio;
+        private float near;
+        private float far;
+
         public Matrix4x4 Matrix { get; private set; }
 
         public ProjectionType ProjectionType => ProjectionType.Perspective;
 
         public float FoV
         {
-            get;
+            get => foV;
             set
             {
-                field = value;
+                foV = value;
                 UpdateMatrix();
             }
-        } = fov;
+        }
 
         public float AspectRatio
         {
-            get;
+            get => aspectRatio;
             set
             {
-                field = value;
+                aspectRatio = value;
                 UpdateMatrix();
             }
-        } = aspectRatio;
+        }
 
         public float Near
         {
-            get;
+            get => near;
             set
             {
-                field = value;
+                near = value;
                 UpdateMatrix();
             }
-        } = near;
+        }
 
         public float Far
         {
-            get;
+            get => far;
             set
             {
-                field = value;
+                far = value;
                 UpdateMatrix();
             }
-        } = far;
+        }
+
+        public PerspectiveProjection(float fov, float aspectRatio, float near, float far)
+        {
+            this.foV = fov;
+            this.aspectRatio = aspectRatio;
+            this.near = near;
+            this.far = far;
+            UpdateMatrix();
+        }
 
         private void UpdateMatrix()
         {
