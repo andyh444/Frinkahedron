@@ -5,6 +5,7 @@ using Frinkahedron.Core.Physics;
 using Frinkahedron.Core.Template;
 using Frinkahedron.TestApp;
 using Frinkahedron.VeldridImplementation;
+using Frinkahedron.WinformsEditor.GameObjectEditor;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,7 +19,7 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using Veldrid;
 
-namespace Frinkahedron.WinformsEditor
+namespace Frinkahedron.WinformsEditor.GameObjectEditor
 {
     public partial class VeldridControl : UserControl
     {
@@ -27,20 +28,24 @@ namespace Frinkahedron.WinformsEditor
         private Scene? scene;
         private InMemoryAssetManager? assetManager;
         private GameState? gameState;
-        private GameObjectTemplate gameObjectTemplate;
         private GameObject? currentObj;
         private OrbitalCameraMouseBehaviour behaviour;
+        private GameObjectTemplateEditor? editor;
         private readonly UserControlInputListener userControlInputListener;
 
         public VeldridControl()
         {
             InitializeComponent();
             userControlInputListener = new UserControlInputListener(this);
-            gameObjectTemplate = new GameObjectTemplate();
             behaviour = new OrbitalCameraMouseBehaviour();
         }
 
-        public GameObjectTemplate GetGameObjectTemplate() => gameObjectTemplate;
+        public void Initialise(GameObjectTemplateEditor editor)
+        {
+            this.editor = editor;
+            editor.TemplateChangedCallback = GameObjectTemplateUpdated;
+            editor.LoadModelFunc = LoadModel;
+        }
 
         protected override void OnHandleCreated(EventArgs e)
         {
@@ -54,21 +59,12 @@ namespace Frinkahedron.WinformsEditor
             assetManager.AddShadersFromFolder("Assets\\Shaders");
             graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager);
 
-            scene = new Scene(new Vector3(), Vector3.UnitZ, (float)Width / Height, []);
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
-            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
-
-            scene.CollisionsEnabled = false;
-
-            gameState = new GameState(0.001f, scene);
             timer1.Enabled = true;
         }
 
-        public void LoadModel(string fileName, out Model? model)
+        public ModelInfo? LoadModel(string fileName)
         {
-            model = null;
+            Model? model = null;
             //try
             {
                 model = ModelLoader.LoadModel(graphicsDevice.ResourceFactory, graphicsDevice, fileName, null);
@@ -79,24 +75,39 @@ namespace Frinkahedron.WinformsEditor
             }
             if (model is not null)
             {
-                assetManager.AddModel(Path.GetFileNameWithoutExtension(fileName), model);
+                string modelID = Path.GetFileNameWithoutExtension(fileName);
+                assetManager.AddModel(modelID, model);
+
+                return new ModelInfo(model, modelID);
             }
+            return null;
         }
 
-        public void GameObjectTemplateUpdated()
+        private void GameObjectTemplateUpdated()
         {
-            SetCurrentObject(gameObjectTemplate.ToGameObject(new Vector3(), [behaviour]));
+            SetCurrentObject(editor.Template.ToGameObject(new Vector3(), [behaviour]));
         }
 
         private void SetCurrentObject(GameObject obj)
         {
+            scene = new Scene(new Vector3(), Vector3.UnitZ, (float)Width / Height, []);
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
+            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
+            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
+
+            scene.CollisionsEnabled = false;
+            scene.AddObject(obj);
+
+            gameState = new GameState(0.001f, scene);
+
             // TODO: This can be called multiple times in a single frame which is problematic as the objects don't get removed/added til the end of the frame
-            if (currentObj is not null)
+            /*if (currentObj is not null)
             {
                 scene.RemoveObject(currentObj);
             }
             currentObj = obj;
-            scene.AddObject(obj);
+            scene.AddObject(obj);*/
         }
 
         private GraphicsDevice CreateGraphicsDevice()
@@ -115,6 +126,10 @@ namespace Frinkahedron.WinformsEditor
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (scene is null || gameState is null)
+            {
+                return;
+            }
             userControlInputListener.UpdateInput(gameState.Input);
 
             gameState.DeltaTime = timer1.Interval * 0.001f;

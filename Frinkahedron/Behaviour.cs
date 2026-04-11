@@ -33,7 +33,7 @@ namespace Frinkahedron.Core
                 pitch = Math.Clamp(pitch, minPitch, maxPitch);
             }
             var scrollDelta = gameState.Input.GetMouseScrollDelta();
-            distance -= 250 * scrollDelta * gameState.DeltaTime;
+            distance -= 10 * distance * scrollDelta * gameState.DeltaTime;
             distance = Math.Clamp(distance, 1, 500);
 
             var rotation = Quaternion.CreateFromYawPitchRoll(-yaw, -pitch, 0f);

@@ -28,11 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            veldridControl1 = new VeldridControl();
-            loadButton = new Button();
-            transformControl1 = new TransformControl();
+            veldridControl1 = new Frinkahedron.WinformsEditor.GameObjectEditor.VeldridControl();
             colliderControl1 = new ColliderControl();
-            checkedListBox1 = new CheckedListBox();
+            renderableTemplateControl1 = new Frinkahedron.WinformsEditor.GameObjectEditor.RenderableTemplateControl();
             SuspendLayout();
             // 
             // veldridControl1
@@ -43,50 +41,28 @@
             veldridControl1.Size = new Size(925, 665);
             veldridControl1.TabIndex = 0;
             // 
-            // loadButton
-            // 
-            loadButton.Location = new Point(22, 18);
-            loadButton.Name = "loadButton";
-            loadButton.Size = new Size(94, 23);
-            loadButton.TabIndex = 1;
-            loadButton.Text = "Load Model";
-            loadButton.UseVisualStyleBackColor = true;
-            loadButton.Click += loadButton_Click;
-            // 
-            // transformControl1
-            // 
-            transformControl1.Location = new Point(12, 47);
-            transformControl1.Name = "transformControl1";
-            transformControl1.Size = new Size(145, 188);
-            transformControl1.TabIndex = 2;
-            transformControl1.TransformChanged += transformControl1_TransformChanged;
-            // 
             // colliderControl1
             // 
-            colliderControl1.Location = new Point(5, 286);
+            colliderControl1.Location = new Point(5, 586);
             colliderControl1.Name = "colliderControl1";
             colliderControl1.Size = new Size(161, 79);
             colliderControl1.TabIndex = 3;
             colliderControl1.ColliderChanged += colliderControl1_ColliderChanged;
             // 
-            // checkedListBox1
+            // renderableTemplateControl1
             // 
-            checkedListBox1.FormattingEnabled = true;
-            checkedListBox1.Location = new Point(5, 380);
-            checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(161, 292);
-            checkedListBox1.TabIndex = 4;
-            checkedListBox1.ItemCheck += checkedListBox1_ItemCheck;
+            renderableTemplateControl1.Location = new Point(5, 12);
+            renderableTemplateControl1.Name = "renderableTemplateControl1";
+            renderableTemplateControl1.Size = new Size(161, 414);
+            renderableTemplateControl1.TabIndex = 4;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1109, 689);
-            Controls.Add(checkedListBox1);
+            Controls.Add(renderableTemplateControl1);
             Controls.Add(colliderControl1);
-            Controls.Add(transformControl1);
-            Controls.Add(loadButton);
             Controls.Add(veldridControl1);
             Name = "Form1";
             Text = "Form1";
@@ -95,10 +71,8 @@
 
         #endregion
 
-        private VeldridControl veldridControl1;
-        private Button loadButton;
-        private TransformControl transformControl1;
+        private GameObjectEditor.VeldridControl veldridControl1;
         private ColliderControl colliderControl1;
-        private CheckedListBox checkedListBox1;
+        private GameObjectEditor.RenderableTemplateControl renderableTemplateControl1;
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Frinkahedron.WinformsEditor
+﻿namespace Frinkahedron.WinformsEditor.GameObjectEditor
 {
     partial class VeldridControl
     {
