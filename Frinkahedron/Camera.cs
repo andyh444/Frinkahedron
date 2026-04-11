@@ -2,6 +2,25 @@
 
 namespace Frinkahedron
 {
+    public enum ProjectionType
+    {
+        Perspective,
+        Orthographic
+    }
+
+    public interface IProjection
+    {
+        Matrix4x4 Matrix { get; }
+
+        ProjectionType ProjectionType { get; }
+
+        float AspectRatio { get; }
+
+        float Near { get; }
+
+        float Far { get; }
+    }
+
     public class Camera
     {
         public Vector3 Position { get; private set; }
@@ -10,14 +29,15 @@ namespace Frinkahedron
 
         public Matrix4x4 ViewMatrix { get; private set; }
 
-        public Matrix4x4 ProjectionMatrix { get; private set; }
+        public IProjection Projection { get; private set; }
 
-        private Camera(Vector3 initialPosition, Vector3 initialDirection, Matrix4x4 projectionMatrix)
+        public ProjectionType ProjectionType => Projection.ProjectionType;
+
+        private Camera(Vector3 initialPosition, Vector3 initialDirection, IProjection projection)
         {
             Position = initialPosition;
             LookDirection = initialDirection;
-
-            ProjectionMatrix = projectionMatrix;
+            Projection = projection;
             ViewMatrix = CreateViewMatrix();
         }
 
@@ -26,15 +46,25 @@ namespace Frinkahedron
             return new Camera(
                 initialPosition,
                 initialDirection,
-                CreatePerspective(MathF.PI / 4, screenAspectRatio, 0.1f, 1000f));
+                new PerspectiveProjection(MathF.PI / 4, screenAspectRatio, 1.0f, 1000f));
         }
 
-        public static Camera CreateOrthoCamera(Vector3 initialPosition, Vector3 initialDirection)
+        public static Camera CreateOrthoCamera(Vector3 initialPosition, Vector3 initialDirection, float width, float screenAspectRatio)
         {
             return new Camera(
                 initialPosition,
                 initialDirection,
-                CreateOrtho(false, -100, 100, -100, 100, 1.0f, 1000f));
+                new OrthographicProjection(width, screenAspectRatio, 1.0f, 1000f));
+        }
+
+        public void MakePerspective(float fov, float aspectRatio, float near, float far)
+        {
+            Projection = new PerspectiveProjection(fov, aspectRatio, near, far);
+        }
+
+        public void MakeOrtho(float width, float aspectRatio, float near, float far)
+        {
+            Projection = new OrthographicProjection(width, aspectRatio, near, far);
         }
 
         public void SetValues(Vector3 position, Vector3 direction)
@@ -77,7 +107,7 @@ namespace Frinkahedron
             Vector4 nearClip = new Vector4(screenPosition.X, screenPosition.Y, 0.0f, 1.0f);
             Vector4 farClip = new Vector4(screenPosition.X, screenPosition.Y, 1.0f, 1.0f);
 
-            _ = Matrix4x4.Invert(ProjectionMatrix, out var inverseProjection);
+            _ = Matrix4x4.Invert(Projection.Matrix, out var inverseProjection);
             _ = Matrix4x4.Invert(ViewMatrix, out var inverseView);
 
             Vector4 nearView = Vector4.Transform(nearClip, inverseProjection);
@@ -98,72 +128,6 @@ namespace Frinkahedron
         private Matrix4x4 CreateViewMatrix()
         {
             return Matrix4x4.CreateLookAt(Position, Position + LookDirection, Vector3.UnitY);
-        }
-
-        //private static Matrix4x4 CreatePerspective(float fov, float aspectRatio, float near, float far)
-        //{
-        //    return Matrix4x4.CreatePerspectiveFieldOfView(fov, aspectRatio, near, far);
-        //}
-
-        private static Matrix4x4 CreatePerspective(float fov, float aspectRatio, float near, float far)
-        {
-            if (fov <= 0.0f || fov >= MathF.PI)
-                throw new ArgumentOutOfRangeException(nameof(fov));
-
-            if (near <= 0.0f)
-                throw new ArgumentOutOfRangeException(nameof(near));
-
-            if (far <= 0.0f)
-                throw new ArgumentOutOfRangeException(nameof(far));
-
-            float yScale = 1.0f / MathF.Tan(fov * 0.5f);
-            float xScale = yScale / aspectRatio;
-
-            Matrix4x4 result;
-
-            result.M11 = xScale;
-            result.M12 = result.M13 = result.M14 = 0.0f;
-
-            result.M22 = yScale;
-            result.M21 = result.M23 = result.M24 = 0.0f;
-
-            result.M31 = result.M32 = 0.0f;
-            var negFarRange = float.IsPositiveInfinity(far) ? -1.0f : far / (near - far);
-            result.M33 = negFarRange;
-            result.M34 = -1.0f;
-
-            result.M41 = result.M42 = result.M44 = 0.0f;
-            result.M43 = near * negFarRange;
-
-            return result;
-        }
-
-        private static Matrix4x4 CreateOrtho(
-            bool useReverseDepth,
-            float left, float right,
-            float bottom, float top,
-            float near, float far)
-        {
-            Matrix4x4 ortho;
-            if (useReverseDepth)
-            {
-                ortho = Matrix4x4.CreateOrthographicOffCenter(left, right, bottom, top, far, near);
-            }
-            else
-            {
-                ortho = Matrix4x4.CreateOrthographicOffCenter(left, right, bottom, top, near, far);
-            }
-            bool isClipSpaceYInverted = false;
-            if (isClipSpaceYInverted)
-            {
-                ortho *= new Matrix4x4(
-                    1, 0, 0, 0,
-                    0, -1, 0, 0,
-                    0, 0, 1, 0,
-                    0, 0, 0, 1);
-            }
-
-            return ortho;
         }
     }
 }

@@ -103,7 +103,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
             CameraMatrixInfo cameraMatrixInfo = new CameraMatrixInfo
             {
-                Projection = lightCamera.ProjectionMatrix,
+                Projection = lightCamera.Projection.Matrix,
                 View = lightCamera.ViewMatrix,
             };
 

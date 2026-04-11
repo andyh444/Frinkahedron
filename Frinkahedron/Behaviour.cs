@@ -33,8 +33,15 @@ namespace Frinkahedron.Core
                 pitch = Math.Clamp(pitch, minPitch, maxPitch);
             }
             var scrollDelta = gameState.Input.GetMouseScrollDelta();
+            
             distance -= 10 * distance * scrollDelta * gameState.DeltaTime;
             distance = Math.Clamp(distance, 1, 500);
+
+            if (gameState.Scene.Camera.ProjectionType is ProjectionType.Orthographic
+                && gameState.Scene.Camera.Projection is OrthographicProjection op)
+            {
+                op.Width -= 10 * op.Width * scrollDelta * gameState.DeltaTime;
+            }
 
             var rotation = Quaternion.CreateFromYawPitchRoll(-yaw, -pitch, 0f);
             Vector3 offset = Vector3.Transform(new Vector3(0, 0, -distance), rotation);

@@ -122,7 +122,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             DirectionalLightInfo directionalLight = scene.GetDirectionalLight();
             CameraMatrixInfo cameraMatrixInfo = new CameraMatrixInfo
             {
-                Projection = scene.Camera.ProjectionMatrix,
+                Projection = scene.Camera.Projection.Matrix,
                 View = scene.Camera.ViewMatrix,
             };
 
@@ -131,7 +131,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 var lightCam = scene.SceneLights.DirectionalLight.Value.GetDirectionalLightCamera();
                 CameraMatrixInfo lightMatrixInfo = new CameraMatrixInfo
                 {
-                    Projection = lightCam.ProjectionMatrix,
+                    Projection = lightCam.Projection.Matrix,
                     View = lightCam.ViewMatrix,
                 };
                 commandList.UpdateBuffer(LightMatricesBufferInfo.DeviceBuffer, 0, ref lightMatrixInfo);
