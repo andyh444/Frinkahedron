@@ -13,22 +13,9 @@ namespace Frinkahedron.WinformsEditor
 {
     public partial class Form1 : Form
     {
-        private GameObjectTemplateEditor editor;
-
         public Form1()
         {
             InitializeComponent();
-            editor = new GameObjectTemplateEditor();
-            veldridControl1.Initialise(editor);
-            renderableTemplateControl1.Initialise(editor);
-        }
-
-        private void colliderControl1_ColliderChanged(object sender, IShapeTemplate e)
-        {
-            //TODO: Move this to collider control
-            var template = editor.Template;
-            template.Collider = e;
-            editor.TemplateChangedCallback?.Invoke();
         }
     }
 }

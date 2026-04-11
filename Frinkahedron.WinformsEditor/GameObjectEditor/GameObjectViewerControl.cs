@@ -21,7 +21,7 @@ using Veldrid;
 
 namespace Frinkahedron.WinformsEditor.GameObjectEditor
 {
-    public partial class VeldridControl : UserControl
+    public partial class GameObjectViewerControl : UserControl
     {
         private GraphicsDevice? graphicsDevice;
         private GraphicsResources? graphicsResources;
@@ -33,7 +33,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
         private GameObjectTemplateEditor? editor;
         private readonly UserControlInputListener userControlInputListener;
 
-        public VeldridControl()
+        public GameObjectViewerControl()
         {
             InitializeComponent();
             userControlInputListener = new UserControlInputListener(this);
@@ -60,6 +60,16 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager);
 
             timer1.Enabled = true;
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            graphicsDevice?.ResizeMainWindow((uint)Width, (uint)Height);
+            if (scene is not null)
+            {
+                scene.Camera.Projection.AspectRatio = (float)Width / Height;
+            }
         }
 
         public ModelInfo? LoadModel(string fileName)

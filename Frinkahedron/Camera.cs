@@ -14,7 +14,7 @@ namespace Frinkahedron
 
         ProjectionType ProjectionType { get; }
 
-        float AspectRatio { get; }
+        float AspectRatio { get; set; }
 
         float Near { get; }
 

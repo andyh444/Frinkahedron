@@ -1,6 +1,6 @@
 ﻿namespace Frinkahedron.WinformsEditor.GameObjectEditor
 {
-    partial class VeldridControl
+    partial class GameObjectViewerControl
     {
         /// <summary> 
         /// Required designer variable.

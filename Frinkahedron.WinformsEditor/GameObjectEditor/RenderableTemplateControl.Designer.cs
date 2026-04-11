@@ -40,7 +40,7 @@
             transformControl1.Dock = DockStyle.Fill;
             transformControl1.Location = new Point(3, 33);
             transformControl1.Name = "transformControl1";
-            transformControl1.Size = new Size(210, 187);
+            transformControl1.Size = new Size(254, 108);
             transformControl1.TabIndex = 6;
             transformControl1.TransformChanged += transformControl1_TransformChanged;
             // 
@@ -66,18 +66,18 @@
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 3;
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanel1.Size = new Size(216, 417);
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.Size = new Size(260, 417);
             tableLayoutPanel1.TabIndex = 8;
             // 
             // checkedListBox1
             // 
             checkedListBox1.Dock = DockStyle.Fill;
             checkedListBox1.FormattingEnabled = true;
-            checkedListBox1.Location = new Point(3, 226);
+            checkedListBox1.Location = new Point(3, 147);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(210, 188);
+            checkedListBox1.Size = new Size(254, 267);
             checkedListBox1.TabIndex = 7;
             checkedListBox1.ItemCheck += checkedListBox1_ItemCheck;
             // 
@@ -87,7 +87,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(tableLayoutPanel1);
             Name = "RenderableTemplateControl";
-            Size = new Size(216, 417);
+            Size = new Size(260, 417);
             tableLayoutPanel1.ResumeLayout(false);
             ResumeLayout(false);
         }
