@@ -13,23 +13,31 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 {
     public partial class GameObjectEditorControl : UserControl
     {
-        private GameObjectTemplateEditor editor;
+        private GameObjectTemplateEditor objectEditor;
+        private GameTemplateEditor? gameEditor;
 
         public GameObjectEditorControl()
         {
             InitializeComponent();
-            editor = new GameObjectTemplateEditor();
-            veldridControl1.Initialise(editor);
-            renderableTemplateControl1.Initialise(editor);
-            colliderControl1.Initialise(editor);
+            objectEditor = new GameObjectTemplateEditor();
+        }
+
+        public void Initialise(GameTemplateEditor gameEditor, InMemoryAssetManager assetManager)
+        {
+            this.gameEditor = gameEditor;
+            veldridControl1.Initialise(gameEditor, objectEditor, assetManager);
+            renderableTemplateControl1.Initialise(gameEditor, objectEditor);
+            colliderControl1.Initialise(objectEditor);
         }
 
         public void SetNewTemplate(GameObjectTemplate template)
         {
-            editor.Template = template;
+            objectEditor.Template = template;
 
-            renderableTemplateControl1.Initialise(editor);
-            colliderControl1.Initialise(editor);
+            renderableTemplateControl1.Initialise(gameEditor, objectEditor);
+            colliderControl1.Initialise(objectEditor);
         }
+
+        public GameObjectTemplateEditor GetObjectEditor() => objectEditor;
     }
 }

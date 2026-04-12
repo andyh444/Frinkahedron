@@ -16,11 +16,15 @@ namespace Frinkahedron.WinformsEditor
         private GameTemplateEditor gameEditor;
         private TreeNode modelsNode;
         private TreeNode objectsNode;
+        private InMemoryAssetManager assetManager;
 
         public Form1()
         {
             InitializeComponent();
+            assetManager = new InMemoryAssetManager();
             gameEditor = new GameTemplateEditor();
+
+            gameObjectEditorControl1.Initialise(gameEditor, assetManager);
 
             modelsNode = treeView1.Nodes.Add("Models");
             objectsNode = treeView1.Nodes.Add("Objects");
@@ -29,16 +33,29 @@ namespace Frinkahedron.WinformsEditor
         private void addObjectButton_Click(object sender, EventArgs e)
         {
             var template = new GameObjectTemplate();
-            objectsNode.Expand();
             var node = objectsNode.Nodes.Add($"Object {objectsNode.Nodes.Count + 1}");
             node.Tag = template;
             gameEditor.Template.GameObjects.Add(template);
+            objectsNode.Expand();
         }
 
         private void loadModelButton_Click(object sender, EventArgs e)
         {
-            // TODO
-            // Do model loading here, and change the game object editor to just pick one of the existing models
+            using OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = $"gltf files (*.gltf)|*.gltf",
+            };
+
+            if (ofd.ShowDialog(this) == DialogResult.OK)
+            {
+                string fileName = ofd.FileName;
+                string modelID = new DirectoryInfo(Path.GetDirectoryName(fileName)!).Name;
+                ModelTemplate modelTemplate = new ModelTemplate(modelID, fileName);
+                var node = modelsNode.Nodes.Add(modelID);
+                node.Tag = modelTemplate;
+                gameEditor.Template.Models.Add(modelTemplate);
+                modelsNode.Expand();
+            }
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)

@@ -30,7 +30,8 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
         private GameState? gameState;
         private GameObject? currentObj;
         private OrbitalCameraMouseBehaviour behaviour;
-        private GameObjectTemplateEditor? editor;
+        private GameObjectTemplateEditor? objectEditor;
+        private GameTemplateEditor? gameEditor;
         private readonly UserControlInputListener userControlInputListener;
 
         public GameObjectViewerControl()
@@ -40,11 +41,23 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             behaviour = new OrbitalCameraMouseBehaviour();
         }
 
-        public void Initialise(GameObjectTemplateEditor editor)
+        public void Initialise(GameTemplateEditor gameEditor, GameObjectTemplateEditor objectEditor, InMemoryAssetManager assetManager)
         {
-            this.editor = editor;
-            editor.TemplateChangedCallback = GameObjectTemplateUpdated;
-            editor.LoadModelFunc = LoadModel;
+            if (this.objectEditor is not null)
+            {
+                throw new Exception($"Should only initialise once");
+            }
+            this.gameEditor = gameEditor;
+            this.objectEditor = objectEditor;
+            objectEditor.TemplateChangedCallback = GameObjectTemplateUpdated;
+            objectEditor.LoadModelFunc = GetModel;
+
+            graphicsDevice = CreateGraphicsDevice();
+            this.assetManager = assetManager;// new InMemoryAssetManager();
+            assetManager.AddShadersFromFolder("Assets\\Shaders");
+            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager);
+
+            timer1.Enabled = true;
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -56,12 +69,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             }
             try
             {
-                graphicsDevice = CreateGraphicsDevice();
-                assetManager = new InMemoryAssetManager();
-                assetManager.AddShadersFromFolder("Assets\\Shaders");
-                graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager);
-
-                timer1.Enabled = true;
+                
             }
             catch (Exception ex)
             {
@@ -77,6 +85,15 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             {
                 scene.Camera.Projection.AspectRatio = (float)Width / Height;
             }
+        }
+
+        public ModelInfo? GetModel(string modelID)
+        {
+            if (assetManager.HasModel(modelID))
+            {
+                return new ModelInfo(assetManager.GetModel(modelID), modelID);
+            }
+            return LoadModel(gameEditor.Template.Models.Single(x => x.ModelID == modelID).ModelPath);
         }
 
         public ModelInfo? LoadModel(string fileName)
@@ -102,7 +119,18 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 
         private void GameObjectTemplateUpdated()
         {
-            SetCurrentObject(editor.Template.ToGameObject(new Vector3(), [behaviour]));
+            var template = objectEditor?.Template;
+            if (template is null)
+            {
+                return;
+            }
+            if (template.Renderable is ModelEntitiesRenderableTemplate mert)
+            {
+                // ensures it's loaded
+                _ = GetModel(mert.ModelID);
+            }
+
+            SetCurrentObject(template.ToGameObject(new Vector3(), [behaviour]));
         }
 
         private void SetCurrentObject(GameObject obj)

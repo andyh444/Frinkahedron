@@ -15,8 +15,8 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 {
     public partial class RenderableTemplateControl : UserControl
     {
-        private GameObjectTemplateEditor? editor;
-        private ModelInfo? modelInfo;
+        private GameTemplateEditor? gameEditor;
+        private GameObjectTemplateEditor? objectEditor;
         private bool[] activeIndices;
         private TransformTemplate currentTransform;
         private bool freeze;
@@ -28,11 +28,36 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             currentTransform = new TransformTemplate();
         }
 
-        public void Initialise(GameObjectTemplateEditor editor)
+        public void Initialise(GameTemplateEditor gameEditor, GameObjectTemplateEditor objectEditor)
         {
-            this.editor = editor;
-            transformControl1.Initialise(editor.Template.Renderable?.Transform ?? new TransformTemplate());
-            InitialiseCheckedListBox(editor.Template.Renderable);
+            this.gameEditor = gameEditor;
+            this.objectEditor = objectEditor;
+
+            transformControl1.Initialise(objectEditor.Template.Renderable?.Transform ?? new TransformTemplate());
+            InitialiseCheckedListBox(objectEditor.Template.Renderable);
+            InitialiseModelComboBox(gameEditor, objectEditor);
+
+            currentTransform = transformControl1.GetTransform();
+        }
+
+        private void InitialiseModelComboBox(GameTemplateEditor gameEditor, GameObjectTemplateEditor objectEditor)
+        {
+            freeze = true;
+            comboBox1.Items.Clear();
+            comboBox1.Items.Add(string.Empty);
+            foreach (var model in gameEditor.Template.Models)
+            {
+                comboBox1.Items.Add(model.ModelID);
+            }
+            if (objectEditor.Template.Renderable is ModelEntitiesRenderableTemplate mert)
+            {
+                comboBox1.SelectedItem = mert.ModelID;
+            }
+            else
+            {
+                comboBox1.SelectedItem = string.Empty;
+            }
+            freeze = false;
         }
 
         private void InitialiseCheckedListBox(IRenderableTemplate? template)
@@ -49,36 +74,6 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
                 activeIndices = mert.EnabledIndices;
             }
             freeze = false;
-        }
-
-        private void loadButton_Click(object sender, EventArgs e)
-        {
-            if (editor?.LoadModelFunc is null)
-            {
-                return;
-            }
-
-            using OpenFileDialog ofd = new OpenFileDialog
-            {
-                Filter = $"gltf files (*.gltf)|*.gltf",
-            };
-
-            if (ofd.ShowDialog(this) == DialogResult.OK)
-            {
-                modelInfo = editor.LoadModelFunc(ofd.FileName);
-                if (modelInfo is null)
-                {
-                    return;
-                }
-                ModelEntitiesRenderableTemplate template = new ModelEntitiesRenderableTemplate
-                {
-                    ModelID = modelInfo.Value.ModelID,
-                    EnabledIndices = modelInfo.Value.Model.Entities.Select(x => true).ToArray(),
-                    Transform = currentTransform
-                };
-                InitialiseCheckedListBox(template);
-                UpdateRenderableTemplate();
-            }
         }
 
         private void transformControl1_TransformChanged(object sender, TransformTemplate e)
@@ -99,19 +94,52 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 
         private void UpdateRenderableTemplate()
         {
-            if (modelInfo is null || editor is null)
+            if (objectEditor is null)
             {
                 return;
             }
 
-            editor.Template.Renderable = new ModelEntitiesRenderableTemplate
+            if (string.IsNullOrEmpty(comboBox1.SelectedItem.ToString()))
+            {
+                objectEditor.Template.Renderable = null;
+            }
+            else
+            {
+                objectEditor.Template.Renderable = new ModelEntitiesRenderableTemplate
+                {
+                    ModelID = comboBox1.SelectedItem.ToString(),
+                    EnabledIndices = activeIndices,
+                    Transform = currentTransform,
+                };
+            }
+            objectEditor.TemplateChangedCallback?.Invoke();
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (freeze)
+            {
+                return;
+            }
+            if (string.IsNullOrEmpty(comboBox1.SelectedItem?.ToString()))
+            {
+                InitialiseCheckedListBox(null);
+                UpdateRenderableTemplate();
+                return;
+            }
+            var modelInfo = objectEditor.LoadModelFunc(comboBox1.SelectedItem.ToString());
+            if (modelInfo is null)
+            {
+                return;
+            }
+            ModelEntitiesRenderableTemplate template = new ModelEntitiesRenderableTemplate
             {
                 ModelID = modelInfo.Value.ModelID,
-                EnabledIndices = activeIndices,
-                Transform = currentTransform,
+                EnabledIndices = modelInfo.Value.Model.Entities.Select(x => true).ToArray(),
+                Transform = currentTransform
             };
-
-            editor.TemplateChangedCallback?.Invoke();
+            InitialiseCheckedListBox(template);
+            UpdateRenderableTemplate();
         }
     }
 }

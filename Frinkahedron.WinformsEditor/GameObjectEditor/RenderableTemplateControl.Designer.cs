@@ -29,38 +29,28 @@
         private void InitializeComponent()
         {
             transformControl1 = new TransformControl();
-            loadButton = new Button();
             tableLayoutPanel1 = new TableLayoutPanel();
             checkedListBox1 = new CheckedListBox();
+            comboBox1 = new ComboBox();
             tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
             // transformControl1
             // 
             transformControl1.Dock = DockStyle.Fill;
-            transformControl1.Location = new Point(3, 33);
+            transformControl1.Location = new Point(3, 32);
             transformControl1.Name = "transformControl1";
             transformControl1.Size = new Size(254, 108);
             transformControl1.TabIndex = 6;
             transformControl1.TransformChanged += transformControl1_TransformChanged;
             // 
-            // loadButton
-            // 
-            loadButton.Location = new Point(3, 3);
-            loadButton.Name = "loadButton";
-            loadButton.Size = new Size(94, 24);
-            loadButton.TabIndex = 5;
-            loadButton.Text = "Load Model";
-            loadButton.UseVisualStyleBackColor = true;
-            loadButton.Click += loadButton_Click;
-            // 
             // tableLayoutPanel1
             // 
             tableLayoutPanel1.ColumnCount = 1;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.Controls.Add(loadButton, 0, 0);
             tableLayoutPanel1.Controls.Add(checkedListBox1, 0, 2);
             tableLayoutPanel1.Controls.Add(transformControl1, 0, 1);
+            tableLayoutPanel1.Controls.Add(comboBox1, 0, 0);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -75,11 +65,21 @@
             // 
             checkedListBox1.Dock = DockStyle.Fill;
             checkedListBox1.FormattingEnabled = true;
-            checkedListBox1.Location = new Point(3, 147);
+            checkedListBox1.Location = new Point(3, 146);
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(254, 267);
+            checkedListBox1.Size = new Size(254, 268);
             checkedListBox1.TabIndex = 7;
             checkedListBox1.ItemCheck += checkedListBox1_ItemCheck;
+            // 
+            // comboBox1
+            // 
+            comboBox1.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Location = new Point(3, 3);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new Size(254, 23);
+            comboBox1.TabIndex = 8;
+            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
             // 
             // RenderableTemplateControl
             // 
@@ -95,8 +95,8 @@
         #endregion
 
         private TransformControl transformControl1;
-        private Button loadButton;
         private TableLayoutPanel tableLayoutPanel1;
         private CheckedListBox checkedListBox1;
+        private ComboBox comboBox1;
     }
 }

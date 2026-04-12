@@ -30,15 +30,15 @@ namespace Frinkahedron.WinformsEditor
             yTranslationInput.Value = (decimal)transform.Translation.Y;
             zTranslationInput.Value = (decimal)transform.Translation.Z;
 
-            xRotationInput.Value = (decimal)transform.RotationEulerAngles.X;
-            yRotationInput.Value = (decimal)transform.RotationEulerAngles.Y;
-            zRotationInput.Value = (decimal)transform.RotationEulerAngles.Z;
+            xRotationInput.Value = (decimal)(transform.RotationEulerAngles.X * 180 / MathF.PI);
+            yRotationInput.Value = (decimal)(transform.RotationEulerAngles.Y * 180 / MathF.PI);
+            zRotationInput.Value = (decimal)(transform.RotationEulerAngles.Z * 180 / MathF.PI);
 
             scaleInput.Value = (decimal)transform.Scale;
             freeze = false;
         }
 
-        private TransformTemplate CalculateTransform()
+        public TransformTemplate GetTransform()
         {
             float xRot = (float)xRotationInput.Value * MathF.PI / 180;
             float yRot = (float)yRotationInput.Value * MathF.PI / 180;
@@ -62,7 +62,7 @@ namespace Frinkahedron.WinformsEditor
             {
                 return;
             }
-            TransformChanged?.Invoke(this, CalculateTransform());
+            TransformChanged?.Invoke(this, GetTransform());
         }
     }
 }
