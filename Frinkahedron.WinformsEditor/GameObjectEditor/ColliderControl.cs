@@ -16,6 +16,7 @@ namespace Frinkahedron.WinformsEditor
     public partial class ColliderControl : UserControl
     {
         private GameObjectTemplateEditor? editor;
+        private bool freeze;
 
         public event EventHandler<IShapeTemplate>? ColliderChanged;
 
@@ -27,10 +28,23 @@ namespace Frinkahedron.WinformsEditor
         public void Initialise(GameObjectTemplateEditor editor)
         {
             this.editor = editor;
+
+            freeze = true;
+            if (editor.Template.Collider is BoxTemplate bt)
+            {
+                xDimensionInput.Value = (decimal)bt.Dimensions.X;
+                yDimensionInput.Value = (decimal)bt.Dimensions.Y;
+                zDimensionInput.Value = (decimal)bt.Dimensions.Z;
+            }
+            freeze = false;
         }
 
         private void dimensionInput_ValueChanged(object sender, EventArgs e)
         {
+            if (freeze)
+            {
+                return;
+            }
             float xDim = (float)xDimensionInput.Value;
             float yDim = (float)yDimensionInput.Value;
             float zDim = (float)zDimensionInput.Value;

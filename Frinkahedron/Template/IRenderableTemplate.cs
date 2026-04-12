@@ -4,7 +4,7 @@ namespace Frinkahedron.Core.Template
 {
     public interface IRenderableTemplate
     {
-        public void TrySetTransform(Matrix4x4 newTransform);
+        TransformTemplate Transform { get; set; }
 
         IRenderable ToRenderable();
     }
@@ -13,13 +13,33 @@ namespace Frinkahedron.Core.Template
     {
         public string ModelID { get; set; } = string.Empty;
 
-        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
+        public TransformTemplate Transform { get; set; } = new TransformTemplate();
 
-        public IRenderable ToRenderable() => new ModelRenderable(ModelID, Transform);
+        public IRenderable ToRenderable() => new ModelRenderable(ModelID, Transform.ToMatrix());
+    }
 
-        public void TrySetTransform(Matrix4x4 newTransform)
+    public class ModelEntitiesRenderableTemplate : IRenderableTemplate
+    {
+        public string ModelID { get; set; } = string.Empty;
+
+        public TransformTemplate Transform { get; set; } = new TransformTemplate();
+
+        public bool[] EnabledIndices { get; set; } = [];
+
+        public IRenderable ToRenderable()
         {
-            Transform = newTransform;
+            var matrix = Transform.ToMatrix();
+            List<IRenderable> renderables = new List<IRenderable>();
+            
+            for (int i = 0; i < EnabledIndices.Length; i++)
+            {
+                if (EnabledIndices[i])
+                {
+                    renderables.Add(new ModelEntityRenderable(ModelID, i, matrix));
+                }
+            }
+
+            return new CompositeRenderable(renderables);
         }
     }
 
@@ -29,31 +49,33 @@ namespace Frinkahedron.Core.Template
 
         public int Index { get; set; } = 0;
 
-        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
+        public TransformTemplate Transform { get; set; } = new TransformTemplate();
 
-        public IRenderable ToRenderable() => new ModelEntityRenderable(ModelID, Index, Transform);
-
-        public void TrySetTransform(Matrix4x4 newTransform)
-        {
-            Transform = newTransform;
-        }
+        public IRenderable ToRenderable() => new ModelEntityRenderable(ModelID, Index, Transform.ToMatrix());
     }
 
     public class CompositeRenderableTemplate : IRenderableTemplate
     {
+        private TransformTemplate transform;
+
         public List<IRenderableTemplate> Children { get; set; } = [];
+
+        public TransformTemplate Transform
+        {
+            get => transform;
+            set
+            {
+                transform = value;
+                foreach (var child in Children)
+                {
+                    child.Transform = transform;
+                }
+            }
+        }
 
         public IRenderable ToRenderable()
         {
             return new CompositeRenderable(Children.Select(x => x.ToRenderable()).ToList());
-        }
-
-        public void TrySetTransform(Matrix4x4 newTransform)
-        {
-            foreach (var child in Children)
-            {
-                child.TrySetTransform(newTransform);
-            }
         }
     }
 }

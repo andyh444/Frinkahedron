@@ -17,19 +17,38 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
     {
         private GameObjectTemplateEditor? editor;
         private ModelInfo? modelInfo;
-        private HashSet<int> activeIndices;
-        private Matrix4x4 currentTransform;
+        private bool[] activeIndices;
+        private TransformTemplate currentTransform;
+        private bool freeze;
 
         public RenderableTemplateControl()
         {
             InitializeComponent();
-            activeIndices = new HashSet<int>();
-            currentTransform = Matrix4x4.Identity;
+            activeIndices = [];
+            currentTransform = new TransformTemplate();
         }
 
         public void Initialise(GameObjectTemplateEditor editor)
         {
             this.editor = editor;
+            transformControl1.Initialise(editor.Template.Renderable?.Transform ?? new TransformTemplate());
+            InitialiseCheckedListBox(editor.Template.Renderable);
+        }
+
+        private void InitialiseCheckedListBox(IRenderableTemplate? template)
+        {
+            freeze = true;
+            checkedListBox1.Items.Clear();
+            if (template is ModelEntitiesRenderableTemplate mert)
+            {
+                for (int i = 0; i < mert.EnabledIndices.Length; i++)
+                {
+                    var index = checkedListBox1.Items.Add($"Entity {i + 1}");
+                    checkedListBox1.SetItemChecked(index, mert.EnabledIndices[i]);
+                }
+                activeIndices = mert.EnabledIndices;
+            }
+            freeze = false;
         }
 
         private void loadButton_Click(object sender, EventArgs e)
@@ -51,21 +70,18 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
                 {
                     return;
                 }
-
-                checkedListBox1.ItemCheck -= checkedListBox1_ItemCheck;
-                checkedListBox1.Items.Clear();
-                for (int i = 0; i < modelInfo.Value.Model.Entities.Count; i++)
+                ModelEntitiesRenderableTemplate template = new ModelEntitiesRenderableTemplate
                 {
-                    var index = checkedListBox1.Items.Add($"Entity {i + 1}");
-                    checkedListBox1.SetItemChecked(index, true);
-                    activeIndices.Add(index);
-                }
-                checkedListBox1.ItemCheck += checkedListBox1_ItemCheck;
+                    ModelID = modelInfo.Value.ModelID,
+                    EnabledIndices = modelInfo.Value.Model.Entities.Select(x => true).ToArray(),
+                    Transform = currentTransform
+                };
+                InitialiseCheckedListBox(template);
                 UpdateRenderableTemplate();
             }
         }
 
-        private void transformControl1_TransformChanged(object sender, System.Numerics.Matrix4x4 e)
+        private void transformControl1_TransformChanged(object sender, TransformTemplate e)
         {
             currentTransform = e;
             UpdateRenderableTemplate();
@@ -73,14 +89,11 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 
         private void checkedListBox1_ItemCheck(object? sender, ItemCheckEventArgs e)
         {
-            if (e.NewValue == CheckState.Checked)
+            if (freeze)
             {
-                activeIndices.Add(e.Index);
+                return;
             }
-            else
-            {
-                activeIndices.Remove(e.Index);
-            }
+            activeIndices[e.Index] = e.NewValue == CheckState.Checked;
             UpdateRenderableTemplate();
         }
 
@@ -91,16 +104,11 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
                 return;
             }
 
-            editor.Template.Renderable = new CompositeRenderableTemplate
+            editor.Template.Renderable = new ModelEntitiesRenderableTemplate
             {
-                Children = activeIndices
-                .Select<int, IRenderableTemplate>(x => new ModelEntityRenderableTemplate
-                {
-                    ModelID = modelInfo.Value.ModelID,
-                    Index = x,
-                    Transform = currentTransform
-                })
-                .ToList()
+                ModelID = modelInfo.Value.ModelID,
+                EnabledIndices = activeIndices,
+                Transform = currentTransform,
             };
 
             editor.TemplateChangedCallback?.Invoke();

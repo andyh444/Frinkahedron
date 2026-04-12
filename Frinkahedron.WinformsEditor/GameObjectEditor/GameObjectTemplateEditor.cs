@@ -12,7 +12,15 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 
     public sealed class GameObjectTemplateEditor
     {
-        public GameObjectTemplate Template { get; }
+        public GameObjectTemplate Template
+        {
+            get;
+            set
+            {
+                field = value;
+                TemplateChangedCallback?.Invoke();
+            }
+        }
 
         public Action? TemplateChangedCallback { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Frinkahedron.Core.Template;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,14 +14,31 @@ namespace Frinkahedron.WinformsEditor
 {
     public partial class TransformControl : UserControl
     {
-        public event EventHandler<Matrix4x4>? TransformChanged;
+        public event EventHandler<TransformTemplate>? TransformChanged;
+
+        private bool freeze;
 
         public TransformControl()
         {
             InitializeComponent();
         }
 
-        private Matrix4x4 CalculateTransform()
+        public void Initialise(TransformTemplate transform)
+        {
+            freeze = true;
+            xTranslationInput.Value = (decimal)transform.Translation.X;
+            yTranslationInput.Value = (decimal)transform.Translation.Y;
+            zTranslationInput.Value = (decimal)transform.Translation.Z;
+
+            xRotationInput.Value = (decimal)transform.RotationEulerAngles.X;
+            yRotationInput.Value = (decimal)transform.RotationEulerAngles.Y;
+            zRotationInput.Value = (decimal)transform.RotationEulerAngles.Z;
+
+            scaleInput.Value = (decimal)transform.Scale;
+            freeze = false;
+        }
+
+        private TransformTemplate CalculateTransform()
         {
             float xRot = (float)xRotationInput.Value * MathF.PI / 180;
             float yRot = (float)yRotationInput.Value * MathF.PI / 180;
@@ -30,14 +48,20 @@ namespace Frinkahedron.WinformsEditor
             float yTrans = (float)yTranslationInput.Value;
             float zTrans = (float)zTranslationInput.Value;
 
-            Quaternion rotation = Quaternion.CreateFromYawPitchRoll(yRot, xRot, zRot);
-            return Matrix4x4.CreateScale((float)scaleInput.Value)
-                * Matrix4x4.CreateFromQuaternion(rotation)
-                * Matrix4x4.CreateTranslation(xTrans, yTrans, zTrans);
+            return new TransformTemplate
+            {
+                Translation = new Vector3(xTrans, yTrans, zTrans),
+                RotationEulerAngles = new Vector3(xRot, yRot, zRot),
+                Scale = (float)scaleInput.Value
+            };
         }
 
         private void input_ValueChanged(object sender, EventArgs e)
         {
+            if (freeze)
+            {
+                return;
+            }
             TransformChanged?.Invoke(this, CalculateTransform());
         }
     }

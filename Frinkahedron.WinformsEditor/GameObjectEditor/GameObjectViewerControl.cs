@@ -54,12 +54,19 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             {
                 return;
             }
-            graphicsDevice = CreateGraphicsDevice();
-            assetManager = new InMemoryAssetManager();
-            assetManager.AddShadersFromFolder("Assets\\Shaders");
-            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager);
+            try
+            {
+                graphicsDevice = CreateGraphicsDevice();
+                assetManager = new InMemoryAssetManager();
+                assetManager.AddShadersFromFolder("Assets\\Shaders");
+                graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager);
 
-            timer1.Enabled = true;
+                timer1.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                // do nothing - do this to stop the designer having a tantrum
+            }
         }
 
         protected override void OnResize(EventArgs e)
@@ -85,7 +92,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             }
             if (model is not null)
             {
-                string modelID = Path.GetFileNameWithoutExtension(fileName);
+                string modelID = new DirectoryInfo(Path.GetDirectoryName(fileName)!).Name;
                 assetManager.AddModel(modelID, model);
 
                 return new ModelInfo(model, modelID);
@@ -136,7 +143,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (scene is null || gameState is null)
+            if (scene is null || gameState is null || DesignMode)
             {
                 return;
             }

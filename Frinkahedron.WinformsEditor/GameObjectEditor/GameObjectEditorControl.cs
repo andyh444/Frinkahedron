@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Frinkahedron.Core.Template;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,6 +20,14 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             InitializeComponent();
             editor = new GameObjectTemplateEditor();
             veldridControl1.Initialise(editor);
+            renderableTemplateControl1.Initialise(editor);
+            colliderControl1.Initialise(editor);
+        }
+
+        public void SetNewTemplate(GameObjectTemplate template)
+        {
+            editor.Template = template;
+
             renderableTemplateControl1.Initialise(editor);
             colliderControl1.Initialise(editor);
         }
