@@ -22,10 +22,10 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             objectEditor = new GameObjectTemplateEditor();
         }
 
-        public void Initialise(GameTemplateEditor gameEditor, InMemoryAssetManager assetManager)
+        public void Initialise(GameTemplateEditor gameEditor, GraphicsService graphicsService)
         {
             this.gameEditor = gameEditor;
-            veldridControl1.Initialise(gameEditor, objectEditor, assetManager);
+            veldridControl1.Initialise(gameEditor, objectEditor, graphicsService);
             renderableTemplateControl1.Initialise(gameEditor, objectEditor);
             colliderControl1.Initialise(objectEditor);
         }

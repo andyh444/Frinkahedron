@@ -16,15 +16,15 @@ namespace Frinkahedron.WinformsEditor
         private GameTemplateEditor gameEditor;
         private TreeNode modelsNode;
         private TreeNode objectsNode;
-        private InMemoryAssetManager assetManager;
+        private GraphicsService graphicsService;
 
         public Form1()
         {
             InitializeComponent();
-            assetManager = new InMemoryAssetManager();
+            graphicsService = new GraphicsService();
             gameEditor = new GameTemplateEditor();
 
-            gameObjectEditorControl1.Initialise(gameEditor, assetManager);
+            gameObjectEditorControl1.Initialise(gameEditor, graphicsService);
 
             modelsNode = treeView1.Nodes.Add("Models");
             objectsNode = treeView1.Nodes.Add("Objects");

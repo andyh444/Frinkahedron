@@ -23,11 +23,10 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 {
     public partial class GameObjectViewerControl : UserControl
     {
-        private GraphicsDevice? graphicsDevice;
+        private GraphicsService? graphicsService;
         private Swapchain? swapchain;
         private GraphicsResources? graphicsResources;
         private Scene? scene;
-        private InMemoryAssetManager? assetManager;
         private GameState? gameState;
         private GameObject? currentObj;
         private OrbitalCameraMouseBehaviour behaviour;
@@ -42,21 +41,20 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             behaviour = new OrbitalCameraMouseBehaviour();
         }
 
-        public void Initialise(GameTemplateEditor gameEditor, GameObjectTemplateEditor objectEditor, InMemoryAssetManager assetManager)
+        public void Initialise(GameTemplateEditor gameEditor, GameObjectTemplateEditor objectEditor, GraphicsService graphicsService)
         {
             if (this.objectEditor is not null)
             {
                 throw new Exception($"Should only initialise once");
             }
+            this.graphicsService = graphicsService;
             this.gameEditor = gameEditor;
             this.objectEditor = objectEditor;
             objectEditor.TemplateChangedCallback = GameObjectTemplateUpdated;
             objectEditor.LoadModelFunc = GetModel;
 
-            (graphicsDevice, swapchain) = CreateGraphicsDevice();
-            this.assetManager = assetManager;// new InMemoryAssetManager();
-            assetManager.AddShadersFromFolder("Assets\\Shaders");
-            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager, swapchain);
+            swapchain = graphicsService.CreateSwapchain(this);
+            graphicsResources = GraphicsResources.CreateResources(graphicsService.GraphicsDevice, Width, Height, graphicsService.AssetManager, swapchain);
 
             timer1.Enabled = true;
         }
@@ -73,32 +71,11 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 
         public ModelInfo? GetModel(string modelID)
         {
-            if (assetManager.HasModel(modelID))
+            if (graphicsService.AssetManager.HasModel(modelID))
             {
-                return new ModelInfo(assetManager.GetModel(modelID), modelID);
+                return new ModelInfo(graphicsService.AssetManager.GetModel(modelID), modelID);
             }
-            return LoadModel(gameEditor.Template.Models.Single(x => x.ModelID == modelID).ModelPath);
-        }
-
-        public ModelInfo? LoadModel(string fileName)
-        {
-            Model? model = null;
-            //try
-            {
-                model = ModelLoader.LoadModel(graphicsDevice.ResourceFactory, graphicsDevice, fileName, null);
-            }
-            //catch (Exception ex)
-            {
-            //    MessageBox.Show($"Failed to load model: {ex.Message}");
-            }
-            if (model is not null)
-            {
-                string modelID = new DirectoryInfo(Path.GetDirectoryName(fileName)!).Name;
-                assetManager.AddModel(modelID, model);
-
-                return new ModelInfo(model, modelID);
-            }
-            return null;
+            return graphicsService.LoadModel(gameEditor.Template.Models.Single(x => x.ModelID == modelID).ModelPath);
         }
 
         private void GameObjectTemplateUpdated()
@@ -139,31 +116,6 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             scene.AddObject(obj);*/
         }
 
-        private (GraphicsDevice, Swapchain) CreateGraphicsDevice()
-        {
-            var options = new GraphicsDeviceOptions
-            {
-                HasMainSwapchain = false,
-                //SwapchainDepthFormat = PixelFormat.D32_Float_S8_UInt,
-                SyncToVerticalBlank = true,
-                PreferDepthRangeZeroToOne = true,
-                PreferStandardClipSpaceYDirection = true,
-            };
-
-            var gd = GraphicsDevice.CreateD3D11(options);
-            var swapChainSource = SwapchainSource.CreateWin32(Handle, IntPtr.Zero);
-            var swapChainDescription = new SwapchainDescription
-            {
-                Source = swapChainSource,
-                Width = (uint)Width,
-                Height = (uint)Height,
-                SyncToVerticalBlank = true,
-            };
-            var swapchain = gd.ResourceFactory.CreateSwapchain(swapChainDescription);
-            return (gd, swapchain);
-            //return GraphicsDevice.CreateD3D11(options, Handle, (uint)Width, (uint)Height);
-        }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (scene is null || gameState is null || DesignMode)
@@ -180,11 +132,11 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             graphicsResources.CommandList.Begin();
             foreach (var renderPass in graphicsResources.RenderPasses)
             {
-                renderPass.RenderScene(graphicsDevice, graphicsResources.CommandList, graphicsResources, scene, context.DrawInstructions);
+                renderPass.RenderScene(graphicsService.GraphicsDevice, graphicsResources.CommandList, graphicsResources, scene, context.DrawInstructions);
             }
             graphicsResources.CommandList.End();
-            graphicsDevice.SubmitCommands(graphicsResources.CommandList);
-            graphicsDevice.SwapBuffers(swapchain);
+            graphicsService.GraphicsDevice.SubmitCommands(graphicsResources.CommandList);
+            graphicsService.GraphicsDevice.SwapBuffers(swapchain);
         }
     }
 }
