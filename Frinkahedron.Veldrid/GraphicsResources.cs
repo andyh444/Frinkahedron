@@ -26,7 +26,7 @@ namespace Frinkahedron.VeldridImplementation
 
         public IEnumerable<IRenderPass> RenderPasses => [ShadowRenderPass, MainRenderPass, WireframeRenderPass, QuadRenderPass];
 
-        public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice, int screenWidth, int screenHeight, IAssetManager assetManager)
+        public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice, int screenWidth, int screenHeight, IAssetManager assetManager, Swapchain? swapchain = null)
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
             
@@ -61,7 +61,7 @@ namespace Frinkahedron.VeldridImplementation
 
             WireframeRenderPass wireframeRenderPass = WireframeRenderPass.Create(factory, graphicsDevice, assetManager, mainFrameBuffer);
 
-            FullScreenQuadRenderPass quadRenderPass = FullScreenQuadRenderPass.Create(factory, graphicsDevice, assetManager);
+            FullScreenQuadRenderPass quadRenderPass = FullScreenQuadRenderPass.Create(factory, graphicsDevice, assetManager, swapchain);
             quadRenderPass.FullScreenTexture = colourTexture;
 
             return new GraphicsResources

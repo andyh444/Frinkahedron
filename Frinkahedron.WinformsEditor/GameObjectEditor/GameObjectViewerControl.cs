@@ -24,6 +24,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
     public partial class GameObjectViewerControl : UserControl
     {
         private GraphicsDevice? graphicsDevice;
+        private Swapchain? swapchain;
         private GraphicsResources? graphicsResources;
         private Scene? scene;
         private InMemoryAssetManager? assetManager;
@@ -52,35 +53,18 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             objectEditor.TemplateChangedCallback = GameObjectTemplateUpdated;
             objectEditor.LoadModelFunc = GetModel;
 
-            graphicsDevice = CreateGraphicsDevice();
+            (graphicsDevice, swapchain) = CreateGraphicsDevice();
             this.assetManager = assetManager;// new InMemoryAssetManager();
             assetManager.AddShadersFromFolder("Assets\\Shaders");
-            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager);
+            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, Width, Height, assetManager, swapchain);
 
             timer1.Enabled = true;
-        }
-
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
-            if (DesignMode)
-            {
-                return;
-            }
-            try
-            {
-                
-            }
-            catch (Exception ex)
-            {
-                // do nothing - do this to stop the designer having a tantrum
-            }
         }
 
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            graphicsDevice?.ResizeMainWindow((uint)Width, (uint)Height);
+            swapchain?.Resize((uint)Width, (uint)Height);
             if (scene is not null)
             {
                 scene.Camera.Projection.AspectRatio = (float)Width / Height;
@@ -155,18 +139,29 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             scene.AddObject(obj);*/
         }
 
-        private GraphicsDevice CreateGraphicsDevice()
+        private (GraphicsDevice, Swapchain) CreateGraphicsDevice()
         {
             var options = new GraphicsDeviceOptions
             {
-                HasMainSwapchain = true,
-                SwapchainDepthFormat = PixelFormat.D32_Float_S8_UInt,
+                HasMainSwapchain = false,
+                //SwapchainDepthFormat = PixelFormat.D32_Float_S8_UInt,
                 SyncToVerticalBlank = true,
                 PreferDepthRangeZeroToOne = true,
                 PreferStandardClipSpaceYDirection = true,
             };
 
-            return GraphicsDevice.CreateD3D11(options, Handle, (uint)Width, (uint)Height);
+            var gd = GraphicsDevice.CreateD3D11(options);
+            var swapChainSource = SwapchainSource.CreateWin32(Handle, IntPtr.Zero);
+            var swapChainDescription = new SwapchainDescription
+            {
+                Source = swapChainSource,
+                Width = (uint)Width,
+                Height = (uint)Height,
+                SyncToVerticalBlank = true,
+            };
+            var swapchain = gd.ResourceFactory.CreateSwapchain(swapChainDescription);
+            return (gd, swapchain);
+            //return GraphicsDevice.CreateD3D11(options, Handle, (uint)Width, (uint)Height);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -189,7 +184,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             }
             graphicsResources.CommandList.End();
             graphicsDevice.SubmitCommands(graphicsResources.CommandList);
-            graphicsDevice.SwapBuffers();
+            graphicsDevice.SwapBuffers(swapchain);
         }
     }
 }

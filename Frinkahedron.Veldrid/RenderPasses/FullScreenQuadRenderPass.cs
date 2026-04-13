@@ -25,7 +25,9 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
         public TextureInfo? FullScreenTexture { get; set; }
 
-        public static FullScreenQuadRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, IAssetManager assetManager)
+        public Swapchain? Swapchain { get; set; }
+
+        public static FullScreenQuadRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, IAssetManager assetManager, Swapchain? swapchain)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
                 ShaderStages.Vertex,
@@ -74,7 +76,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                     new VertexElementDescription("TexCoord", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)) },
                 shaders: shaders);
 
-            pipelineDescription.Outputs = graphicsDevice.SwapchainFramebuffer.OutputDescription;
+            pipelineDescription.Outputs = swapchain?.Framebuffer.OutputDescription ?? graphicsDevice.SwapchainFramebuffer.OutputDescription;
             pipelineDescription.ResourceLayouts = new[]
             {
                 TextureInfo.GetResourceLayout(factory)
@@ -87,13 +89,14 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
                 Pipeline = pipeline,
-                Shaders = shaders
+                Shaders = shaders,
+                Swapchain = swapchain
             };
         }
 
         public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene, IReadOnlyList<DrawInstruction> sceneDrawInstructions)
         {
-            commandList.SetFramebuffer(graphicsDevice.SwapchainFramebuffer);
+            commandList.SetFramebuffer(Swapchain.Framebuffer ?? graphicsDevice.SwapchainFramebuffer);
             commandList.ClearColorTarget(0, RgbaFloat.Black);
             commandList.SetPipeline(Pipeline);
             commandList.SetVertexBuffer(0, VertexBuffer);
