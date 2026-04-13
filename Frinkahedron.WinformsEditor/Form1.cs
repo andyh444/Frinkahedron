@@ -26,6 +26,7 @@ namespace Frinkahedron.WinformsEditor
             gameEditor = new GameTemplateEditor();
 
             gameObjectEditorControl1.Initialise(gameEditor, graphicsService);
+            levelEditorControl1.Initialise(gameEditor, graphicsService);
 
             modelsNode = treeView1.Nodes.Add("Models");
             objectsNode = treeView1.Nodes.Add("Objects");

@@ -12,17 +12,17 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
 {
     public partial class LevelEditorControl : UserControl
     {
-        private LevelTemplateEditor templateEditor;
+        private LevelTemplateEditor levelEditor;
 
         public LevelEditorControl()
         {
             InitializeComponent();
-            templateEditor = new LevelTemplateEditor();
+            levelEditor = new LevelTemplateEditor();
         }
 
         public void Initialise(GameTemplateEditor gameEditor, GraphicsService graphicsService)
         {
-
+            levelViewerControl1.Initialise(gameEditor, levelEditor, graphicsService);
         }
     }
 }
