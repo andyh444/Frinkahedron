@@ -16,6 +16,7 @@ namespace Frinkahedron.WinformsEditor
         private GameTemplateEditor gameEditor;
         private TreeNode modelsNode;
         private TreeNode objectsNode;
+        private TreeNode levelsNode;
         private GraphicsService graphicsService;
 
         public Form1()
@@ -28,6 +29,13 @@ namespace Frinkahedron.WinformsEditor
 
             modelsNode = treeView1.Nodes.Add("Models");
             objectsNode = treeView1.Nodes.Add("Objects");
+            levelsNode = treeView1.Nodes.Add("Levels");
+
+            LevelTemplate levelTemplate = new LevelTemplate();
+            var level = levelsNode.Nodes.Add("Level 1");
+            level.Tag = levelTemplate;
+            gameEditor.Template.Levels.Add(levelTemplate);
+            levelsNode.Expand();
         }
 
         private void addObjectButton_Click(object sender, EventArgs e)
@@ -62,7 +70,12 @@ namespace Frinkahedron.WinformsEditor
         {
             if (treeView1.SelectedNode?.Tag is GameObjectTemplate got)
             {
+                tabControl1.SelectedIndex = 0;
                 gameObjectEditorControl1.SetNewTemplate(got);
+            }
+            else if (treeView1.SelectedNode?.Tag is LevelTemplate lt)
+            {
+                tabControl1.SelectedIndex = 1;
             }
         }
     }
