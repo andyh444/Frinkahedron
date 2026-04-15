@@ -13,14 +13,21 @@ namespace Frinkahedron.Core.Template
 
         public IRenderableTemplate? Renderable { get; set; }
 
-        public GameObject ToGameObject(Vector3 initialPosition, IReadOnlyList<Behaviour> additionalBehaviours)
+        public GameObject ToGameObject(TransformTemplate worldTransform, IReadOnlyList<Behaviour> additionalBehaviours)
         {
-            return new GameObject(
-                initialPosition,
+            var obj = new GameObject(
+                worldTransform.Translation,
                 behaviour: new CompositeBehaviour(additionalBehaviours),
                 colliderShape: Collider?.ToShape(),
                 rigidBody: null,
                 renderable: Renderable?.ToRenderable());
+
+            var rot = worldTransform.RotationEulerAngles;
+            obj.Position.Orientation = Quaternion.CreateFromYawPitchRoll(rot.Y, rot.X, rot.Z);
+
+            // TODO: World transform scale?
+
+            return obj;
         }
     }
 }

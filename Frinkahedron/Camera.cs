@@ -85,6 +85,8 @@ namespace Frinkahedron
             return Vector3.Cross(LookDirection, Vector3.UnitY);
         }
 
+        public Vector3 GetUp() => Vector3.Cross(GetRight(), LookDirection);
+
         public void RotateYaw(float angle)
         {
             var rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle);

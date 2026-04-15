@@ -27,7 +27,7 @@ namespace Frinkahedron.Core.Colliders
                 float overlap = plane.CirclePlanePenetration(circleCentre1, cylAxis, shapeA.Shape.Radius, out var penetrationPoint);
                 if (overlap > 0)
                 {
-                    bestOverlap = MathF.Max(-plane.DistanceTo(penetrationPoint), bestOverlap);
+                    bestOverlap = MathF.Max(plane.DistanceTo(penetrationPoint), bestOverlap);
                     points.Add(penetrationPoint);
                 }
             }
@@ -35,7 +35,7 @@ namespace Frinkahedron.Core.Colliders
                 float overlap = plane.CirclePlanePenetration(circleCentre2, cylAxis, shapeA.Shape.Radius, out var penetrationPoint);
                 if (overlap > 0)
                 {
-                    bestOverlap = MathF.Max(-plane.DistanceTo(penetrationPoint), bestOverlap);
+                    bestOverlap = MathF.Max(plane.DistanceTo(penetrationPoint), bestOverlap);
                     points.Add(penetrationPoint);
                 }
             }

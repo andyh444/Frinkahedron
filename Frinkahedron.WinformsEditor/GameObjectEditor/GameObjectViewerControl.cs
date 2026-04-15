@@ -91,7 +91,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
                 _ = GetModel(mert.ModelID);
             }
 
-            SetCurrentObject(template.ToGameObject(new Vector3(), [behaviour]));
+            SetCurrentObject(template.ToGameObject(new TransformTemplate(), [behaviour]));
         }
 
         private void SetCurrentObject(GameObject obj)

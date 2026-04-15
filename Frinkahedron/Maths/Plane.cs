@@ -15,12 +15,12 @@ namespace Frinkahedron.Core.Maths
 
         public float DistanceTo(Vector3 point)
         {
-            return Vector3.Dot(Normal, point) - Vector3.Dot(Point, Normal);
+            return Vector3.Dot(Point, Normal) - Vector3.Dot(Normal, point);
         }
 
         public Vector3 ProjectOntoPlane(Vector3 point)
         {
-            return point - DistanceTo(point) * Normal;
+            return point + DistanceTo(point) * Normal;
         }
 
         public int IntersectCirclePlane(
@@ -195,6 +195,33 @@ namespace Frinkahedron.Core.Maths
 
             // Return penetration depth
             return MathF.Max(0f, -minDist);
+        }
+
+        public bool RayPlaneIntersection(Vector3 rayPos, Vector3 rayDir, out Vector3 intersection)
+        {
+            // Calculate the denominator
+            float denominator = Vector3.Dot(Normal, rayDir);
+
+            // If the denominator is zero, the ray is parallel to the plane
+            if (Math.Abs(denominator) < float.Epsilon)
+            {
+                intersection = Vector3.Zero;
+                return false;
+            }
+
+            // Calculate the distance from the ray origin to the plane
+            float t = DistanceTo(rayPos) / denominator;
+
+            // If t is negative, the intersection is behind the ray origin
+            if (t < 0)
+            {
+                intersection = Vector3.Zero;
+                return false;
+            }
+
+            // Calculate the intersection point
+            intersection = rayPos + t * rayDir;
+            return true;
         }
     }
 }

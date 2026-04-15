@@ -24,6 +24,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         private GameTemplateEditor? gameEditor;
         private LevelTemplateEditor? levelEditor;
         private readonly UserControlInputListener userControlInputListener;
+        private LevelViewerBehaviour? behaviour;
 
         public LevelViewerControl()
         {
@@ -33,17 +34,42 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
 
         public void Initialise(GameTemplateEditor gameEditor, LevelTemplateEditor levelEditor, GraphicsService graphicsService)
         {
+            if (this.graphicsService is not null)
+            {
+                throw new Exception($"Should only call initialise once");
+            }
             this.graphicsService = graphicsService;
             this.gameEditor = gameEditor;
             this.levelEditor = levelEditor;
+            this.behaviour = new LevelViewerBehaviour(gameEditor, levelEditor);
+            this.levelEditor.TemplateChangedCallback = UpdateScene;
 
             swapchain = graphicsService.CreateSwapchain(this);
             graphicsResources = GraphicsResources.CreateResources(graphicsService.GraphicsDevice, Width, Height, graphicsService.AssetManager, swapchain);
 
-            scene = new Scene(new Vector3(0, 0, -10), new Vector3(0, 0, 1), (float)Width / Height, []);
-            gameState = new GameState(0.01f, scene);
+            UpdateScene();
 
             timer1.Enabled = true;
+        }
+
+        private void UpdateScene()
+        {
+            float aspectRatio = (float)Width / Height;
+
+            scene = levelEditor.Template.ToScene(gameEditor.Template, scene?.Camera.Position ?? new Vector3(0, 0, -10), scene?.Camera.LookDirection ?? new Vector3(0, 0, 1), aspectRatio);
+            scene.AddObject(new GameObject(Vector3.Zero, behaviour));
+            gameState = new GameState(0.01f, scene);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            // TODO: Also need to update the full screen quad texture size
+            swapchain?.Resize((uint)Width, (uint)Height);
+            if (scene is not null)
+            {
+                scene.Camera.Projection.AspectRatio = (float)Width / Height;
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -70,10 +96,6 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             graphicsResources.CommandList.End();
             graphicsService.GraphicsDevice.SubmitCommands(graphicsResources.CommandList);
             graphicsService.GraphicsDevice.SwapBuffers(swapchain);
-
-            // TODO: remove
-            var newLook = Vector3.Transform(scene.Camera.LookDirection, Quaternion.CreateFromAxisAngle(Vector3.UnitY, 0.01f));
-            scene.Camera.SetValues(-10 * newLook, newLook);
         }
     }
 }

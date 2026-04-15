@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,6 +20,20 @@ namespace Frinkahedron.Core.Template
     public sealed class LevelTemplate
     {
         public List<LevelObjectTemplate> LevelObjects { get; } = new List<LevelObjectTemplate>();
+
+        public Scene ToScene(GameTemplate gameTemplate, Vector3 initialCameraPosition, Vector3 initialCameraDirection, float cameraAspectRatio)
+        {
+            List<GameObject> gameObjects = new List<GameObject>();
+            foreach (var levelObj in LevelObjects)
+            {
+                var gameObjTemplate = gameTemplate.GameObjects[levelObj.GameObjectIndex];
+                var gameObj = gameObjTemplate.ToGameObject(levelObj.WorldTransform, []);
+                gameObjects.Add(gameObj);
+            }
+            var scene = new Scene(initialCameraPosition, initialCameraDirection, cameraAspectRatio, gameObjects);
+            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-1)), new Vector3(1));
+            return scene;
+        }
     }
 
     public sealed class LevelObjectTemplate

@@ -1,4 +1,5 @@
-﻿using Frinkahedron.Core.Template;
+﻿using Frinkahedron.Core;
+using Frinkahedron.Core.Template;
 using System;
 using System.Collections.Generic;
 using System.Linq;
