@@ -87,5 +87,22 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
 
             levelEditor.TemplateChanged();
         }
+
+        private void removeButton_Click(object sender, EventArgs e)
+        {
+            if (levelObjectsBox.SelectedIndex < 0)
+            {
+                return;
+            }
+            int selectedIndex = levelObjectsBox.SelectedIndex;
+            levelEditor.Template.LevelObjects.RemoveAt(selectedIndex);
+            levelObjectsBox.Items.RemoveAt(selectedIndex);
+            if (levelObjectsBox.Items.Count > 0)
+            {
+                levelObjectsBox.SelectedIndex = Math.Clamp(selectedIndex, 0, levelObjectsBox.Items.Count - 1);
+            }
+
+            levelEditor.TemplateChanged();
+        }
     }
 }

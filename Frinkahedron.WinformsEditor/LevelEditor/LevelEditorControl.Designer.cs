@@ -35,6 +35,7 @@
             button1 = new Button();
             levelObjectsBox = new ListBox();
             levelObjTransformControl = new TransformControl();
+            removeButton = new Button();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             SuspendLayout();
@@ -68,15 +69,17 @@
             tableLayoutPanel2.ColumnCount = 1;
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel2.Controls.Add(objectSelectionBox, 0, 0);
-            tableLayoutPanel2.Controls.Add(button1, 0, 3);
+            tableLayoutPanel2.Controls.Add(button1, 0, 4);
             tableLayoutPanel2.Controls.Add(levelObjectsBox, 0, 1);
-            tableLayoutPanel2.Controls.Add(levelObjTransformControl, 0, 2);
+            tableLayoutPanel2.Controls.Add(levelObjTransformControl, 0, 3);
+            tableLayoutPanel2.Controls.Add(removeButton, 0, 2);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(3, 3);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
-            tableLayoutPanel2.RowCount = 4;
+            tableLayoutPanel2.RowCount = 5;
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.Size = new Size(232, 606);
@@ -107,7 +110,7 @@
             levelObjectsBox.FormattingEnabled = true;
             levelObjectsBox.Location = new Point(3, 32);
             levelObjectsBox.Name = "levelObjectsBox";
-            levelObjectsBox.Size = new Size(226, 431);
+            levelObjectsBox.Size = new Size(226, 402);
             levelObjectsBox.TabIndex = 2;
             levelObjectsBox.SelectedIndexChanged += levelObjectsBox_SelectedIndexChanged;
             // 
@@ -119,6 +122,16 @@
             levelObjTransformControl.Size = new Size(226, 105);
             levelObjTransformControl.TabIndex = 3;
             levelObjTransformControl.TransformChanged += levelObjTransformControl_TransformChanged;
+            // 
+            // removeButton
+            // 
+            removeButton.Location = new Point(3, 440);
+            removeButton.Name = "removeButton";
+            removeButton.Size = new Size(75, 23);
+            removeButton.TabIndex = 4;
+            removeButton.Text = "Remove";
+            removeButton.UseVisualStyleBackColor = true;
+            removeButton.Click += removeButton_Click;
             // 
             // LevelEditorControl
             // 
@@ -141,5 +154,6 @@
         private Button button1;
         private ListBox levelObjectsBox;
         private TransformControl levelObjTransformControl;
+        private Button removeButton;
     }
 }
