@@ -25,13 +25,13 @@ namespace Frinkahedron.Core.Template
             if (index == 0)
             {
                 // box
-                rigidBody = new RigidBody { Gravity = false, Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3() };
+                rigidBody = new RigidBody { Gravity = false, Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Material = new PhysicsMaterial(0.2f, 0.8f) };
             }
             else if (index == 1)
             {
                 // car
                 var mass = 1 * collider?.CalculateVolume() ?? 1;
-                rigidBody = new RigidBody { Mass = mass, Gravity = true, InverseInertia = collider?.CalculateFilledInertia(mass).GetInverse() ?? DiagonalMatrix3x3.Identity() };
+                rigidBody = new RigidBody { Mass = mass, Gravity = true, InverseInertia = collider?.CalculateFilledInertia(mass).GetInverse() ?? DiagonalMatrix3x3.Identity(), Material = new PhysicsMaterial(0.2f, 0.8f) };
                 behaviour = new CompositeBehaviour([new CarCameraFollowBehaviour(), new CarBehaviour(), ..additionalBehaviours]);
             }
 

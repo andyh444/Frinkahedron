@@ -17,14 +17,16 @@ namespace Frinkahedron.WinformsEditor
         public event EventHandler<TransformTemplate>? TransformChanged;
 
         private bool freeze;
+        private bool allowScaling;
 
         public TransformControl()
         {
             InitializeComponent();
         }
 
-        public void Initialise(TransformTemplate transform)
+        public void Initialise(TransformTemplate transform, bool allowScaling = true)
         {
+            this.allowScaling = allowScaling;
             freeze = true;
             xTranslationInput.Value = (decimal)transform.Translation.X;
             yTranslationInput.Value = (decimal)transform.Translation.Y;
@@ -33,7 +35,12 @@ namespace Frinkahedron.WinformsEditor
             xRotationInput.Value = (decimal)(transform.RotationEulerAngles.X * 180 / MathF.PI);
             yRotationInput.Value = (decimal)(transform.RotationEulerAngles.Y * 180 / MathF.PI);
             zRotationInput.Value = (decimal)(transform.RotationEulerAngles.Z * 180 / MathF.PI);
-
+            if (!allowScaling)
+            {
+                scaleInputX.Visible = false;
+                scaleInputY.Visible = false;
+                scaleInputZ.Visible = false;
+            }
             scaleInputX.Value = (decimal)transform.Scale.X;
             scaleInputY.Value = (decimal)transform.Scale.Y;
             scaleInputZ.Value = (decimal)transform.Scale.Z;
@@ -58,7 +65,7 @@ namespace Frinkahedron.WinformsEditor
             {
                 Translation = new Vector3(xTrans, yTrans, zTrans),
                 RotationEulerAngles = new Vector3(xRot, yRot, zRot),
-                Scale = new Vector3(xScale, yScale, zScale)
+                Scale = allowScaling ? new Vector3(xScale, yScale, zScale) : Vector3.One
             };
         }
 

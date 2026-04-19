@@ -25,7 +25,6 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         public float maxPitch = 0.45f * MathF.PI;
 
         private bool isOrbiting = false;
-        private float orbitDist;
         private Vector3 orbitCentre;
         private Vector3 pivotDiff;
 
@@ -47,9 +46,9 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 if (gameState.Input.IsKeyDown(Key.ShiftKey))
                 {
                     float panSensitivity = 0.001f;
-                    if (SceneRayCast(gameState, out var rayPos, out var intersect, out _))
+                    if (SceneRayCast(gameState, out var rayPos, out _, out var intersect, out _))
                     {
-                        panSensitivity = 0.001f * Vector3.Distance(rayPos, intersect);
+                        panSensitivity = MathF.Max(0.001f, 0.001f * Vector3.Distance(rayPos, intersect));
                     }
                     isOrbiting = false;
                     Vector2 delta = gameState.Input.GetMouseDelta();
@@ -61,10 +60,9 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 {
                     if (!isOrbiting)
                     {
-                        if (SceneRayCast(gameState, out var rayPos, out var centreOfRotation, out _))
+                        if (SceneRayCast(gameState, out var rayPos, out _, out var centreOfRotation, out _))
                         {
                             isOrbiting = true;
-                            orbitDist = Vector3.Distance(rayPos, centreOfRotation);
                             orbitCentre = centreOfRotation;
 
                             pivotDiff = cam.Position - orbitCentre;
@@ -107,9 +105,11 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                     // TODO: Zoom amount should change based on distance to scene
                     if (cam.ProjectionType is ProjectionType.Perspective)
                     {
-                        (_, var rayDir) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
-
                         float scrollSensitivity = 0.05f;
+                        if (SceneRayCast(gameState, out var rayPos, out var rayDir, out var intersect, out _))
+                        {
+                            scrollSensitivity = MathF.Max(0.05f, 0.02f * Vector3.Distance(rayPos, intersect));
+                        }
                         int delta = gameState.Input.GetMouseScrollDelta();
                         cam.SetValues(cam.Position + scrollSensitivity * delta * rayDir, cam.LookDirection);
                     }
@@ -124,22 +124,22 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
 
             if (gameState.Input.IsMouseButtonPressed(MouseButton.Left))
             {
-                if (SceneRayCast(gameState, out _, out var intersect, out var intersectNormal))
+                if (SceneRayCast(gameState, out _, out _, out var intersect, out var intersectNormal))
                 {
                     levelEditor.Template.LevelObjects.Add(new LevelObjectTemplate
                     {
                         GameObjectIndex = getObjIndex(),
                         WorldTransform = new TransformTemplate { Translation = intersect + 0.5f * intersectNormal } // TODO: translate based on AABB rather than just 0.5
                     });
-                    levelEditor.TemplateChangedCallback?.Invoke();
+                    levelEditor.TemplateChanged();
                 }
 
             }
         }
 
-        private bool SceneRayCast(GameState gameState, out Vector3 rayPos, out Vector3 intersect, out Vector3 normal)
+        private bool SceneRayCast(GameState gameState, out Vector3 rayPos, out Vector3 rayDir, out Vector3 intersect, out Vector3 normal)
         {
-            (rayPos, var rayDir) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
+            (rayPos, rayDir) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
 
             float bestDistance = float.PositiveInfinity;
             Vector3 bestIntersection = default;

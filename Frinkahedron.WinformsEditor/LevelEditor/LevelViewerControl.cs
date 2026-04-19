@@ -45,7 +45,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             this.gameEditor = gameEditor;
             this.levelEditor = levelEditor;
             this.behaviour = new LevelViewerBehaviour(gameEditor, levelEditor, getObjectIndex);
-            this.levelEditor.TemplateChangedCallback = UpdateScene;
+            _ = this.levelEditor.RegisterTemplateChangedCallback(UpdateScene);
 
             graphicsResources = GraphicsResources.CreateResources(graphicsService.GraphicsDevice, Width, Height, graphicsService.AssetManager, swapchain);
 

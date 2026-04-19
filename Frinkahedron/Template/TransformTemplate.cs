@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace Frinkahedron.Core.Template
 {
-    //[JsonConverter(typeof(TransformTemplateConverter))]
     public sealed class TransformTemplate
     {
         public Vector3 Translation { get; set; }
@@ -44,7 +43,7 @@ namespace Frinkahedron.Core.Template
 
         private string Vector3ToString(Vector3 v)
         {
-            return $"{v.X:#0.0#},{v.Y:#0.0#},{v.Z:#0.0#}";
+            return $"{v.X:#0.0#####},{v.Y:#0.0######},{v.Z:#0.0######}";
         }
 
         private Vector3 StringToVector3(string s)

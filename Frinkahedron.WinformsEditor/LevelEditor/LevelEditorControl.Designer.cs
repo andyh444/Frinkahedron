@@ -33,6 +33,8 @@
             tableLayoutPanel2 = new TableLayoutPanel();
             objectSelectionBox = new ComboBox();
             button1 = new Button();
+            levelObjectsBox = new ListBox();
+            levelObjTransformControl = new TransformControl();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             SuspendLayout();
@@ -66,13 +68,17 @@
             tableLayoutPanel2.ColumnCount = 1;
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel2.Controls.Add(objectSelectionBox, 0, 0);
-            tableLayoutPanel2.Controls.Add(button1, 0, 1);
+            tableLayoutPanel2.Controls.Add(button1, 0, 3);
+            tableLayoutPanel2.Controls.Add(levelObjectsBox, 0, 1);
+            tableLayoutPanel2.Controls.Add(levelObjTransformControl, 0, 2);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(3, 3);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
-            tableLayoutPanel2.RowCount = 2;
+            tableLayoutPanel2.RowCount = 4;
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle());
+            tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.Size = new Size(232, 606);
             tableLayoutPanel2.TabIndex = 1;
             // 
@@ -87,13 +93,32 @@
             // 
             // button1
             // 
-            button1.Location = new Point(3, 32);
+            button1.Location = new Point(3, 580);
             button1.Name = "button1";
             button1.Size = new Size(75, 23);
             button1.TabIndex = 1;
             button1.Text = "Play/Stop";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
+            // 
+            // levelObjectsBox
+            // 
+            levelObjectsBox.Dock = DockStyle.Fill;
+            levelObjectsBox.FormattingEnabled = true;
+            levelObjectsBox.Location = new Point(3, 32);
+            levelObjectsBox.Name = "levelObjectsBox";
+            levelObjectsBox.Size = new Size(226, 431);
+            levelObjectsBox.TabIndex = 2;
+            levelObjectsBox.SelectedIndexChanged += levelObjectsBox_SelectedIndexChanged;
+            // 
+            // levelObjTransformControl
+            // 
+            levelObjTransformControl.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            levelObjTransformControl.Location = new Point(3, 469);
+            levelObjTransformControl.Name = "levelObjTransformControl";
+            levelObjTransformControl.Size = new Size(226, 105);
+            levelObjTransformControl.TabIndex = 3;
+            levelObjTransformControl.TransformChanged += levelObjTransformControl_TransformChanged;
             // 
             // LevelEditorControl
             // 
@@ -114,5 +139,7 @@
         private TableLayoutPanel tableLayoutPanel2;
         private ComboBox objectSelectionBox;
         private Button button1;
+        private ListBox levelObjectsBox;
+        private TransformControl levelObjTransformControl;
     }
 }
