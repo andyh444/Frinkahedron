@@ -11,7 +11,6 @@
 	-Sliding joint
 	-Spring
 -Other:
-	-Ray/Shape intersection
 	-Static/Dynamic/Kinematic bodies
 
 Game Engine:
@@ -22,14 +21,16 @@ Game Engine:
 -Nav mesh
 
 Veldrid/3D Rendering:
--Render off-screen and then render to full-screen mesh
--Post processing filters:
-	-Blur
-	-Pixellation
-	-Greyscale
-	-etc
 -Text rendering
 -Ambient Occlusion
--Anti-aliasing
+-Better Anti-aliasing
 -Controller support
--Model import/rendering
+-Other wireframe shapes
+
+Editor:
+-Game Obj Names
+-Level Obj Names?
+-Other Collider Templates
+-Rigid body template
+-behaviour template
+
