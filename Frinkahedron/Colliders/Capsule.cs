@@ -98,10 +98,114 @@ namespace Frinkahedron.Core.Colliders
             return new AxisAlignedBoundingBox(min, max);
         }
 
-        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 result)
+        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 result, out Vector3 normal)
         {
             result = Vector3.Zero;
-            return false;
+            normal = Vector3.Zero;
+
+            // Transform ray into local space
+            Quaternion invRot = Quaternion.Inverse(position.Orientation);
+            Vector3 ro = Vector3.Transform(rayPosition - position.Centre, invRot);
+            Vector3 rd = Vector3.Normalize(Vector3.Transform(rayDirection, invRot));
+
+            float halfHeight = PointToPointLength * 0.5f;
+            float r = Radius;
+
+            float tMin = float.MaxValue;
+            bool hit = false;
+            int hitType = 0; // 1 = top sphere, -1 = bottom sphere, 0 = side
+
+            // --- 1. Cylinder side (infinite cylinder x^2 + z^2 = r^2), limited by y
+            float a = rd.X * rd.X + rd.Z * rd.Z;
+            float b = 2f * (ro.X * rd.X + ro.Z * rd.Z);
+            float c = ro.X * ro.X + ro.Z * ro.Z - r * r;
+
+            float discriminant = b * b - 4f * a * c;
+            if (discriminant >= 0f && Math.Abs(a) > 1e-6f)
+            {
+                float sqrtD = MathF.Sqrt(discriminant);
+                float t1 = (-b - sqrtD) / (2f * a);
+                float t2 = (-b + sqrtD) / (2f * a);
+
+                void CheckSide(float t)
+                {
+                    if (t < 0f) return;
+                    float y = ro.Y + t * rd.Y;
+                    if (y >= -halfHeight && y <= halfHeight)
+                    {
+                        if (t < tMin)
+                        {
+                            tMin = t;
+                            hit = true;
+                            hitType = 0;
+                        }
+                    }
+                }
+
+                CheckSide(t1);
+                CheckSide(t2);
+            }
+
+            // --- 2. End spheres
+            Vector3 topCenter = new Vector3(0f, halfHeight, 0f);
+            Vector3 bottomCenter = new Vector3(0f, -halfHeight, 0f);
+
+            void CheckSphere(Vector3 center, int type)
+            {
+                Vector3 oc = ro - center;
+                float A = Vector3.Dot(rd, rd);
+                float B = 2f * Vector3.Dot(oc, rd);
+                float C = Vector3.Dot(oc, oc) - r * r;
+
+                float disc = B * B - 4f * A * C;
+                if (disc < 0f) return;
+
+                float sqrtD = MathF.Sqrt(disc);
+                float t0 = (-B - sqrtD) / (2f * A);
+                float t1 = (-B + sqrtD) / (2f * A);
+
+                if (t0 > 0f && t0 < tMin)
+                {
+                    tMin = t0;
+                    hit = true;
+                    hitType = type;
+                }
+                else if (t1 > 0f && t1 < tMin)
+                {
+                    tMin = t1;
+                    hit = true;
+                    hitType = type;
+                }
+            }
+
+            CheckSphere(topCenter, 1);
+            CheckSphere(bottomCenter, -1);
+
+            if (!hit)
+                return false;
+
+            Vector3 localHit = ro + tMin * rd;
+
+            result = Vector3.Transform(localHit, position.Orientation) + position.Centre;
+
+            // Compute normal in local space
+            Vector3 localNormal;
+            if (hitType == 0)
+            {
+                localNormal = Vector3.Normalize(new Vector3(localHit.X, 0f, localHit.Z));
+            }
+            else if (hitType == 1)
+            {
+                localNormal = Vector3.Normalize(localHit - topCenter);
+            }
+            else
+            {
+                localNormal = Vector3.Normalize(localHit - bottomCenter);
+            }
+
+            normal = Vector3.Normalize(Vector3.Transform(localNormal, position.Orientation));
+
+            return true;
         }
     }
 }

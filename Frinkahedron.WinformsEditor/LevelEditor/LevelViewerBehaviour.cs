@@ -81,7 +81,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 foreach (var obj in gameState.Scene.Objects)
                 {
                     
-                    if (obj.Collider?.RayIntersection(obj.Position, rayPos, rayDir, out Vector3 result) == true)
+                    if (obj.Collider?.RayIntersection(obj.Position, rayPos, rayDir, out Vector3 result, out _) == true)
                     {
                         if (Vector3.DistanceSquared(result, rayPos) < bestDistance)
                         {

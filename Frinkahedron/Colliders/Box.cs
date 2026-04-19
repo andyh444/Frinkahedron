@@ -114,9 +114,10 @@ namespace Frinkahedron.Core.Colliders
                 ];
         }
 
-        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 result)
+        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 result, out Vector3 normal)
         {
             result = Vector3.Zero;
+            normal = Vector3.Zero;
 
             Quaternion invRot = Quaternion.Inverse(position.Orientation);
 
@@ -138,6 +139,29 @@ namespace Frinkahedron.Core.Colliders
 
             // Transform back to world space
             result = Vector3.Transform(localHit, position.Orientation) + position.Centre;
+
+            // Compute local normal by finding the nearest face
+            Vector3 half = Dimensions / 2;
+            float dx = MathF.Abs(MathF.Abs(localHit.X) - half.X);
+            float dy = MathF.Abs(MathF.Abs(localHit.Y) - half.Y);
+            float dz = MathF.Abs(MathF.Abs(localHit.Z) - half.Z);
+
+            Vector3 localNormal;
+            if (dx <= dy && dx <= dz)
+            {
+                localNormal = new Vector3(localHit.X >= 0 ? 1f : -1f, 0f, 0f);
+            }
+            else if (dy <= dx && dy <= dz)
+            {
+                localNormal = new Vector3(0f, localHit.Y >= 0 ? 1f : -1f, 0f);
+            }
+            else
+            {
+                localNormal = new Vector3(0f, 0f, localHit.Z >= 0 ? 1f : -1f);
+            }
+
+            Vector3 worldNormal = Vector3.Transform(localNormal, position.Orientation);
+            normal = Vector3.Normalize(worldNormal);
 
             return true;
         }

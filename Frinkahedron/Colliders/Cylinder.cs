@@ -49,52 +49,56 @@ namespace Frinkahedron.Core.Colliders
             //renderer.DrawDisc(cap2Transform * position);
         }
 
-        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 hitPoint)
+        public bool RayIntersection(Position position, Vector3 rayPosition, Vector3 rayDirection, out Vector3 hitPoint, out Vector3 normal)
         {
             hitPoint = Vector3.Zero;
+            normal = Vector3.Zero;
 
             // Transform ray into cylinder local space
             Quaternion invRot = Quaternion.Inverse(position.Orientation);
 
-            Vector3 ro = Vector3.Transform(rayPosition- position.Centre, invRot);
+            Vector3 ro = Vector3.Transform(rayPosition - position.Centre, invRot);
             Vector3 rd = Vector3.Normalize(Vector3.Transform(rayDirection, invRot));
 
             float halfHeight = height * 0.5f;
 
             float tMin = float.MaxValue;
             bool hit = false;
+            bool hitSide = false;
+            bool hitTopCap = false;
 
             // --- 1. Intersection with infinite cylinder (x^2 + z^2 = r^2) ---
             float a = rd.X * rd.X + rd.Z * rd.Z;
-            float b = 2 * (ro.X * rd.X + ro.Z * rd.Z);
+            float b = 2f * (ro.X * rd.X + ro.Z * rd.Z);
             float c = ro.X * ro.X + ro.Z * ro.Z - radius * radius;
 
-            float discriminant = b * b - 4 * a * c;
+            float discriminant = b * b - 4f * a * c;
 
-            if (discriminant >= 0 && Math.Abs(a) > 1e-6f)
+            if (discriminant >= 0f && Math.Abs(a) > 1e-6f)
             {
                 float sqrtD = (float)Math.Sqrt(discriminant);
 
-                float t1 = (-b - sqrtD) / (2 * a);
-                float t2 = (-b + sqrtD) / (2 * a);
+                float t1 = (-b - sqrtD) / (2f * a);
+                float t2 = (-b + sqrtD) / (2f * a);
+
+                void CheckCylinderSide(float t)
+                {
+                    if (t < 0f) return;
+
+                    float y = ro.Y + t * rd.Y;
+                    if (y >= -halfHeight && y <= halfHeight)
+                    {
+                        if (t < tMin)
+                        {
+                            tMin = t;
+                            hit = true;
+                            hitSide = true;
+                        }
+                    }
+                }
 
                 CheckCylinderSide(t1);
                 CheckCylinderSide(t2);
-            }
-
-            void CheckCylinderSide(float t)
-            {
-                if (t < 0) return;
-
-                float y = ro.Y + t * rd.Y;
-                if (y >= -halfHeight && y <= halfHeight)
-                {
-                    if (t < tMin)
-                    {
-                        tMin = t;
-                        hit = true;
-                    }
-                }
             }
 
             // --- 2. Check caps ---
@@ -102,16 +106,16 @@ namespace Frinkahedron.Core.Colliders
             {
                 // Bottom cap (y = -halfHeight)
                 float tBottom = (-halfHeight - ro.Y) / rd.Y;
-                CheckCap(tBottom, -halfHeight);
+                CheckCap(tBottom, -halfHeight, false);
 
                 // Top cap (y = +halfHeight)
                 float tTop = (halfHeight - ro.Y) / rd.Y;
-                CheckCap(tTop, halfHeight);
+                CheckCap(tTop, halfHeight, true);
             }
 
-            void CheckCap(float t, float yPlane)
+            void CheckCap(float t, float yPlane, bool top)
             {
-                if (t < 0) return;
+                if (t < 0f) return;
 
                 Vector3 p = ro + t * rd;
 
@@ -121,6 +125,8 @@ namespace Frinkahedron.Core.Colliders
                     {
                         tMin = t;
                         hit = true;
+                        hitSide = false;
+                        hitTopCap = top;
                     }
                 }
             }
@@ -133,6 +139,23 @@ namespace Frinkahedron.Core.Colliders
 
             // Transform back to world space
             hitPoint = Vector3.Transform(localHit, position.Orientation) + position.Centre;
+
+            // Compute local normal
+            Vector3 localNormal;
+            if (hitSide)
+            {
+                localNormal = Vector3.Normalize(new Vector3(localHit.X, 0f, localHit.Z));
+            }
+            else
+            {
+                // cap normal (if top cap then +Y else -Y)
+                if (hitTopCap)
+                    localNormal = Vector3.UnitY;
+                else
+                    localNormal = -Vector3.UnitY;
+            }
+
+            normal = Vector3.Normalize(Vector3.Transform(localNormal, position.Orientation));
 
             return true;
         }

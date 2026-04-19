@@ -287,9 +287,9 @@ namespace Frinkahedron.Core
                 {
                     continue;
                 }
-                r1 = r1 || obj.Collider.RayIntersection(obj.Position, point1, down, out hitPoint1);
-                r2 = r2 || obj.Collider.RayIntersection(obj.Position, point2, down, out hitPoint2);
-                r3 = r3 || obj.Collider.RayIntersection(obj.Position, point3, down, out hitPoint3);
+                r1 = r1 || obj.Collider.RayIntersection(obj.Position, point1, down, out hitPoint1, out _);
+                r2 = r2 || obj.Collider.RayIntersection(obj.Position, point2, down, out hitPoint2, out _);
+                r3 = r3 || obj.Collider.RayIntersection(obj.Position, point3, down, out hitPoint3, out _);
             }
             if (r1
                 && r2
@@ -318,7 +318,7 @@ namespace Frinkahedron.Core
 
                 foreach (var obj in gameState.Scene.Objects)
                 {
-                    if (obj.Collider?.RayIntersection(obj.Position, rayPosition, rayDirection, out Vector3 hitPoint) == true)
+                    if (obj.Collider?.RayIntersection(obj.Position, rayPosition, rayDirection, out Vector3 hitPoint, out _) == true)
                     {
                         intersections.Add((obj, hitPoint));
                         //obj.RigidBody?.ApplyImpulse(1 * rayDirection, hitPoint, obj.Position);
