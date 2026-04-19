@@ -34,7 +34,9 @@ namespace Frinkahedron.WinformsEditor
             yRotationInput.Value = (decimal)(transform.RotationEulerAngles.Y * 180 / MathF.PI);
             zRotationInput.Value = (decimal)(transform.RotationEulerAngles.Z * 180 / MathF.PI);
 
-            scaleInput.Value = (decimal)transform.Scale;
+            scaleInputX.Value = (decimal)transform.Scale.X;
+            scaleInputY.Value = (decimal)transform.Scale.Y;
+            scaleInputZ.Value = (decimal)transform.Scale.Z;
             freeze = false;
         }
 
@@ -48,11 +50,15 @@ namespace Frinkahedron.WinformsEditor
             float yTrans = (float)yTranslationInput.Value;
             float zTrans = (float)zTranslationInput.Value;
 
+            float xScale = (float)scaleInputX.Value;
+            float yScale = (float)scaleInputY.Value;
+            float zScale = (float)scaleInputZ.Value;
+
             return new TransformTemplate
             {
                 Translation = new Vector3(xTrans, yTrans, zTrans),
                 RotationEulerAngles = new Vector3(xRot, yRot, zRot),
-                Scale = (float)scaleInput.Value
+                Scale = new Vector3(xScale, yScale, zScale)
             };
         }
 

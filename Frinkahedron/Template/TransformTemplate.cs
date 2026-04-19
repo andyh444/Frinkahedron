@@ -13,7 +13,7 @@ namespace Frinkahedron.Core.Template
 
         public Vector3 RotationEulerAngles { get; set; }
 
-        public float Scale { get; set; } = 1;
+        public Vector3 Scale { get; set; } = Vector3.One;
 
         public Matrix4x4 ToMatrix()
         {
