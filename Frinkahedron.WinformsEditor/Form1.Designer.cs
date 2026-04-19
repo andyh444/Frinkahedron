@@ -38,6 +38,7 @@
             tabPage1 = new TabPage();
             tabPage2 = new TabPage();
             levelEditorControl1 = new Frinkahedron.WinformsEditor.LevelEditor.LevelEditorControl();
+            saveButton = new Button();
             tableLayoutPanel1.SuspendLayout();
             flowLayoutPanel1.SuspendLayout();
             tabControl1.SuspendLayout();
@@ -83,6 +84,7 @@
             // 
             flowLayoutPanel1.Controls.Add(addObjectButton);
             flowLayoutPanel1.Controls.Add(loadModelButton);
+            flowLayoutPanel1.Controls.Add(saveButton);
             flowLayoutPanel1.Dock = DockStyle.Fill;
             flowLayoutPanel1.Location = new Point(0, 657);
             flowLayoutPanel1.Margin = new Padding(0);
@@ -153,6 +155,16 @@
             levelEditorControl1.Size = new Size(812, 646);
             levelEditorControl1.TabIndex = 0;
             // 
+            // saveButton
+            // 
+            saveButton.Location = new Point(173, 3);
+            saveButton.Name = "saveButton";
+            saveButton.Size = new Size(75, 23);
+            saveButton.TabIndex = 2;
+            saveButton.Text = "Save";
+            saveButton.UseVisualStyleBackColor = true;
+            saveButton.Click += saveButton_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -181,5 +193,6 @@
         private TabPage tabPage1;
         private TabPage tabPage2;
         private LevelEditor.LevelEditorControl levelEditorControl1;
+        private Button saveButton;
     }
 }

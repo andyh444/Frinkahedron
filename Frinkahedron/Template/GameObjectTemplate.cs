@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Frinkahedron.Core.Maths;
+using Frinkahedron.Core.Physics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -13,14 +15,32 @@ namespace Frinkahedron.Core.Template
 
         public IRenderableTemplate? Renderable { get; set; }
 
-        public GameObject ToGameObject(TransformTemplate worldTransform, IReadOnlyList<Behaviour> additionalBehaviours)
+        public GameObject ToGameObject(TransformTemplate worldTransform, IReadOnlyList<Behaviour> additionalBehaviours, int index)
         {
-            var obj = new GameObject(
-                worldTransform.Translation,
-                behaviour: new CompositeBehaviour(additionalBehaviours),
-                colliderShape: Collider?.ToShape(),
-                rigidBody: null,
-                renderable: Renderable?.ToRenderable());
+            // todo remove index
+
+            RigidBody? rigidBody = null;
+            Behaviour behaviour = new CompositeBehaviour(additionalBehaviours);
+            var collider = Collider?.ToShape();
+            if (index == 0)
+            {
+                // box
+                rigidBody = new RigidBody { Gravity = false, Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3() };
+            }
+            else if (index == 1)
+            {
+                // car
+                var mass = 1 * collider?.CalculateVolume() ?? 1;
+                rigidBody = new RigidBody { Mass = mass, Gravity = true, InverseInertia = collider?.CalculateFilledInertia(mass).GetInverse() ?? DiagonalMatrix3x3.Identity() };
+                behaviour = new CompositeBehaviour([new CarCameraFollowBehaviour(), new CarBehaviour(), ..additionalBehaviours]);
+            }
+
+                var obj = new GameObject(
+                    worldTransform.Translation,
+                    behaviour: behaviour,
+                    colliderShape: collider,
+                    rigidBody: rigidBody,
+                    renderable: Renderable?.ToRenderable());
 
             var rot = worldTransform.RotationEulerAngles;
             obj.Position.Orientation = Quaternion.CreateFromYawPitchRoll(rot.Y, rot.X, rot.Z);

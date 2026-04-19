@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ namespace Frinkahedron.WinformsEditor
     {
         private System.Windows.Forms.Timer timer;
         protected Swapchain? swapchain;
+        private long lastTimestamp;
+
 
         public VeldridControl()
         {
@@ -27,6 +30,7 @@ namespace Frinkahedron.WinformsEditor
 
         protected void StartRenderLoop()
         {
+            lastTimestamp = Stopwatch.GetTimestamp();
             timer.Start();
         }
 
@@ -35,13 +39,16 @@ namespace Frinkahedron.WinformsEditor
             swapchain = graphicsService.CreateSwapchain(this);
         }
 
+        
         private void Timer_Tick(object? sender, EventArgs e)
         {
             if (swapchain is null)
             {
                 return;
             }
-            Render(swapchain, TimeSpan.FromMilliseconds(timer.Interval));
+            TimeSpan timeSpan = Stopwatch.GetElapsedTime(lastTimestamp);
+            Render(swapchain, timeSpan);
+            lastTimestamp = Stopwatch.GetTimestamp();
         }
 
         protected abstract void Render(Swapchain swapChain, TimeSpan interval);

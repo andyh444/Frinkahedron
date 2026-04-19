@@ -16,6 +16,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
     {
         private readonly GameTemplateEditor gameEditor;
         private readonly LevelTemplateEditor levelEditor;
+        private readonly Func<int> getObjIndex;
 
         public float pitch = 0;
         public float yaw = 0;
@@ -28,10 +29,11 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         private Vector3 orbitCentre;
         private Vector3 pivotDiff;
 
-        public LevelViewerBehaviour(GameTemplateEditor gameEditor, LevelTemplateEditor levelEditor)
+        public LevelViewerBehaviour(GameTemplateEditor gameEditor, LevelTemplateEditor levelEditor, Func<int> getObjIndex)
         {
             this.gameEditor = gameEditor;
             this.levelEditor = levelEditor;
+            this.getObjIndex = getObjIndex;
         }
 
         public override void Update(GameObject self, GameState gameState)
@@ -45,6 +47,10 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 if (gameState.Input.IsKeyDown(Key.ShiftKey))
                 {
                     float panSensitivity = 0.001f;
+                    if (SceneRayCast(gameState, out var rayPos, out var intersect, out _))
+                    {
+                        panSensitivity = 0.001f * Vector3.Distance(rayPos, intersect);
+                    }
                     isOrbiting = false;
                     Vector2 delta = gameState.Input.GetMouseDelta();
                     var camPos = cam.Position;
@@ -122,7 +128,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 {
                     levelEditor.Template.LevelObjects.Add(new LevelObjectTemplate
                     {
-                        GameObjectIndex = 0, // TODO
+                        GameObjectIndex = getObjIndex(),
                         WorldTransform = new TransformTemplate { Translation = intersect + 0.5f * intersectNormal } // TODO: translate based on AABB rather than just 0.5
                     });
                     levelEditor.TemplateChangedCallback?.Invoke();

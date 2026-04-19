@@ -99,10 +99,13 @@ namespace Frinkahedron.Core
                 for (int j = i + 1; j < worldRigidBodies.Length; j++)
                 {
                     ref var bodyB = ref worldRigidBodies[j];
-                    if (bodyA.BoundingBox.IntersectsWith(bodyB.BoundingBox))
+                    if (bodyA.RigidBody is not null && bodyB.RigidBody is not null)
                     {
-                        //collisionPairs.Add((objA, inertiaA, objB, inertiaB));
-                        collisionPairs.Add((i, j));
+                        if (bodyA.BoundingBox.IntersectsWith(bodyB.BoundingBox))
+                        {
+                            //collisionPairs.Add((objA, inertiaA, objB, inertiaB));
+                            collisionPairs.Add((i, j));
+                        }
                     }
                 }
             });

@@ -1,7 +1,13 @@
 ﻿using System.Numerics;
+using System.Text.Json.Serialization;
 
 namespace Frinkahedron.Core.Template
 {
+    [JsonPolymorphic()]
+    [JsonDerivedType(typeof(ModelRenderableTemplate), nameof(ModelRenderableTemplate))]
+    [JsonDerivedType(typeof(ModelEntitiesRenderableTemplate), nameof(ModelEntitiesRenderableTemplate))]
+    [JsonDerivedType(typeof(ModelEntityRenderableTemplate), nameof(ModelEntityRenderableTemplate))]
+    [JsonDerivedType(typeof(CompositeRenderableTemplate), nameof(CompositeRenderableTemplate))]
     public interface IRenderableTemplate
     {
         TransformTemplate Transform { get; set; }

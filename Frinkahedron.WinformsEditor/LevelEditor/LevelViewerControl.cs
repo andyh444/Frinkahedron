@@ -24,6 +24,9 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         private LevelTemplateEditor? levelEditor;
         private readonly UserControlInputListener userControlInputListener;
         private LevelViewerBehaviour? behaviour;
+        private bool isPlaying;
+        private Vector3 prevCamPos;
+        private Vector3 prevCamDir;
 
         public LevelViewerControl()
         {
@@ -31,7 +34,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             userControlInputListener = new UserControlInputListener(this);
         }
 
-        public void Initialise(GameTemplateEditor gameEditor, LevelTemplateEditor levelEditor, GraphicsService graphicsService)
+        public void Initialise(GameTemplateEditor gameEditor, LevelTemplateEditor levelEditor, GraphicsService graphicsService, Func<int> getObjectIndex)
         {
             if (this.graphicsService is not null)
             {
@@ -41,7 +44,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             this.graphicsService = graphicsService;
             this.gameEditor = gameEditor;
             this.levelEditor = levelEditor;
-            this.behaviour = new LevelViewerBehaviour(gameEditor, levelEditor);
+            this.behaviour = new LevelViewerBehaviour(gameEditor, levelEditor, getObjectIndex);
             this.levelEditor.TemplateChangedCallback = UpdateScene;
 
             graphicsResources = GraphicsResources.CreateResources(graphicsService.GraphicsDevice, Width, Height, graphicsService.AssetManager, swapchain);
@@ -51,12 +54,29 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             StartRenderLoop();
         }
 
+        public void TogglePlay()
+        {
+            if (!isPlaying)
+            {
+                prevCamPos = scene.Camera.Position;
+                prevCamDir = scene.Camera.LookDirection;
+                isPlaying = true;
+                UpdateScene();
+            }
+            else
+            {
+                isPlaying = false;
+                scene.Camera.SetValues(prevCamPos, prevCamDir);
+                UpdateScene();
+            }
+        }
+
         private void UpdateScene()
         {
             float aspectRatio = (float)Width / Height;
 
             scene = levelEditor.Template.ToScene(gameEditor.Template, scene?.Camera.Position ?? new Vector3(0, 0, -10), scene?.Camera.LookDirection ?? new Vector3(0, 0, 1), aspectRatio);
-            scene.AddObject(new GameObject(Vector3.Zero, behaviour));
+            //scene.AddObject(new GameObject(Vector3.Zero, behaviour));
             gameState = new GameState(0.01f, scene);
         }
 
@@ -79,7 +99,14 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             userControlInputListener.UpdateInput(gameState.Input);
 
             gameState.DeltaTime = (float)interval.TotalSeconds;
-            scene.Update(gameState);
+            if (isPlaying)
+            {
+                scene.Update(gameState);
+            }
+            else
+            {
+                behaviour.Update(null, gameState);
+            }
             VeldridRenderContext context = new VeldridRenderContext();
             scene.Draw(context);
 

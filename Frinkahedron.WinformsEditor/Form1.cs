@@ -8,6 +8,7 @@ using Frinkahedron.Core.Colliders;
 using System.Runtime.InteropServices;
 using Frinkahedron.Core.Template;
 using Frinkahedron.WinformsEditor.GameObjectEditor;
+using System.Text.Json;
 
 namespace Frinkahedron.WinformsEditor
 {
@@ -23,7 +24,26 @@ namespace Frinkahedron.WinformsEditor
         {
             InitializeComponent();
             graphicsService = new GraphicsService();
-            gameEditor = new GameTemplateEditor();
+            if (File.Exists($@"C:\tmp\tempgame.json"))
+            {
+                try
+                {
+                    using var fs = File.OpenRead($@"C:\tmp\tempgame.json");
+
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, IncludeFields = true, };
+                    options.Converters.Add(new Vector3Converter());
+                    var template = JsonSerializer.Deserialize<GameTemplate>(fs, options);
+                    gameEditor = new GameTemplateEditor(template);
+                }
+                catch (Exception ex)
+                {
+                    gameEditor = new GameTemplateEditor();
+                }
+            }
+            else
+            {
+                gameEditor = new GameTemplateEditor();
+            }
 
             gameObjectEditorControl1.Initialise(gameEditor, graphicsService);
             levelEditorControl1.Initialise(gameEditor, graphicsService);
@@ -32,10 +52,43 @@ namespace Frinkahedron.WinformsEditor
             objectsNode = treeView1.Nodes.Add("Objects");
             levelsNode = treeView1.Nodes.Add("Levels");
 
-            LevelTemplate levelTemplate = new LevelTemplate();
-            var level = levelsNode.Nodes.Add("Level 1");
-            level.Tag = levelTemplate;
-            gameEditor.Template.Levels.Add(levelTemplate);
+            if (gameEditor.Template.Models.Count > 0)
+            {
+                foreach (var model in gameEditor.Template.Models)
+                {
+                    var node = modelsNode.Nodes.Add(model.ModelID);
+                    node.Tag = model;
+                }
+                modelsNode.Expand();
+            }
+
+            if (gameEditor.Template.GameObjects.Count > 0)
+            {
+                int index = 0;
+                foreach (var obj in gameEditor.Template.GameObjects)
+                {
+                    var node = objectsNode.Nodes.Add($"Object {++index}");
+                    node.Tag = obj;
+                }
+                objectsNode.Expand();
+            }
+
+            if (gameEditor.Template.Levels.Count == 0)
+            {
+                LevelTemplate levelTemplate = new LevelTemplate();
+                var level = levelsNode.Nodes.Add("Level 1");
+                level.Tag = levelTemplate;
+                gameEditor.Template.Levels.Add(levelTemplate);
+            }
+            else
+            {
+                int index = 0;
+                foreach (var levelTemplate in gameEditor.Template.Levels)
+                {
+                    var level = levelsNode.Nodes.Add($"Level {++index}");
+                    level.Tag = levelTemplate;
+                }
+            }
             levelsNode.Expand();
         }
 
@@ -77,7 +130,17 @@ namespace Frinkahedron.WinformsEditor
             else if (treeView1.SelectedNode?.Tag is LevelTemplate lt)
             {
                 tabControl1.SelectedIndex = 1;
+                levelEditorControl1.IsShown(lt);
             }
+        }
+
+        private void saveButton_Click(object sender, EventArgs e)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, IncludeFields = true, };
+            options.Converters.Add(new Vector3Converter());
+
+            using var fs = File.Create($@"C:\tmp\tempgame.json");
+            JsonSerializer.Serialize<GameTemplate>(fs, gameEditor.Template, options);
         }
     }
 }

@@ -1,8 +1,11 @@
 ﻿using Frinkahedron.Core.Colliders;
 using System.Numerics;
+using System.Text.Json.Serialization;
 
 namespace Frinkahedron.Core.Template
 {
+    [JsonPolymorphic]
+    [JsonDerivedType(typeof(BoxTemplate), nameof(BoxTemplate))]
     public interface IShapeTemplate
     {
         IShape ToShape();

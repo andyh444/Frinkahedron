@@ -12,8 +12,13 @@ namespace Frinkahedron.WinformsEditor
         public GameTemplate Template { get; }
 
         public GameTemplateEditor()
+            :this(new GameTemplate())
         {
-            Template = new GameTemplate();
+        }
+
+        public GameTemplateEditor(GameTemplate template)
+        {
+            Template = template;
         }
     }
 }
