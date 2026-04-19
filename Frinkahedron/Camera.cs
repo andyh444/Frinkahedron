@@ -127,6 +127,25 @@ namespace Frinkahedron
             return (rayPosition, direction);
         }
 
+        public Vector3 Unproject(Vector2 screenPosition)
+        {
+            // screen position should be in normalised device coordinates (ndc)
+            Vector4 nearClip = new Vector4(screenPosition.X, screenPosition.Y, 0.0f, 1.0f);
+
+            _ = Matrix4x4.Invert(Projection.Matrix, out var inverseProjection);
+            _ = Matrix4x4.Invert(ViewMatrix, out var inverseView);
+
+            Vector4 nearView = Vector4.Transform(nearClip, inverseProjection);
+
+            // Perspective divide
+            nearView /= nearView.W;
+
+            Vector4 nearWorld = Vector4.Transform(nearView, inverseView);
+
+            Vector3 rayPosition = nearWorld.AsVector3();
+            return rayPosition;
+        }
+
         private Matrix4x4 CreateViewMatrix()
         {
             return Matrix4x4.CreateLookAt(Position, Position + LookDirection, Vector3.UnitY);
