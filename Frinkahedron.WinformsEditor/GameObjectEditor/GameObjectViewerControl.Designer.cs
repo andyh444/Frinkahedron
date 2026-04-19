@@ -28,27 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
-            timer1 = new System.Windows.Forms.Timer(components);
             SuspendLayout();
             // 
-            // timer1
-            // 
-            timer1.Interval = 10;
-            timer1.Tick += timer1_Tick;
-            // 
-            // VeldridControl
+            // GameObjectViewerControl
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
-            Name = "VeldridControl";
+            Name = "GameObjectViewerControl";
             Size = new Size(421, 398);
             ResumeLayout(false);
         }
 
         #endregion
-
-        private System.Windows.Forms.Timer timer1;
     }
 }

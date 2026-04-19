@@ -29,13 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            timer1 = new System.Windows.Forms.Timer(components);
             SuspendLayout();
-            // 
-            // timer1
-            // 
-            timer1.Interval = 10;
-            timer1.Tick += timer1_Tick;
             // 
             // LevelViewerControl
             // 
@@ -48,6 +42,5 @@
 
         #endregion
 
-        private System.Windows.Forms.Timer timer1;
     }
 }

@@ -14,10 +14,9 @@ using Veldrid;
 
 namespace Frinkahedron.WinformsEditor.LevelEditor
 {
-    public partial class LevelViewerControl : UserControl
+    public partial class LevelViewerControl : VeldridControl
     {
         private GraphicsService? graphicsService;
-        private Swapchain? swapchain;
         private GraphicsResources? graphicsResources;
         private Scene? scene;
         private GameState? gameState;
@@ -38,18 +37,18 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             {
                 throw new Exception($"Should only call initialise once");
             }
+            base.Initialise(graphicsService);
             this.graphicsService = graphicsService;
             this.gameEditor = gameEditor;
             this.levelEditor = levelEditor;
             this.behaviour = new LevelViewerBehaviour(gameEditor, levelEditor);
             this.levelEditor.TemplateChangedCallback = UpdateScene;
 
-            swapchain = graphicsService.CreateSwapchain(this);
             graphicsResources = GraphicsResources.CreateResources(graphicsService.GraphicsDevice, Width, Height, graphicsService.AssetManager, swapchain);
 
             UpdateScene();
 
-            timer1.Enabled = true;
+            StartRenderLoop();
         }
 
         private void UpdateScene()
@@ -65,14 +64,13 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         {
             base.OnResize(e);
             // TODO: Also need to update the full screen quad texture size
-            swapchain?.Resize((uint)Width, (uint)Height);
             if (scene is not null)
             {
                 scene.Camera.Projection.AspectRatio = (float)Width / Height;
             }
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        protected override void Render(Swapchain swapChain, TimeSpan interval)
         {
             if (scene is null || gameState is null || DesignMode)
             {
@@ -80,7 +78,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             }
             userControlInputListener.UpdateInput(gameState.Input);
 
-            gameState.DeltaTime = timer1.Interval * 0.001f;
+            gameState.DeltaTime = (float)interval.TotalSeconds;
             scene.Update(gameState);
             VeldridRenderContext context = new VeldridRenderContext();
             scene.Draw(context);

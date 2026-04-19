@@ -21,10 +21,9 @@ using Veldrid;
 
 namespace Frinkahedron.WinformsEditor.GameObjectEditor
 {
-    public partial class GameObjectViewerControl : UserControl
+    public partial class GameObjectViewerControl : VeldridControl
     {
         private GraphicsService? graphicsService;
-        private Swapchain? swapchain;
         private GraphicsResources? graphicsResources;
         private Scene? scene;
         private GameState? gameState;
@@ -47,22 +46,21 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             {
                 throw new Exception($"Should only initialise once");
             }
+            base.Initialise(graphicsService);
             this.graphicsService = graphicsService;
             this.gameEditor = gameEditor;
             this.objectEditor = objectEditor;
             objectEditor.TemplateChangedCallback = GameObjectTemplateUpdated;
             objectEditor.LoadModelFunc = GetModel;
 
-            swapchain = graphicsService.CreateSwapchain(this);
             graphicsResources = GraphicsResources.CreateResources(graphicsService.GraphicsDevice, Width, Height, graphicsService.AssetManager, swapchain);
 
-            timer1.Enabled = true;
+            StartRenderLoop();
         }
 
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            swapchain?.Resize((uint)Width, (uint)Height);
             if (scene is not null)
             {
                 scene.Camera.Projection.AspectRatio = (float)Width / Height;
@@ -116,7 +114,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             scene.AddObject(obj);*/
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        protected override void Render(Swapchain swapChain, TimeSpan interval)
         {
             if (scene is null || gameState is null || DesignMode)
             {
@@ -124,7 +122,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             }
             userControlInputListener.UpdateInput(gameState.Input);
 
-            gameState.DeltaTime = timer1.Interval * 0.001f;
+            gameState.DeltaTime = (float)interval.TotalSeconds;
             scene.Update(gameState);
             VeldridRenderContext context = new VeldridRenderContext();
             scene.Draw(context);

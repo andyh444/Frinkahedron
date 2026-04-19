@@ -36,6 +36,8 @@ namespace Frinkahedron.WinformsEditor
             control.KeyDown += Control_KeyDown;
             control.KeyUp += Control_KeyUp;
 
+            control.PreviewKeyDown += Control_PreviewKeyDown;
+
             this.control = control;
         }
 
@@ -47,6 +49,18 @@ namespace Frinkahedron.WinformsEditor
             control.MouseMove -= Control_MouseMove;
             control.KeyDown -= Control_KeyDown;
             control.KeyUp -= Control_KeyUp;
+            control.PreviewKeyDown -= Control_PreviewKeyDown;
+        }
+
+        private void Control_PreviewKeyDown(object? sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyCode == Keys.Left
+                || e.KeyCode == Keys.Right
+                || e.KeyCode == Keys.Up
+                || e.KeyCode == Keys.Down)
+            {
+                keysDown.Add(e.KeyCode);
+            }
         }
 
         private void Control_KeyUp(object? sender, KeyEventArgs e)
