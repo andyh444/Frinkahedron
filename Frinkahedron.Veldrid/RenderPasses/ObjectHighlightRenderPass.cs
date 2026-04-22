@@ -18,6 +18,8 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
         public required UniformBufferInfo CameraMatricesBufferInfo { get; init; }
 
+        public required UniformBufferInfo HighlightParamsBufferInfo { get; init; }
+
         public static ObjectHighlightRenderPass Create(ResourceFactory factory, GraphicsDevice graphicsDevice, IAssetManager assetManager, Framebuffer frameBuffer)
         {
             ShaderDescription vertexShaderDesc = new ShaderDescription(
@@ -32,13 +34,15 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
             var modelBufferInfo = UniformBufferInfo.Create<ModelMatrixInfo>(factory, "ModelMatrices", ShaderStages.Vertex);
             var cameraMatrixBufferInfo = UniformBufferInfo.Create<CameraMatrixInfo>(factory, "CameraMatrices", ShaderStages.Vertex);
+            var highlightParamsBufferInfo = UniformBufferInfo.Create<HighlightParams>(factory, "HighlightParams", ShaderStages.Vertex | ShaderStages.Fragment);
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
             pipelineDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
 
+            // disable depth testing here - I want whatever is drawn last to be drawn on top
             pipelineDescription.DepthStencilState = new DepthStencilStateDescription(
-                depthTestEnabled: true,
-                depthWriteEnabled: true,
+                depthTestEnabled: false,
+                depthWriteEnabled: false,
                 comparisonKind: ComparisonKind.LessEqual);
 
             pipelineDescription.RasterizerState = new RasterizerStateDescription(
@@ -60,6 +64,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             {
                 modelBufferInfo.ResourceLayout,
                 cameraMatrixBufferInfo.ResourceLayout,
+                highlightParamsBufferInfo.ResourceLayout,
             };
             var pipeline = factory.CreateGraphicsPipeline(pipelineDescription);
 
@@ -70,6 +75,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 Pipeline = pipeline,
                 ModelMatricesBufferInfo = modelBufferInfo,
                 CameraMatricesBufferInfo = cameraMatrixBufferInfo,
+                HighlightParamsBufferInfo = highlightParamsBufferInfo,
             };
         }
 
@@ -81,6 +87,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             commandList.SetPipeline(Pipeline);
             commandList.SetGraphicsResourceSet(0, ModelMatricesBufferInfo.ResourceSet);
             commandList.SetGraphicsResourceSet(1, CameraMatricesBufferInfo.ResourceSet);
+            commandList.SetGraphicsResourceSet(2, HighlightParamsBufferInfo.ResourceSet);
             
             CameraMatrixInfo cameraMatrixInfo = new CameraMatrixInfo
             {
@@ -94,6 +101,9 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             {
                 if (instruction.InstructionType is InstructionType.ModelEntityHighlight)
                 {
+                    var highlightParams = instruction.HighlightParams;
+                    commandList.UpdateBuffer(HighlightParamsBufferInfo.DeviceBuffer, 0, ref highlightParams);
+
                     var model = graphicsResources.AssetManager.GetModel(instruction.ModelID);
                     DrawMesh(model.Entities[instruction.EntityIndex].Mesh, instruction.Transform, commandList);
                 }
@@ -119,6 +129,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             Pipeline.Dispose();
             ModelMatricesBufferInfo.Dispose();
             CameraMatricesBufferInfo.Dispose();
+            HighlightParamsBufferInfo.Dispose();
         }
     }
 }

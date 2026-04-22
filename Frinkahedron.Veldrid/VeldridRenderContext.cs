@@ -28,6 +28,7 @@ namespace Frinkahedron.VeldridImplementation
             public int EntityIndex { get; init; }
             public Primitive Primitive { get; init; }
             public required Matrix4x4 Transform { get; init; }
+            public HighlightParams HighlightParams { get; init; }
         };
 
         private readonly List<DrawInstruction> drawInstructions;

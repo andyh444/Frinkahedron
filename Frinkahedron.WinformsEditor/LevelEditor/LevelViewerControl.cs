@@ -123,12 +123,27 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 // TODO: This without needing to cast
                 var selectedLevelObj = levelEditor.Template.LevelObjects[levelObjectSelectedIndex];
                 var selectedGameObj = gameEditor.Template.GameObjects[selectedLevelObj.GameObjectIndex];
+
+                // first render the entity inflated, and with alpha 1
                 ((List<VeldridRenderContext.DrawInstruction>)context.DrawInstructions).Add(new VeldridRenderContext.DrawInstruction
                 {
                     InstructionType = VeldridRenderContext.InstructionType.ModelEntityHighlight,
                     Transform = selectedGameObj.Renderable.Transform.ToMatrix() * selectedLevelObj.WorldTransform.ToMatrix(),
                     ModelID = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).ModelID,
                     EntityIndex = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).EnabledIndices.Select((x, i) => (x, i)).First(x => x.x).i,
+                    HighlightParams = new HighlightParams { Color = new Vector4(1f, 0.65f, 0f, 1f), Params = new Vector4(0.005f, 0, 0, 0) }
+                });
+
+                // now draw the entity with a reduced alpha, and no inflation
+                // The idea is that the highlight render pass doesn't blend, and doesn't do depth testing, so this second draw will overwrite the first
+                // The result is a translucent, constant-colour mesh (second draw) with an opaque outline (first draw)
+                ((List<VeldridRenderContext.DrawInstruction>)context.DrawInstructions).Add(new VeldridRenderContext.DrawInstruction
+                {
+                    InstructionType = VeldridRenderContext.InstructionType.ModelEntityHighlight,
+                    Transform = selectedGameObj.Renderable.Transform.ToMatrix() * selectedLevelObj.WorldTransform.ToMatrix(),
+                    ModelID = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).ModelID,
+                    EntityIndex = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).EnabledIndices.Select((x, i) => (x, i)).First(x => x.x).i,
+                    HighlightParams = new HighlightParams { Color = new Vector4(1f, 0.65f, 0f, 0.25f), Params = new Vector4(0, 0, 0, 0) }
                 });
             }
 

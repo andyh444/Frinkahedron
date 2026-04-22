@@ -2,7 +2,13 @@
 
 layout(location = 0) out vec4 fsout_Color;
 
+layout(std140, set = 2, binding = 0) uniform HighlightParamsUB
+{
+	vec4 Color;
+	vec4 Params; // Params.x = OutlineWidth
+} highlightParams;
+
 void main()
 {
-	fsout_Color = vec4(1, 0.65, 0, 0.25);
+    fsout_Color = highlightParams.Color;
 }

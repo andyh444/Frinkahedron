@@ -14,6 +14,12 @@ layout(set = 1, binding = 0) uniform CameraMatrices
     mat4 projection;
 };
 
+layout(std140, set = 2, binding = 0) uniform HighlightParamsUB
+{
+    vec4 Color;
+    vec4 Params; // Params.x = OutlineWidth
+} highlightParams;
+
 void main()
 {
     vec4 worldPos = model * vec4(Position, 1.0);
@@ -21,7 +27,7 @@ void main()
     mat3 normalMatrix = transpose(inverse(mat3(model)));
     vec3 worldNormal = normalize(normalMatrix * Normal);
 
-    float outlineWidth = 0.0175;
+    float outlineWidth = highlightParams.Params.x;
     /*worldPos.xyz += worldNormal * outlineWidth;
 
     gl_Position = projection * view * worldPos;*/

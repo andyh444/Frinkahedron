@@ -56,4 +56,12 @@ namespace Frinkahedron.VeldridImplementation
         public Vector3 LookDirection;
         public float _padding2;
     }
+
+    public struct HighlightParams
+    {
+        // Colour stored as RGBA
+        public Vector4 Color;
+        // Params.X = OutlineWidth, other components unused
+        public Vector4 Params;
+    }
 }
