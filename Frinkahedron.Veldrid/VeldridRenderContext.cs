@@ -17,6 +17,7 @@ namespace Frinkahedron.VeldridImplementation
         {
             Model,
             ModelEntity,
+            ModelEntityHighlight,
             Primitive
         }
 

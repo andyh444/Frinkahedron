@@ -23,7 +23,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
         public required DeviceBuffer IndexBuffer { get; init; }
 
-        public TextureInfo? FullScreenTexture { get; set; }
+        public List<(TextureInfo texture, Vector4 tint)> Textures { get; } = new List<(TextureInfo texture, Vector4 tint)>();
 
         public Swapchain? Swapchain { get; set; }
 
@@ -54,18 +54,18 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             graphicsDevice.UpdateBuffer(indexBuffer, 0, indices);
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
-            pipelineDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
+            pipelineDescription.BlendState = BlendStateDescription.SingleAlphaBlend;
 
             pipelineDescription.DepthStencilState = new DepthStencilStateDescription(
-                depthTestEnabled: true,
-                depthWriteEnabled: true,
+                depthTestEnabled: false,
+                depthWriteEnabled: false,
                 comparisonKind: ComparisonKind.LessEqual);
 
             pipelineDescription.RasterizerState = new RasterizerStateDescription(
                 cullMode: FaceCullMode.None,
                 fillMode: PolygonFillMode.Solid,
                 frontFace: FrontFace.Clockwise,
-                depthClipEnabled: true,
+                depthClipEnabled: false,
                 scissorTestEnabled: false);
 
             pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
@@ -101,8 +101,11 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             commandList.SetPipeline(Pipeline);
             commandList.SetVertexBuffer(0, VertexBuffer);
             commandList.SetIndexBuffer(IndexBuffer, IndexFormat.UInt16);
-            commandList.SetGraphicsResourceSet(0, FullScreenTexture.ResourceSet);
-            commandList.DrawIndexed(4, 1, 0, 0, 0);
+            foreach ((var texture, var tint) in Textures)
+            {
+                commandList.SetGraphicsResourceSet(0, texture.ResourceSet);
+                commandList.DrawIndexed(4, 1, 0, 0, 0);
+            }
         }
 
         public void Dispose()

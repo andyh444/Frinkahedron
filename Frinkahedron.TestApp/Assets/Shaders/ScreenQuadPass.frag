@@ -116,6 +116,11 @@ vec4 applyGreyscale(vec4 color)
 
 void main()
 {
-    fsout_colour = vec4(applyFXAA(fsin_texCoord), 1);
+    vec4 colour = texture(sampler2D(Texture, TextureSampler), fsin_texCoord);
+    if (colour.a < 0.001)
+    {
+        discard;
+    }
+    fsout_colour = vec4(applyFXAA(fsin_texCoord), colour.a);
     //fsout_colour = applyPixellation(fsin_texCoord, 4);
 }

@@ -48,6 +48,12 @@
     <None Include="..\Frinkahedron.TestApp\Assets\Shaders\MainRenderPass.vert" Link="Assets\Shaders\MainRenderPass.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\ObjectHighlightPass.frag" Link="Assets\Shaders\ObjectHighlightPass.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Frinkahedron.TestApp\Assets\Shaders\ObjectHighlightPass.vert" Link="Assets\Shaders\ObjectHighlightPass.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\Frinkahedron.TestApp\Assets\Shaders\ScreenQuadPass.frag" Link="Assets\Shaders\ScreenQuadPass.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

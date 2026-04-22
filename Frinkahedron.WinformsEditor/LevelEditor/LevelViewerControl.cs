@@ -1,4 +1,5 @@
 ﻿using Frinkahedron.Core;
+using Frinkahedron.Core.Template;
 using Frinkahedron.VeldridImplementation;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         private bool isPlaying;
         private Vector3 prevCamPos;
         private Vector3 prevCamDir;
+        private int levelObjectSelectedIndex;
 
         public LevelViewerControl()
         {
@@ -75,7 +77,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         {
             float aspectRatio = (float)Width / Height;
 
-            scene = levelEditor.Template.ToScene(gameEditor.Template, scene?.Camera.Position ?? new Vector3(0, 0, -10), scene?.Camera.LookDirection ?? new Vector3(0, 0, 1), aspectRatio);
+            scene = levelEditor.Template.ToScene(gameEditor.Template, scene?.Camera.Position ?? new Vector3(0, 0, -100), scene?.Camera.LookDirection ?? Vector3.Normalize(new Vector3(0, 0, 1)), aspectRatio);
             //scene.AddObject(new GameObject(Vector3.Zero, behaviour));
             gameState = new GameState(0.01f, scene);
         }
@@ -87,6 +89,8 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             if (scene is not null)
             {
                 scene.Camera.Projection.AspectRatio = (float)Width / Height;
+                graphicsResources?.Dispose();
+                graphicsResources = GraphicsResources.CreateResources(graphicsService.GraphicsDevice, Width, Height, graphicsService.AssetManager, swapchain);
             }
         }
 
@@ -113,6 +117,21 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             // TODO: Remove
             context.DrawPrimitiveWireframe(Primitive.Box, System.Numerics.Matrix4x4.Identity);
 
+            if (levelObjectSelectedIndex >= 0
+                && levelEditor.Template.LevelObjects.Count > 0)
+            {
+                // TODO: This without needing to cast
+                var selectedLevelObj = levelEditor.Template.LevelObjects[levelObjectSelectedIndex];
+                var selectedGameObj = gameEditor.Template.GameObjects[selectedLevelObj.GameObjectIndex];
+                ((List<VeldridRenderContext.DrawInstruction>)context.DrawInstructions).Add(new VeldridRenderContext.DrawInstruction
+                {
+                    InstructionType = VeldridRenderContext.InstructionType.ModelEntityHighlight,
+                    Transform = selectedGameObj.Renderable.Transform.ToMatrix() * selectedLevelObj.WorldTransform.ToMatrix(),
+                    ModelID = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).ModelID,
+                    EntityIndex = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).EnabledIndices.Select((x, i) => (x, i)).First(x => x.x).i,
+                });
+            }
+
             graphicsResources.CommandList.Begin();
             foreach (var renderPass in graphicsResources.RenderPasses)
             {
@@ -121,6 +140,11 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             graphicsResources.CommandList.End();
             graphicsService.GraphicsDevice.SubmitCommands(graphicsResources.CommandList);
             graphicsService.GraphicsDevice.SwapBuffers(swapchain);
+        }
+
+        internal void SetSelectedIndex(int selectedIndex)
+        {
+            this.levelObjectSelectedIndex = selectedIndex;
         }
     }
 }

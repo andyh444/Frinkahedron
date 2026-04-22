@@ -74,6 +74,8 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             }
             var levelObj = levelEditor.Template.LevelObjects[levelObjectsBox.SelectedIndex];
             levelObjTransformControl.Initialise(levelObj.WorldTransform, false);
+
+            levelViewerControl1.SetSelectedIndex(levelObjectsBox.SelectedIndex);
         }
 
         private void levelObjTransformControl_TransformChanged(object sender, TransformTemplate e)
