@@ -19,19 +19,19 @@ namespace Frinkahedron.Core.Template
         {
             // todo remove index
 
-            RigidBody? rigidBody = null;
+            DynamicBody? rigidBody = null;
             Behaviour behaviour = new CompositeBehaviour(additionalBehaviours);
             var collider = Collider?.ToShape();
             if (index == 0)
             {
                 // box
-                rigidBody = new RigidBody { Gravity = false, Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Material = new PhysicsMaterial(0.2f, 0.8f) };
+                rigidBody = new DynamicBody { Gravity = false, Mass = float.PositiveInfinity, InverseInertia = new DiagonalMatrix3x3(), Material = new PhysicsMaterial(0.2f, 0.8f) };
             }
             else if (index == 1)
             {
                 // car
                 var mass = 1 * collider?.CalculateVolume() ?? 1;
-                rigidBody = new RigidBody { Mass = mass, Gravity = true, InverseInertia = collider?.CalculateFilledInertia(mass).GetInverse() ?? DiagonalMatrix3x3.Identity(), Material = new PhysicsMaterial(0.2f, 0.8f) };
+                rigidBody = new DynamicBody { Mass = mass, Gravity = true, InverseInertia = collider?.CalculateFilledInertia(mass).GetInverse() ?? DiagonalMatrix3x3.Identity(), Material = new PhysicsMaterial(0.2f, 0.8f) };
                 behaviour = new CompositeBehaviour([new CarCameraFollowBehaviour(), new CarBehaviour(), ..additionalBehaviours]);
             }
 

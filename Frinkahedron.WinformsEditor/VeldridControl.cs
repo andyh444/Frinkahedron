@@ -19,7 +19,7 @@ namespace Frinkahedron.WinformsEditor
         {
             timer = new System.Windows.Forms.Timer();
             timer.Tick += Timer_Tick;
-            timer.Interval = 10;
+            timer.Interval = 1;
         }
 
         protected override void OnResize(EventArgs e)

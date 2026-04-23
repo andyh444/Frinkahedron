@@ -2,6 +2,7 @@
 using Frinkahedron.Core.Maths;
 using Frinkahedron.Core.Physics;
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -79,45 +80,81 @@ namespace Frinkahedron.Core
 
         private void ResolveAllCollisions()
         {
-            WorldRigidBody[] worldRigidBodies = new WorldRigidBody[Objects.Count];
-            int index = 0;
-            for (int i = 0; i < Objects.Count; i++)
+            // we need to check for collisions with all dynamic body pairs
+            // and collisions with all static-dynamic body pairs
+            // but don't need to check static-static body pairs as they never move
+            WorldRigidBody[] worldDynamicBodies = ArrayPool<WorldRigidBody>.Shared.Rent(Objects.Count);
+            WorldRigidBody[] worldStaticBodies = ArrayPool<WorldRigidBody>.Shared.Rent(Objects.Count);
+            try
             {
-                GameObject obj = Objects[i];
-                if (obj.Collider is not null
-                    && obj.RigidBody is not null)
+                int dynamicIndex = 0;
+                int staticIndex = 0;
+                for (int i = 0; i < Objects.Count; i++)
                 {
-                    worldRigidBodies[index++] = new WorldRigidBody(obj.Position, obj.RigidBody, obj.Collider);
-                }
-            }
-
-            ConcurrentBag<(int, int)> collisionPairs = new ConcurrentBag<(int, int)>();
-            //for (int i = 0; i < aabbs.Count; i++)
-            Parallel.For(0, index, i =>
-            {
-                ref var bodyA = ref worldRigidBodies[i];
-                for (int j = i + 1; j < worldRigidBodies.Length; j++)
-                {
-                    ref var bodyB = ref worldRigidBodies[j];
-                    if (bodyA.RigidBody is not null && bodyB.RigidBody is not null)
+                    GameObject obj = Objects[i];
+                    if (obj.Collider is not null
+                        && obj.RigidBody is not null)
                     {
-                        if (bodyA.BoundingBox.IntersectsWith(bodyB.BoundingBox))
+                        if (obj.RigidBody.RigidBodyType == RigidBodyType.Dynamic)
                         {
-                            //collisionPairs.Add((objA, inertiaA, objB, inertiaB));
-                            collisionPairs.Add((i, j));
+                            worldDynamicBodies[dynamicIndex++] = new WorldRigidBody(obj.Position, obj.RigidBody, obj.Collider);
+                        }
+                        else
+                        {
+                            worldStaticBodies[staticIndex++] = new WorldRigidBody(obj.Position, obj.RigidBody, obj.Collider);
                         }
                     }
                 }
-            });
 
-            foreach ((var indexA, var indexB) in collisionPairs)
+                ConcurrentBag<(int, int)> dynamicCollisionPairs = new ConcurrentBag<(int, int)>();
+                ConcurrentBag<(int staticIndex, int dynamicIndex)> staticDynamicCollisionPairs = new ConcurrentBag<(int, int)>();
+
+                Parallel.For(0, dynamicIndex, i =>
+                {
+                    ref var bodyA = ref worldDynamicBodies[i];
+                    for (int j = i + 1; j < dynamicIndex; j++)
+                    {
+                        ref var bodyB = ref worldDynamicBodies[j];
+                        if (bodyA.BoundingBox.IntersectsWith(bodyB.BoundingBox))
+                        {
+                            dynamicCollisionPairs.Add((i, j));
+                        }
+                    }
+
+                    for (int j = 0; j < staticIndex; j++)
+                    {
+                        ref var bodyB = ref worldStaticBodies[j];
+                        if (bodyA.BoundingBox.IntersectsWith(bodyB.BoundingBox))
+                        {
+                            staticDynamicCollisionPairs.Add((j, i));
+                        }
+                    }
+                });
+
+                foreach ((var indexA, var indexB) in dynamicCollisionPairs)
+                {
+                    var object1 = worldDynamicBodies[indexA];
+                    var object2 = worldDynamicBodies[indexB];
+
+                    WorldRigidBody.ResolveCollision(
+                        in object1,
+                        in object2);
+                }
+
+                foreach ((var indexA, var indexB) in staticDynamicCollisionPairs)
+                {
+                    var object1 = worldStaticBodies[indexA];
+                    var object2 = worldDynamicBodies[indexB];
+
+                    WorldRigidBody.ResolveCollision(
+                        in object1,
+                        in object2);
+                }
+            }
+            finally
             {
-                var object1 = worldRigidBodies[indexA];
-                var object2 = worldRigidBodies[indexB];
-
-                RigidBody.ResolveCollision(
-                    in object1,
-                    in object2);
+                ArrayPool<WorldRigidBody>.Shared.Return(worldDynamicBodies);
+                ArrayPool<WorldRigidBody>.Shared.Return(worldStaticBodies);
             }
         }
 

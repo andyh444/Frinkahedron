@@ -189,7 +189,7 @@ namespace Frinkahedron.Core
         {
             float dt = gameState.DeltaTime;
 
-            var rb = self.RigidBody;
+            var rb = self.RigidBody as DynamicBody;
 
             // Input
             int accelInput = 0;

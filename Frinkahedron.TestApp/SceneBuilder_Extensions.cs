@@ -21,7 +21,7 @@ namespace Frinkahedron.TestApp
                 new SphereControlBehaviour(),
                 //new CompositeBehaviour([new SphereControlBehaviour(), new OrbitalCameraMouseBehaviour()]),
                 sph,
-                new RigidBody
+                new DynamicBody
                 {
                     Mass = sphMass,
                     InverseInertia = sph.CalculateFilledInertia(sphMass).GetInverse(),
@@ -29,7 +29,7 @@ namespace Frinkahedron.TestApp
                     Velocity = new Vector3(3, 0, 0),
                     AngularVelocity = new Vector3(0.5f, 1f, 1.5f),
                 },
-                new ModelRenderable("bowlingball", Matrix4x4.Identity)); // TODO: Check if scale is correct
+                new ModelRenderable("bowling_ball", Matrix4x4.Identity)); // TODO: Check if scale is correct
             sphObj.Position.Orientation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathF.PI);
             sceneBuilder.AddObject(sphObj);
         }
@@ -47,8 +47,8 @@ namespace Frinkahedron.TestApp
                         GameObject obj = new GameObject(centrePoint + new Vector3(k * 1.01f, i * 2, j * 1.01f),
                             null,
                             box,
-                            new RigidBody { Mass = mass, InverseInertia = box.CalculateFilledInertia(mass).GetInverse(), Gravity = true, Material = new PhysicsMaterial(0.0f, 0.8f) },
-                            new ModelRenderable("crate", Matrix4x4.CreateScale(box.Dimensions / 8f)));
+                            new DynamicBody { Mass = mass, InverseInertia = box.CalculateFilledInertia(mass).GetInverse(), Gravity = true, Material = new PhysicsMaterial(0.0f, 0.8f) },
+                            new ModelRenderable("simple_classic_crate", Matrix4x4.CreateScale(box.Dimensions / 8f)));
                         sceneBuilder.AddObject(obj);
                     }
                 }
@@ -65,7 +65,7 @@ namespace Frinkahedron.TestApp
             GameObject carObj = new GameObject(new Vector3(-30, -13, 0),
                 new CompositeBehaviour([new CarCameraFollowBehaviour(), new CarBehaviour()]),
                 carBox,
-                new RigidBody
+                new DynamicBody
                 {
                     Mass = carMass,
                     InverseInertia = carBox.CalculateFilledInertia(carMass).GetInverse(),
@@ -73,8 +73,8 @@ namespace Frinkahedron.TestApp
                     Material = new PhysicsMaterial(0.2f, 0.8f)
                 },
                 new CompositeRenderable([
-                    new ModelEntityRenderable("car", 0, transform),
-                    new ModelEntityRenderable("car", 1, transform),
+                    new ModelEntityRenderable("old_rusty_car", 0, transform),
+                    new ModelEntityRenderable("old_rusty_car", 1, transform),
                     ]));
             sceneBuilder.AddObject(carObj);
         }
@@ -95,14 +95,8 @@ namespace Frinkahedron.TestApp
                 !first ? null : new CompositeBehaviour([/*new OrbitalCameraMouseBehaviour(),*/
                     new ImpulseOnClickBehaviour()]),
                 box,
-                new Core.Physics.RigidBody
-                {
-                    Mass = float.PositiveInfinity,
-                    InverseInertia = new DiagonalMatrix3x3(),
-                    Gravity = false,
-                    Material = new PhysicsMaterial(0, 0.8f)
-                },
-                new ModelRenderable("crate", Matrix4x4.CreateScale(1f / 8f) * Matrix4x4.CreateScale(box.Dimensions)));
+                new Core.Physics.StaticBody(new PhysicsMaterial(0, 0.8f)),
+                new ModelRenderable("simple_classic_crate", Matrix4x4.CreateScale(1f / 8f) * Matrix4x4.CreateScale(box.Dimensions)));
 
             obj.Position.Orientation = orientation;
             return obj;
