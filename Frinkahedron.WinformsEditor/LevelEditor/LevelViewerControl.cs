@@ -118,11 +118,12 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             context.DrawPrimitiveWireframe(Primitive.Box, System.Numerics.Matrix4x4.Identity);
 
             if (levelObjectSelectedIndex >= 0
-                && levelEditor.Template.LevelObjects.Count > 0)
+                && levelEditor.Template.LevelObjects.Count > 0
+                && !isPlaying)
             {
-                // TODO: This without needing to cast
                 var selectedLevelObj = levelEditor.Template.LevelObjects[levelObjectSelectedIndex];
                 var selectedGameObj = gameEditor.Template.GameObjects[selectedLevelObj.GameObjectIndex];
+                // TODO: This without needing to cast
 
                 // first render the entity inflated, and with alpha 1
                 ((List<VeldridRenderContext.DrawInstruction>)context.DrawInstructions).Add(new VeldridRenderContext.DrawInstruction
@@ -160,6 +161,20 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         internal void SetSelectedIndex(int selectedIndex)
         {
             this.levelObjectSelectedIndex = selectedIndex;
+        }
+
+        internal void CentreCameraOnObject(int selectedIndex)
+        {
+            if (levelObjectSelectedIndex >= 0
+                && levelEditor.Template.LevelObjects.Count > 0
+                && !isPlaying)
+            {
+                var selectedLevelObj = levelEditor.Template.LevelObjects[levelObjectSelectedIndex];
+                var selectedGameObj = gameEditor.Template.GameObjects[selectedLevelObj.GameObjectIndex];
+
+                // TODO: Move camera back far enough so that the object's AABB fits in view instead of just hardcoded a value
+                scene.Camera.SetValues(selectedLevelObj.WorldTransform.Translation - 10 * scene.Camera.LookDirection, scene.Camera.LookDirection);
+            }
         }
     }
 }

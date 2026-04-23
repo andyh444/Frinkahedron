@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Threading.Tasks;
-using Veldrid.Sdl2;
-using Veldrid.StartupUtilities;
-using Veldrid;
-using Frinkahedron.Core;
-using Vulkan.Xlib;
-using System.Diagnostics;
-using Vulkan;
+﻿using Frinkahedron.Core;
 using Frinkahedron.Core.Colliders;
 using Frinkahedron.Core.Maths;
 using Frinkahedron.Core.Physics;
+using Frinkahedron.Core.Template;
 using Frinkahedron.VeldridImplementation;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Numerics;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Veldrid;
+using Veldrid.Sdl2;
+using Veldrid.StartupUtilities;
 
 namespace Frinkahedron.TestApp
 {
@@ -66,18 +66,31 @@ namespace Frinkahedron.TestApp
 
         private Scene CreateScene(float aspectRatio)
         {
-            SceneBuilder sb = new SceneBuilder();
-            sb.AddBigBoxes();
-            sb.AddBasicCar();
-            sb.AddCrateTower(new Vector3(0, -14, 0));
+            if (File.Exists($@"C:\tmp\tempgame.json"))
+            {
+                using var fs = File.OpenRead($@"C:\tmp\tempgame.json");
 
-            var scene = sb.ToScene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), aspectRatio);
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
-            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, IncludeFields = true, };
+                options.Converters.Add(new Vector3Converter());
+                var template = JsonSerializer.Deserialize<GameTemplate>(fs, options);
 
-            return scene;
+                return template.Levels[0].ToScene(template, new Vector3(0, 0, -2), new Vector3(0, 0, 1), aspectRatio);
+            }
+            else
+            {
+                SceneBuilder sb = new SceneBuilder();
+                sb.AddBigBoxes();
+                sb.AddBasicCar();
+                sb.AddCrateTower(new Vector3(0, -14, 0));
+
+                var scene = sb.ToScene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), aspectRatio);
+                scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
+                scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
+                scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
+                scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
+
+                return scene;
+            }
         }
 
         public void Run()

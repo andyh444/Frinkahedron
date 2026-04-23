@@ -62,10 +62,10 @@ namespace Frinkahedron.Core
 
         private float? _smoothedYaw = null;
         private float _smoothedPitch = 0f;
-        private float _baseDistance = 25f;
-        private float _maxDistance = 35f;
-        private float _heightOffset = 3f;
-        private float _tiltAngle = MathF.PI / 24f;
+        private float _baseDistance = 5f;
+        private float _maxDistance = 6f;
+        private float _heightOffset = 0.2f;
+        private float _tiltAngle = MathF.PI / 16f;
         private float _speedThreshold = 3f;
         private float _reverseTransitionSpeed = 8f;
 

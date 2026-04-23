@@ -113,6 +113,7 @@
             levelObjectsBox.Size = new Size(226, 402);
             levelObjectsBox.TabIndex = 2;
             levelObjectsBox.SelectedIndexChanged += levelObjectsBox_SelectedIndexChanged;
+            levelObjectsBox.DoubleClick += levelObjectsBox_DoubleClick;
             // 
             // levelObjTransformControl
             // 

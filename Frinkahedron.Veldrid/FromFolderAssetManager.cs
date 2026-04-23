@@ -35,10 +35,10 @@ namespace Frinkahedron.VeldridImplementation
             }
 
             Dictionary<string, Model> models = new Dictionary<string, Model>();
-            models.Add("bowlingball", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\bowling_ball\scene.gltf", textures["white"]));
-            models.Add("crate", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\simple_classic_crate\scene.gltf", textures["white"]));
-            models.Add("tincan", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\tin_can_damaged\scene.gltf", textures["white"]));
-            models.Add("car", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\old_rusty_car\scene.gltf", textures["white"]));
+            models.Add("bowling_ball", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\bowling_ball\scene.gltf", textures["white"]));
+            models.Add("simple_classic_crate", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\simple_classic_crate\scene.gltf", textures["white"]));
+            models.Add("tin_can_damaged", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\tin_can_damaged\scene.gltf", textures["white"]));
+            models.Add("old_rusty_car", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\old_rusty_car\scene.gltf", textures["white"]));
             return new FromFolderAssetManager(textures, shaders, models);
         }
 

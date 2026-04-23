@@ -96,7 +96,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
         public void RenderScene(GraphicsDevice graphicsDevice, CommandList commandList, GraphicsResources graphicsResources, Scene scene, IReadOnlyList<DrawInstruction> sceneDrawInstructions)
         {
-            commandList.SetFramebuffer(Swapchain.Framebuffer ?? graphicsDevice.SwapchainFramebuffer);
+            commandList.SetFramebuffer(Swapchain?.Framebuffer ?? graphicsDevice.SwapchainFramebuffer);
             commandList.ClearColorTarget(0, RgbaFloat.Black);
             commandList.SetPipeline(Pipeline);
             commandList.SetVertexBuffer(0, VertexBuffer);

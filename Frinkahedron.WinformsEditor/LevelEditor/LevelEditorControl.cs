@@ -106,5 +106,14 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
 
             levelEditor.TemplateChanged();
         }
+
+        private void levelObjectsBox_DoubleClick(object sender, EventArgs e)
+        {
+            if (levelObjectsBox.SelectedIndex < 0)
+            {
+                return;
+            }
+            levelViewerControl1.CentreCameraOnObject(levelObjectsBox.SelectedIndex);
+        }
     }
 }
