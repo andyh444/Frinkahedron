@@ -28,6 +28,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             veldridControl1.Initialise(gameEditor, objectEditor, graphicsService);
             renderableTemplateControl1.Initialise(gameEditor, objectEditor);
             colliderControl1.Initialise(objectEditor);
+            rigidBodyControl1.Initialise(objectEditor);
         }
 
         public void SetNewTemplate(GameObjectTemplate template)
@@ -36,6 +37,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
 
             renderableTemplateControl1.Initialise(gameEditor, objectEditor);
             colliderControl1.Initialise(objectEditor);
+            rigidBodyControl1.Initialise(objectEditor);
         }
 
         public GameObjectTemplateEditor GetObjectEditor() => objectEditor;

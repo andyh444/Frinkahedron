@@ -32,6 +32,7 @@
             veldridControl1 = new GameObjectViewerControl();
             renderableTemplateControl1 = new RenderableTemplateControl();
             colliderControl1 = new ColliderControl();
+            rigidBodyControl1 = new RigidBodyControl();
             tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -42,12 +43,14 @@
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Controls.Add(veldridControl1, 1, 0);
             tableLayoutPanel1.Controls.Add(renderableTemplateControl1, 0, 0);
-            tableLayoutPanel1.Controls.Add(colliderControl1, 0, 1);
+            tableLayoutPanel1.Controls.Add(colliderControl1, 0, 2);
+            tableLayoutPanel1.Controls.Add(rigidBodyControl1, 0, 1);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 2;
+            tableLayoutPanel1.RowCount = 3;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.Size = new Size(970, 687);
             tableLayoutPanel1.TabIndex = 0;
@@ -58,7 +61,7 @@
             veldridControl1.Dock = DockStyle.Fill;
             veldridControl1.Location = new Point(277, 3);
             veldridControl1.Name = "veldridControl1";
-            tableLayoutPanel1.SetRowSpan(veldridControl1, 2);
+            tableLayoutPanel1.SetRowSpan(veldridControl1, 3);
             veldridControl1.Size = new Size(690, 681);
             veldridControl1.TabIndex = 7;
             // 
@@ -67,7 +70,7 @@
             renderableTemplateControl1.Dock = DockStyle.Fill;
             renderableTemplateControl1.Location = new Point(3, 3);
             renderableTemplateControl1.Name = "renderableTemplateControl1";
-            renderableTemplateControl1.Size = new Size(268, 596);
+            renderableTemplateControl1.Size = new Size(268, 478);
             renderableTemplateControl1.TabIndex = 5;
             // 
             // colliderControl1
@@ -76,6 +79,13 @@
             colliderControl1.Name = "colliderControl1";
             colliderControl1.Size = new Size(268, 79);
             colliderControl1.TabIndex = 6;
+            // 
+            // rigidBodyControl1
+            // 
+            rigidBodyControl1.Location = new Point(3, 487);
+            rigidBodyControl1.Name = "rigidBodyControl1";
+            rigidBodyControl1.Size = new Size(268, 112);
+            rigidBodyControl1.TabIndex = 8;
             // 
             // GameObjectEditorControl
             // 
@@ -94,5 +104,6 @@
         private RenderableTemplateControl renderableTemplateControl1;
         private ColliderControl colliderControl1;
         private GameObjectViewerControl veldridControl1;
+        private RigidBodyControl rigidBodyControl1;
     }
 }

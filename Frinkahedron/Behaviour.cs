@@ -62,9 +62,9 @@ namespace Frinkahedron.Core
 
         private float? _smoothedYaw = null;
         private float _smoothedPitch = 0f;
-        private float _baseDistance = 5f;
-        private float _maxDistance = 6f;
-        private float _heightOffset = 0.2f;
+        private float _baseDistance = 7f;
+        private float _maxDistance = 10f;
+        private float _heightOffset = 0.8f;
         private float _tiltAngle = MathF.PI / 16f;
         private float _speedThreshold = 3f;
         private float _reverseTransitionSpeed = 8f;
@@ -114,7 +114,7 @@ namespace Frinkahedron.Core
             {
                 Vector2 delta = gameState.Input.GetMouseDelta();
                 yawOverride += delta.X * sensitivity * dt;
-                pitchOverride -= delta.Y * sensitivity * dt;
+                pitchOverride += delta.Y * sensitivity * dt;
                 pitchOverride = Math.Clamp(pitchOverride, minPitch, maxPitch);
                 targetYaw -= yawOverride;
                 targetPitch -= pitchOverride;
@@ -177,13 +177,13 @@ namespace Frinkahedron.Core
 
     public class CarBehaviour : Behaviour
     {
-        const float ACCEL_FORCE = 80f;
-        const float MAX_SPEED = 800f;
+        const float ACCEL_FORCE = 30f;
+        const float MAX_SPEED = 120f;
         const float LATERAL_FRICTION = 8f;
         const float HANDBRAKE_LATERAL_FRICTION = 1.5f;
         const float HANDBRAKE_FORWARD_DRAG = 3f;
-        const float HANDBRAKE_STEER_SPEED = 75f;
-        const float STEER_SPEED = 25.5f;
+        const float HANDBRAKE_STEER_SPEED = 15f;
+        const float STEER_SPEED = 5.5f;
 
         public override void Update(GameObject self, GameState gameState)
         {
@@ -250,8 +250,8 @@ namespace Frinkahedron.Core
                 + right * lateralSpeed
                 + groundNormal.Value * verticalSpeed;
 
-            // --- Steering (based on forward speed) ---
-            float speedFactor = forwardSpeed / MAX_SPEED;
+            // --- Steering (based on forward speed) ---r
+            float speedFactor = MathF.Min(0.5f, forwardSpeed / MAX_SPEED);
             var steerSpeed = handbrakeOn ? HANDBRAKE_STEER_SPEED : STEER_SPEED;
             float steerAmount = steerInput * steerSpeed * speedFactor * dt;
 

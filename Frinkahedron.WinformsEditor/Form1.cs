@@ -136,7 +136,7 @@ namespace Frinkahedron.WinformsEditor
 
         private void saveButton_Click(object sender, EventArgs e)
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, IncludeFields = true, };
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, IncludeFields = true, WriteIndented = true };
             options.Converters.Add(new Vector3Converter());
 
             using var fs = File.Create($@"C:\tmp\tempgame.json");

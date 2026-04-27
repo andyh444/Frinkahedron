@@ -18,8 +18,6 @@ namespace Frinkahedron.WinformsEditor
         private GameObjectTemplateEditor? editor;
         private bool freeze;
 
-        public event EventHandler<IShapeTemplate>? ColliderChanged;
-
         public ColliderControl()
         {
             InitializeComponent();

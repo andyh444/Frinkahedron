@@ -66,7 +66,7 @@ namespace Frinkahedron.TestApp
 
         private Scene CreateScene(float aspectRatio)
         {
-            /*if (File.Exists($@"C:\tmp\tempgame.json"))
+            if (File.Exists($@"C:\tmp\tempgame.json"))
             {
                 using var fs = File.OpenRead($@"C:\tmp\tempgame.json");
 
@@ -76,7 +76,7 @@ namespace Frinkahedron.TestApp
 
                 return template.Levels[0].ToScene(template, new Vector3(0, 0, -2), new Vector3(0, 0, 1), aspectRatio);
             }
-            else*/
+            else
             {
                 SceneBuilder sb = new SceneBuilder();
                 sb.AddBigBoxes();
