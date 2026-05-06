@@ -16,12 +16,14 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
     {
         private LevelTemplateEditor levelEditor;
         private GameTemplateEditor? gameEditor;
+        private bool freezeSelectionChanged;
 
         public LevelEditorControl()
         {
             InitializeComponent();
             levelEditor = new LevelTemplateEditor();
-            levelEditor.RegisterTemplateChangedCallback(PopulateLevelObjectsListBox);
+            _ = levelEditor.RegisterTemplateChangedCallback(PopulateLevelObjectsListBox);
+            _ = levelEditor.RegisterSelectedIndexChangedCallback(SetSelectedIndex);
         }
 
         public void Initialise(GameTemplateEditor gameEditor, GraphicsService graphicsService)
@@ -64,18 +66,30 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                     levelObjectsBox.Items.Add($"Object {levelObjectsBox.Items.Count + 1}");
                 }
             }
+            SetSelectedIndex();
+        }
+
+        private void SetSelectedIndex()
+        {
+            if (levelObjectsBox.Items.Count == 0)
+            {
+                return;
+            }
+            freezeSelectionChanged = true;
+            levelObjectsBox.SelectedIndex = levelEditor.LevelObjectSelectedIndex;
+            freezeSelectionChanged = false; 
         }
 
         private void levelObjectsBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (levelObjectsBox.SelectedIndex < 0)
+            if (levelObjectsBox.SelectedIndex < 0 || freezeSelectionChanged)
             {
                 return;
             }
             var levelObj = levelEditor.Template.LevelObjects[levelObjectsBox.SelectedIndex];
             levelObjTransformControl.Initialise(levelObj.WorldTransform, false);
 
-            levelViewerControl1.SetSelectedIndex(levelObjectsBox.SelectedIndex);
+            levelEditor.LevelObjectSelectedIndex = levelObjectsBox.SelectedIndex;
         }
 
         private void levelObjTransformControl_TransformChanged(object sender, TransformTemplate e)
@@ -114,6 +128,16 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 return;
             }
             levelViewerControl1.CentreCameraOnObject(levelObjectsBox.SelectedIndex);
+        }
+
+        private void placeObjectButton_CheckedChanged(object sender, EventArgs e)
+        {
+            levelViewerControl1.SetClickMode(LevelViewerClickMode.Place);
+        }
+
+        private void selectObjectButton_CheckedChanged(object sender, EventArgs e)
+        {
+            levelViewerControl1.SetClickMode(LevelViewerClickMode.Select);
         }
     }
 }

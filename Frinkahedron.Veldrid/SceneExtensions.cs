@@ -58,9 +58,9 @@ namespace Frinkahedron.VeldridImplementation
             };
         }
 
-        public static Camera GetDirectionalLightCamera(this DirectionalLight light)
+        public static Camera GetDirectionalLightCamera(this DirectionalLight light, Camera sceneCamera)
         {
-            return Camera.CreateOrthoCamera(-light.Direction * 150, light.Direction, 200, 1);
+            return Camera.CreateOrthoCamera(sceneCamera.Position - light.Direction * 150, light.Direction, 50, 1);
         }
     }
 }

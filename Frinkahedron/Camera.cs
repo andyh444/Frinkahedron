@@ -46,7 +46,7 @@ namespace Frinkahedron
             return new Camera(
                 initialPosition,
                 initialDirection,
-                new PerspectiveProjection(MathF.PI / 4, screenAspectRatio, 1.0f, 1000f));
+                new PerspectiveProjection(MathF.PI / 4, screenAspectRatio, 1.0f, 10000f));
         }
 
         public static Camera CreateOrthoCamera(Vector3 initialPosition, Vector3 initialDirection, float width, float screenAspectRatio)

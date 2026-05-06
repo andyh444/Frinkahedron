@@ -128,7 +128,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
             if (scene.SceneLights.DirectionalLight is not null)
             {
-                var lightCam = scene.SceneLights.DirectionalLight.Value.GetDirectionalLightCamera();
+                var lightCam = scene.SceneLights.DirectionalLight.Value.GetDirectionalLightCamera(scene.Camera);
                 CameraMatrixInfo lightMatrixInfo = new CameraMatrixInfo
                 {
                     Projection = lightCam.Projection.Matrix,

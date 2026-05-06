@@ -28,6 +28,10 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         private Vector3 orbitCentre;
         private Vector3 pivotDiff;
 
+        public LevelViewerClickMode ClickMode { get; set; }
+
+        public int HoveredObjectIndex { get; set; }
+
         public LevelViewerBehaviour(GameTemplateEditor gameEditor, LevelTemplateEditor levelEditor, Func<int> getObjIndex)
         {
             this.gameEditor = gameEditor;
@@ -40,13 +44,14 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             base.Update(self, gameState);
 
             var cam = gameState.Scene.Camera;
-
+            bool sceneRayCast = SceneRayCast(gameState, out var rayPos, out var rayDir, out var intersect, out var normal, out int objectIndex);
+            HoveredObjectIndex = -1;
             if (gameState.Input.IsMouseButtonDown(MouseButton.Right))
             {
                 if (gameState.Input.IsKeyDown(Key.ShiftKey))
                 {
                     float panSensitivity = 0.001f;
-                    if (SceneRayCast(gameState, out var rayPos, out _, out var intersect, out _))
+                    if (sceneRayCast)
                     {
                         panSensitivity = MathF.Max(0.001f, 0.001f * Vector3.Distance(rayPos, intersect));
                     }
@@ -60,10 +65,10 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 {
                     if (!isOrbiting)
                     {
-                        if (SceneRayCast(gameState, out var rayPos, out _, out var centreOfRotation, out _))
+                        if (sceneRayCast)
                         {
                             isOrbiting = true;
-                            orbitCentre = centreOfRotation;
+                            orbitCentre = intersect;
 
                             pivotDiff = cam.Position - orbitCentre;
                         }
@@ -101,17 +106,26 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 }
                 else
                 {
+                    // hover
+                    if (ClickMode == LevelViewerClickMode.Select)
+                    {
+                        HoveredObjectIndex = objectIndex;
+                    }
+
                     // zoom in/out
                     // TODO: Zoom amount should change based on distance to scene
                     if (cam.ProjectionType is ProjectionType.Perspective)
                     {
-                        float scrollSensitivity = 0.05f;
-                        if (SceneRayCast(gameState, out var rayPos, out var rayDir, out var intersect, out _))
-                        {
-                            scrollSensitivity = MathF.Max(0.05f, 0.02f * Vector3.Distance(rayPos, intersect));
-                        }
                         int delta = gameState.Input.GetMouseScrollDelta();
-                        cam.SetValues(cam.Position + scrollSensitivity * delta * rayDir, cam.LookDirection);
+                        if (delta != 0)
+                        {
+                            float scrollSensitivity = 0.05f;
+                            if (sceneRayCast)
+                            {
+                                scrollSensitivity = MathF.Max(0.05f, 0.02f * Vector3.Distance(rayPos, intersect));
+                            }
+                            cam.SetValues(cam.Position + scrollSensitivity * delta * rayDir, cam.LookDirection);
+                        }
                     }
                     else if (cam.ProjectionType is ProjectionType.Orthographic)
                     {
@@ -120,30 +134,40 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 }
             }
             
-
+            
 
             if (gameState.Input.IsMouseButtonPressed(MouseButton.Left))
             {
-                if (SceneRayCast(gameState, out _, out _, out var intersect, out var intersectNormal))
+                if (sceneRayCast)
                 {
-                    levelEditor.Template.LevelObjects.Add(new LevelObjectTemplate
+                    if (ClickMode == LevelViewerClickMode.Place)
                     {
-                        GameObjectIndex = getObjIndex(),
-                        WorldTransform = new TransformTemplate { Translation = intersect + 0.5f * intersectNormal } // TODO: translate based on AABB rather than just 0.5
-                    });
-                    levelEditor.TemplateChanged();
+                        levelEditor.Template.LevelObjects.Add(new LevelObjectTemplate
+                        {
+                            GameObjectIndex = getObjIndex(),
+                            WorldTransform = new TransformTemplate { Translation = intersect + 0.5f * normal } // TODO: translate based on AABB rather than just 0.5
+                        });
+                        levelEditor.TemplateChanged();
+                    }
+                    else if (ClickMode == LevelViewerClickMode.Select)
+                    {
+                        levelEditor.LevelObjectSelectedIndex = objectIndex;
+                    }
                 }
 
             }
         }
 
-        private bool SceneRayCast(GameState gameState, out Vector3 rayPos, out Vector3 rayDir, out Vector3 intersect, out Vector3 normal)
+        private bool SceneRayCast(GameState gameState, out Vector3 rayPos, out Vector3 rayDir, out Vector3 intersect, out Vector3 normal, out int objectIndex)
         {
             (rayPos, rayDir) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
 
             float bestDistance = float.PositiveInfinity;
             Vector3 bestIntersection = default;
             Vector3 bestNormal = default;
+            objectIndex = -1;
+
+            int index = 0;
             foreach (var obj in gameState.Scene.Objects)
             {
 
@@ -154,8 +178,10 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                         bestIntersection = result;
                         bestNormal = n;
                         bestDistance = Vector3.DistanceSquared(result, rayPos);
+                        objectIndex = index;
                     }
                 }
+                index++;
             }
 
             if (!float.IsPositiveInfinity(bestDistance))

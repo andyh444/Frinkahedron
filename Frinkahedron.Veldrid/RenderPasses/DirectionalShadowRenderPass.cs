@@ -92,7 +92,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 return;
             }
 
-            Camera lightCamera = scene.SceneLights.DirectionalLight.Value.GetDirectionalLightCamera();
+            Camera lightCamera = scene.SceneLights.DirectionalLight.Value.GetDirectionalLightCamera(scene.Camera);
 
             commandList.SetFramebuffer(Framebuffer);
 

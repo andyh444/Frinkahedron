@@ -13,6 +13,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
     public sealed class LevelTemplateEditor
     {
         private List<Action> templateChangedCallbacks = new List<Action>();
+        private List<Action> selectedIndexChangedCallbacks = new List<Action>();
 
         public LevelTemplate Template
         {
@@ -24,18 +25,28 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             }
         } = new LevelTemplate();
 
-        public Unsubscriber RegisterTemplateChangedCallback(Action action)
+        public int LevelObjectSelectedIndex
         {
-            templateChangedCallbacks.Add(action);
-            return new Unsubscriber(() => templateChangedCallbacks.Remove(action));
-        }
-
-        public void TemplateChanged()
-        {
-            foreach (var callback in templateChangedCallbacks)
+            get;
+            set
             {
-                callback();
+                field = value;
+                SelectedIndexChanged();
             }
         }
+
+        public Unsubscriber RegisterTemplateChangedCallback(Action action) => RegisterCallback(action, templateChangedCallbacks);
+
+        public Unsubscriber RegisterSelectedIndexChangedCallback(Action action) => RegisterCallback(action, selectedIndexChangedCallbacks);
+
+        private Unsubscriber RegisterCallback(Action action, List<Action> callbacks)
+        {
+            callbacks.Add(action);
+            return new Unsubscriber(() => callbacks.Remove(action));
+        }
+
+        public void TemplateChanged() => templateChangedCallbacks.ForEach(callback => callback());
+
+        public void SelectedIndexChanged() => selectedIndexChangedCallbacks.ForEach(callback => callback());
     }
 }

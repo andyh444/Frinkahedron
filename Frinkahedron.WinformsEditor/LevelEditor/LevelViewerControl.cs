@@ -28,12 +28,18 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         private bool isPlaying;
         private Vector3 prevCamPos;
         private Vector3 prevCamDir;
-        private int levelObjectSelectedIndex;
+        private LevelViewerClickMode clickMode;
+
 
         public LevelViewerControl()
         {
             InitializeComponent();
             userControlInputListener = new UserControlInputListener(this);
+        }
+
+        public void SetClickMode(LevelViewerClickMode clickMode)
+        {
+            behaviour?.ClickMode = clickMode;
         }
 
         public void Initialise(GameTemplateEditor gameEditor, LevelTemplateEditor levelEditor, GraphicsService graphicsService, Func<int> getObjectIndex)
@@ -96,7 +102,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
 
         protected override void Render(Swapchain swapChain, TimeSpan interval)
         {
-            if (scene is null || gameState is null || DesignMode)
+            if (scene is null || gameState is null || levelEditor is null || DesignMode)
             {
                 return;
             }
@@ -110,6 +116,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             else
             {
                 behaviour.Update(null, gameState);
+                gameState.Input.Clear();
             }
             VeldridRenderContext context = new VeldridRenderContext();
             scene.Draw(context);
@@ -117,35 +124,28 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             // TODO: Remove
             context.DrawPrimitiveWireframe(Primitive.Box, System.Numerics.Matrix4x4.Identity);
 
-            if (levelObjectSelectedIndex >= 0
-                && levelEditor.Template.LevelObjects.Count > 0
-                && !isPlaying)
+            if (!isPlaying)
             {
-                var selectedLevelObj = levelEditor.Template.LevelObjects[levelObjectSelectedIndex];
-                var selectedGameObj = gameEditor.Template.GameObjects[selectedLevelObj.GameObjectIndex];
-                // TODO: This without needing to cast
-
-                // first render the entity inflated, and with alpha 1
-                ((List<VeldridRenderContext.DrawInstruction>)context.DrawInstructions).Add(new VeldridRenderContext.DrawInstruction
+                if (levelEditor.LevelObjectSelectedIndex >= 0
+                    && levelEditor.Template.LevelObjects.Count > 0
+                    && levelEditor.LevelObjectSelectedIndex != behaviour.HoveredObjectIndex)
                 {
-                    InstructionType = VeldridRenderContext.InstructionType.ModelEntityHighlight,
-                    Transform = selectedGameObj.Renderable.Transform.ToMatrix() * selectedLevelObj.WorldTransform.ToMatrix(),
-                    ModelID = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).ModelID,
-                    EntityIndex = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).EnabledIndices.Select((x, i) => (x, i)).First(x => x.x).i,
-                    HighlightParams = new HighlightParams { Color = new Vector4(1f, 0.65f, 0f, 1f), Params = new Vector4(0.005f, 0, 0, 0) }
-                });
+                    var selectedLevelObj = levelEditor.Template.LevelObjects[levelEditor.LevelObjectSelectedIndex];
+                    var selectedGameObj = gameEditor.Template.GameObjects[selectedLevelObj.GameObjectIndex];
+                    DrawObjectHighlight(context, selectedGameObj, selectedLevelObj, new Vector3(1f, 0.65f, 0f)); // orange-ish
+                }
 
-                // now draw the entity with a reduced alpha, and no inflation
-                // The idea is that the highlight render pass doesn't blend, and doesn't do depth testing, so this second draw will overwrite the first
-                // The result is a translucent, constant-colour mesh (second draw) with an opaque outline (first draw)
-                ((List<VeldridRenderContext.DrawInstruction>)context.DrawInstructions).Add(new VeldridRenderContext.DrawInstruction
+                if (behaviour.ClickMode == LevelViewerClickMode.Select
+                    && behaviour.HoveredObjectIndex >= 0)
                 {
-                    InstructionType = VeldridRenderContext.InstructionType.ModelEntityHighlight,
-                    Transform = selectedGameObj.Renderable.Transform.ToMatrix() * selectedLevelObj.WorldTransform.ToMatrix(),
-                    ModelID = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).ModelID,
-                    EntityIndex = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).EnabledIndices.Select((x, i) => (x, i)).First(x => x.x).i,
-                    HighlightParams = new HighlightParams { Color = new Vector4(1f, 0.65f, 0f, 0.25f), Params = new Vector4(0, 0, 0, 0) }
-                });
+                    Vector3 colour = behaviour.HoveredObjectIndex == levelEditor.LevelObjectSelectedIndex
+                        ? new Vector3(1, 1, 0.8f) // bright yellow
+                        : RgbaFloat.Yellow.ToVector4().AsVector3();
+
+                    var selectedLevelObj = levelEditor.Template.LevelObjects[behaviour.HoveredObjectIndex];
+                    var selectedGameObj = gameEditor.Template.GameObjects[selectedLevelObj.GameObjectIndex];
+                    DrawObjectHighlight(context, selectedGameObj, selectedLevelObj, colour);
+                }
             }
 
             graphicsResources.CommandList.Begin();
@@ -158,18 +158,40 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             graphicsService.GraphicsDevice.SwapBuffers(swapchain);
         }
 
-        internal void SetSelectedIndex(int selectedIndex)
+        private void DrawObjectHighlight(VeldridRenderContext context, GameObjectTemplate selectedGameObj, LevelObjectTemplate selectedLevelObj, Vector3 colour)
         {
-            this.levelObjectSelectedIndex = selectedIndex;
+            // TODO: This without needing to cast
+
+            // first render the entity inflated, and with alpha 1
+            ((List<VeldridRenderContext.DrawInstruction>)context.DrawInstructions).Add(new VeldridRenderContext.DrawInstruction
+            {
+                InstructionType = VeldridRenderContext.InstructionType.ModelEntityHighlight,
+                Transform = selectedGameObj.Renderable.Transform.ToMatrix() * selectedLevelObj.WorldTransform.ToMatrix(),
+                ModelID = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).ModelID,
+                EntityIndex = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).EnabledIndices.Select((x, i) => (x, i)).First(x => x.x).i,
+                HighlightParams = new HighlightParams { Color = new Vector4(colour, 1f), Params = new Vector4(0.005f, 0, 0, 0) }
+            });
+
+            // now draw the entity with a reduced alpha, and no inflation
+            // The idea is that the highlight render pass doesn't blend, and doesn't do depth testing, so this second draw will overwrite the first
+            // The result is a translucent, constant-colour mesh (second draw) with an opaque outline (first draw)
+            ((List<VeldridRenderContext.DrawInstruction>)context.DrawInstructions).Add(new VeldridRenderContext.DrawInstruction
+            {
+                InstructionType = VeldridRenderContext.InstructionType.ModelEntityHighlight,
+                Transform = selectedGameObj.Renderable.Transform.ToMatrix() * selectedLevelObj.WorldTransform.ToMatrix(),
+                ModelID = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).ModelID,
+                EntityIndex = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).EnabledIndices.Select((x, i) => (x, i)).First(x => x.x).i,
+                HighlightParams = new HighlightParams { Color = new Vector4(colour, 0.25f), Params = new Vector4(0, 0, 0, 0) }
+            });
         }
 
         internal void CentreCameraOnObject(int selectedIndex)
         {
-            if (levelObjectSelectedIndex >= 0
+            if (levelEditor.LevelObjectSelectedIndex >= 0
                 && levelEditor.Template.LevelObjects.Count > 0
                 && !isPlaying)
             {
-                var selectedLevelObj = levelEditor.Template.LevelObjects[levelObjectSelectedIndex];
+                var selectedLevelObj = levelEditor.Template.LevelObjects[levelEditor.LevelObjectSelectedIndex];
                 var selectedGameObj = gameEditor.Template.GameObjects[selectedLevelObj.GameObjectIndex];
 
                 // TODO: Move camera back far enough so that the object's AABB fits in view instead of just hardcoded a value

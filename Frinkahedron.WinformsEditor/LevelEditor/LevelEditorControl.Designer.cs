@@ -29,15 +29,21 @@
         private void InitializeComponent()
         {
             tableLayoutPanel1 = new TableLayoutPanel();
-            levelViewerControl1 = new LevelViewerControl();
             tableLayoutPanel2 = new TableLayoutPanel();
             objectSelectionBox = new ComboBox();
             button1 = new Button();
             levelObjectsBox = new ListBox();
             levelObjTransformControl = new TransformControl();
             removeButton = new Button();
+            tableLayoutPanel3 = new TableLayoutPanel();
+            levelViewerControl1 = new LevelViewerControl();
+            flowLayoutPanel1 = new FlowLayoutPanel();
+            placeObjectButton = new RadioButton();
+            selectObjectButton = new RadioButton();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
+            tableLayoutPanel3.SuspendLayout();
+            flowLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -45,8 +51,8 @@
             tableLayoutPanel1.ColumnCount = 2;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75F));
-            tableLayoutPanel1.Controls.Add(levelViewerControl1, 1, 0);
             tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 0, 0);
+            tableLayoutPanel1.Controls.Add(tableLayoutPanel3, 1, 0);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -54,15 +60,6 @@
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Size = new Size(952, 612);
             tableLayoutPanel1.TabIndex = 0;
-            // 
-            // levelViewerControl1
-            // 
-            levelViewerControl1.BackColor = Color.Black;
-            levelViewerControl1.Dock = DockStyle.Fill;
-            levelViewerControl1.Location = new Point(241, 3);
-            levelViewerControl1.Name = "levelViewerControl1";
-            levelViewerControl1.Size = new Size(708, 606);
-            levelViewerControl1.TabIndex = 0;
             // 
             // tableLayoutPanel2
             // 
@@ -134,6 +131,64 @@
             removeButton.UseVisualStyleBackColor = true;
             removeButton.Click += removeButton_Click;
             // 
+            // tableLayoutPanel3
+            // 
+            tableLayoutPanel3.ColumnCount = 1;
+            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanel3.Controls.Add(levelViewerControl1, 0, 0);
+            tableLayoutPanel3.Controls.Add(flowLayoutPanel1, 0, 1);
+            tableLayoutPanel3.Dock = DockStyle.Fill;
+            tableLayoutPanel3.Location = new Point(241, 3);
+            tableLayoutPanel3.Name = "tableLayoutPanel3";
+            tableLayoutPanel3.RowCount = 2;
+            tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel3.RowStyles.Add(new RowStyle(SizeType.Absolute, 32F));
+            tableLayoutPanel3.Size = new Size(708, 606);
+            tableLayoutPanel3.TabIndex = 2;
+            // 
+            // levelViewerControl1
+            // 
+            levelViewerControl1.BackColor = Color.Black;
+            levelViewerControl1.Dock = DockStyle.Fill;
+            levelViewerControl1.Location = new Point(3, 3);
+            levelViewerControl1.Name = "levelViewerControl1";
+            levelViewerControl1.Size = new Size(702, 568);
+            levelViewerControl1.TabIndex = 1;
+            // 
+            // flowLayoutPanel1
+            // 
+            flowLayoutPanel1.Controls.Add(placeObjectButton);
+            flowLayoutPanel1.Controls.Add(selectObjectButton);
+            flowLayoutPanel1.Dock = DockStyle.Fill;
+            flowLayoutPanel1.Location = new Point(3, 577);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new Size(702, 26);
+            flowLayoutPanel1.TabIndex = 2;
+            // 
+            // placeObjectButton
+            // 
+            placeObjectButton.AutoSize = true;
+            placeObjectButton.Checked = true;
+            placeObjectButton.Location = new Point(3, 3);
+            placeObjectButton.Name = "placeObjectButton";
+            placeObjectButton.Size = new Size(89, 19);
+            placeObjectButton.TabIndex = 0;
+            placeObjectButton.TabStop = true;
+            placeObjectButton.Text = "Place object";
+            placeObjectButton.UseVisualStyleBackColor = true;
+            placeObjectButton.CheckedChanged += placeObjectButton_CheckedChanged;
+            // 
+            // selectObjectButton
+            // 
+            selectObjectButton.AutoSize = true;
+            selectObjectButton.Location = new Point(98, 3);
+            selectObjectButton.Name = "selectObjectButton";
+            selectObjectButton.Size = new Size(92, 19);
+            selectObjectButton.TabIndex = 1;
+            selectObjectButton.Text = "Select object";
+            selectObjectButton.UseVisualStyleBackColor = true;
+            selectObjectButton.CheckedChanged += selectObjectButton_CheckedChanged;
+            // 
             // LevelEditorControl
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -143,18 +198,25 @@
             Size = new Size(952, 612);
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel2.ResumeLayout(false);
+            tableLayoutPanel3.ResumeLayout(false);
+            flowLayoutPanel1.ResumeLayout(false);
+            flowLayoutPanel1.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
         private TableLayoutPanel tableLayoutPanel1;
-        private LevelViewerControl levelViewerControl1;
         private TableLayoutPanel tableLayoutPanel2;
         private ComboBox objectSelectionBox;
         private Button button1;
         private ListBox levelObjectsBox;
         private TransformControl levelObjTransformControl;
         private Button removeButton;
+        private TableLayoutPanel tableLayoutPanel3;
+        private LevelViewerControl levelViewerControl1;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private RadioButton placeObjectButton;
+        private RadioButton selectObjectButton;
     }
 }
