@@ -7,6 +7,29 @@ layout(location = 0) out vec4 fsout_colour;
 layout(set = 0, binding = 0) uniform texture2D Texture;
 layout(set = 0, binding = 1) uniform sampler TextureSampler;
 
+// Post-process settings are provided via a uniform buffer at set=1 binding=0.
+layout(set = 1, binding = 0, std140) uniform PostProcessSettings
+{
+    int enableFXAA;
+    int enableGaussian;
+    int gaussianRadius;
+    float gaussianSigma;
+
+    int enableMean;
+    int meanRadius;
+    int enablePixelation;
+    int pixelationRadius;
+
+    int enableSepia;
+    float sepiaStrength;
+
+    int enableGreyscale;
+    // padding to align to vec4 (std140 rules)
+    int _pad0;
+    int _pad1;
+    int _pad2;
+} pps;
+
 vec3 applyFXAA(vec2 uv)
 {
     vec2 texelSize = 1.0 / textureSize(sampler2D(Texture, TextureSampler), 0);
@@ -73,6 +96,33 @@ vec4 applyMeanBlur(vec2 uv, int radius)
 	return colour / count;
 }
 
+// Gaussian blur (simple weighted kernel). Works for small radii.
+vec4 applyGaussianBlur(vec2 uv, int radius, float sigma)
+{
+    if (radius <= 0) return texture(sampler2D(Texture, TextureSampler), uv);
+    vec2 texSize = textureSize(sampler2D(Texture, TextureSampler), 0);
+    vec2 texelSize = 1.0 / texSize;
+    float twoSigmaSq = 2.0 * sigma * sigma;
+    float invSigmaRoot = 1.0 / sqrt(3.14159265 * twoSigmaSq);
+
+    vec4 color = vec4(0.0);
+    float totalWeight = 0.0;
+
+    for (int x = -radius; x <= radius; ++x)
+    {
+        for (int y = -radius; y <= radius; ++y)
+        {
+            float distSq = float(x * x + y * y);
+            float weight = invSigmaRoot * exp(-distSq / twoSigmaSq);
+            vec2 offset = vec2(float(x), float(y)) * texelSize;
+            color += texture(sampler2D(Texture, TextureSampler), uv + offset) * weight;
+            totalWeight += weight;
+        }
+    }
+
+    return color / totalWeight;
+}
+
 vec4 applyPixellation(vec2 uv, int radius)
 {
     vec2 texSize = textureSize(sampler2D(Texture, TextureSampler), 0);
@@ -89,7 +139,7 @@ vec4 applyPixellation(vec2 uv, int radius)
 	{
 		for (int j = -radius; j <= radius; j++)
 		{
-        vec2 offset = vec2(i, j) * texelSize;
+            vec2 offset = vec2(i, j) * texelSize;
 			colour += texture(sampler2D(Texture, TextureSampler), baseUV + offset);
 			count += 1;
 		}
@@ -111,7 +161,7 @@ vec4 applySepia(vec4 color, float strength)
 vec4 applyGreyscale(vec4 color)
 {
     float avg = (color.r + color.g + color.b) / 3;
-    return vec4(avg, avg, avg, 1);
+    return vec4(avg, avg, avg, color.a);
 }
 
 void main()
@@ -121,6 +171,42 @@ void main()
     {
         discard;
     }
-    fsout_colour = vec4(applyFXAA(fsin_texCoord), colour.a);
-    //fsout_colour = applyPixellation(fsin_texCoord, 4);
+
+    vec4 result = colour;
+
+    // Choose anti-aliasing first if enabled
+    if (pps.enableFXAA != 0)
+    {
+        vec3 aa = applyFXAA(fsin_texCoord);
+        result = vec4(aa, colour.a);
+    }
+
+    // Blur (gaussian or mean)
+    if (pps.enableGaussian != 0)
+    {
+        result = applyGaussianBlur(fsin_texCoord, pps.gaussianRadius, pps.gaussianSigma);
+    }
+    else if (pps.enableMean != 0)
+    {
+        result = applyMeanBlur(fsin_texCoord, pps.meanRadius);
+    }
+
+    // Pixelation
+    if (pps.enablePixelation != 0)
+    {
+        result = applyPixellation(fsin_texCoord, pps.pixelationRadius);
+    }
+
+    // Colour effects
+    if (pps.enableGreyscale != 0)
+    {
+        result = applyGreyscale(result);
+    }
+
+    if (pps.enableSepia != 0)
+    {
+        result = applySepia(result, pps.sepiaStrength);
+    }
+
+    fsout_colour = result;
 }

@@ -149,6 +149,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
             }
 
             graphicsResources.CommandList.Begin();
+
             foreach (var renderPass in graphicsResources.RenderPasses)
             {
                 renderPass.RenderScene(graphicsService.GraphicsDevice, graphicsResources.CommandList, graphicsResources, scene, context.DrawInstructions);
@@ -169,7 +170,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 Transform = selectedGameObj.Renderable.Transform.ToMatrix() * selectedLevelObj.WorldTransform.ToMatrix(),
                 ModelID = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).ModelID,
                 EntityIndex = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).EnabledIndices.Select((x, i) => (x, i)).First(x => x.x).i,
-                HighlightParams = new HighlightParams { Color = new Vector4(colour, 1f), Params = new Vector4(0.005f, 0, 0, 0) }
+                HighlightParams = new HighlightParams { Color = new Vector4(colour, 1f), Params = new Vector4(0.01f, 0, 0, 0) }
             });
 
             // now draw the entity with a reduced alpha, and no inflation
@@ -181,7 +182,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 Transform = selectedGameObj.Renderable.Transform.ToMatrix() * selectedLevelObj.WorldTransform.ToMatrix(),
                 ModelID = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).ModelID,
                 EntityIndex = (selectedGameObj.Renderable as ModelEntitiesRenderableTemplate).EnabledIndices.Select((x, i) => (x, i)).First(x => x.x).i,
-                HighlightParams = new HighlightParams { Color = new Vector4(colour, 0.25f), Params = new Vector4(0, 0, 0, 0) }
+                HighlightParams = new HighlightParams { Color = new Vector4(colour, 0.1f), Params = new Vector4(0, 0, 0, 0) }
             });
         }
 

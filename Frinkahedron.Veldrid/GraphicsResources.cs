@@ -55,8 +55,8 @@ namespace Frinkahedron.VeldridImplementation
             ObjectHighlightRenderPass highlightRenderPass = ObjectHighlightRenderPass.Create(factory, graphicsDevice, assetManager, highlightFrameBuffer);
 
             FullScreenQuadRenderPass quadRenderPass = FullScreenQuadRenderPass.Create(factory, graphicsDevice, assetManager, swapchain);
-            quadRenderPass.Textures.Add((colourTexture, Vector4.One));
-            quadRenderPass.Textures.Add((highlightColourTexture, Vector4.One));
+            quadRenderPass.Textures.Add((colourTexture, new FullScreenQuadRenderPass.PostProcessSettings { enableFXAA = 1 }));
+            quadRenderPass.Textures.Add((highlightColourTexture, new FullScreenQuadRenderPass.PostProcessSettings { enableMean = 1, meanRadius = 2 }));
 
 
             return new GraphicsResources
