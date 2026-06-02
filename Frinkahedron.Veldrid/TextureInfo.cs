@@ -1,4 +1,5 @@
-﻿using Veldrid;
+﻿using System.Runtime.InteropServices;
+using Veldrid;
 using Veldrid.ImageSharp;
 
 namespace Frinkahedron.VeldridImplementation
@@ -33,6 +34,69 @@ namespace Frinkahedron.VeldridImplementation
                 ResourceLayout = textureLayout
             };
         }
+
+        public static TextureInfo CreateSolidColor(
+            ResourceFactory factory,
+            GraphicsDevice graphicsDevice,
+            uint width,
+            uint height,
+            RgbaByte color)
+        {
+            TextureDescription desc = TextureDescription.Texture2D(
+                width,
+                height,
+                mipLevels: 1,
+                arrayLayers: 1,
+                PixelFormat.R8_G8_B8_A8_UNorm,
+                TextureUsage.Sampled);
+
+            Texture texture = factory.CreateTexture(desc);
+
+            // Fill pixel data
+            int pixelSize = Marshal.SizeOf<RgbaByte>();
+            byte[] data = new byte[width * height * pixelSize];
+
+            for (int i = 0; i < width * height; i++)
+            {
+                int offset = i * pixelSize;
+                data[offset + 0] = color.R;
+                data[offset + 1] = color.G;
+                data[offset + 2] = color.B;
+                data[offset + 3] = color.A;
+            }
+
+            graphicsDevice.UpdateTexture(
+                texture,
+                data,
+                0,
+                0,
+                0,
+                width,
+                height,
+                1,
+                0,
+                0);
+
+            TextureView textureView = factory.CreateTextureView(texture);
+            Sampler sampler = graphicsDevice.Aniso4xSampler;
+            var textureLayout = GetResourceLayout(factory);
+
+            ResourceSet textureSet = factory.CreateResourceSet(
+                new ResourceSetDescription(
+                    textureLayout,
+                    textureView,
+                    sampler));
+
+            return new TextureInfo
+            {
+                Texture = texture,
+                TextureView = textureView,
+                Sampler = sampler,
+                ResourceSet = textureSet,
+                ResourceLayout = textureLayout
+            };
+        }
+
 
         public static TextureInfo Create(ResourceFactory factory, GraphicsDevice graphicsDevice, Stream stream, bool srgb)
         {
