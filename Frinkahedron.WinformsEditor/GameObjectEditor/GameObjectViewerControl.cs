@@ -64,6 +64,8 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             if (scene is not null)
             {
                 scene.Camera.Projection.AspectRatio = (float)Width / Height;
+                graphicsResources?.Dispose();
+                graphicsResources = GraphicsResources.CreateResources(graphicsService.GraphicsDevice, Width, Height, graphicsService.AssetManager, swapchain);
             }
         }
 
