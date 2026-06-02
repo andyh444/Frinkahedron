@@ -118,7 +118,8 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 else if (instruction.InstructionType is InstructionType.ModelEntity)
                 {
                     var model = graphicsResources.AssetManager.GetModel(instruction.ModelID);
-                    DrawMesh(model.Entities[instruction.EntityIndex].Mesh, instruction.Transform, commandList);
+                    Entity entity = model.Entities[instruction.EntityIndex];
+                    DrawMesh(entity.Mesh, entity.Transform * instruction.Transform, commandList);
                 }
             }
         }

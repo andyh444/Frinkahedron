@@ -83,7 +83,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
         {
             float aspectRatio = (float)Width / Height;
 
-            scene = levelEditor.Template.ToScene(gameEditor.Template, scene?.Camera.Position ?? new Vector3(0, 0, -100), scene?.Camera.LookDirection ?? Vector3.Normalize(new Vector3(0, 0, 1)), aspectRatio);
+            scene = levelEditor.Template.ToScene(gameEditor.Template, scene?.Camera.Position ?? new Vector3(0, -100, -100), scene?.Camera.LookDirection ?? Vector3.Normalize(new Vector3(0, 1, 1)), aspectRatio);
             //scene.AddObject(new GameObject(Vector3.Zero, behaviour));
             gameState = new GameState(0.01f, scene);
         }

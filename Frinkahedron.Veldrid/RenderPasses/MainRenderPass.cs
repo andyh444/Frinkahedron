@@ -151,7 +151,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 {
                     var model = graphicsResources.AssetManager.GetModel(instruction.ModelID);
                     var entity = model.Entities[instruction.EntityIndex];
-                    DrawMesh(entity.Mesh, instruction.Transform, entity.ColourTexture, entity.NormalMap, entity.MetallicRoughnessMap, commandList);
+                    DrawMesh(entity.Mesh, entity.Transform * instruction.Transform, entity.ColourTexture, entity.NormalMap, entity.MetallicRoughnessMap, commandList);
                 }
             }
         }

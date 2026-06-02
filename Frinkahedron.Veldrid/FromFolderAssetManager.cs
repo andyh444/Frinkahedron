@@ -39,6 +39,7 @@ namespace Frinkahedron.VeldridImplementation
             models.Add("simple_classic_crate", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\simple_classic_crate\scene.gltf", textures["white"]));
             models.Add("tin_can_damaged", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\tin_can_damaged\scene.gltf", textures["white"]));
             models.Add("old_rusty_car", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\old_rusty_car\scene.gltf", textures["white"]));
+            models.Add("2008_lamborghini_reventon", ModelLoader.LoadModel(factory, graphicsDevice, @"D:\3D Models\2008_lamborghini_reventon\scene.gltf", textures["white"]));
             return new FromFolderAssetManager(textures, shaders, models);
         }
 

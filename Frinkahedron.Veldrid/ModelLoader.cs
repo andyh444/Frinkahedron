@@ -44,72 +44,77 @@ namespace Frinkahedron.VeldridImplementation
             var model = SharpGLTF.Schema2.ModelRoot.Load(file);
             List<Entity> entities = new List<Entity>();
 
-            foreach (var node in model.LogicalNodes)
+            Matrix4x4 currentTransform = Matrix4x4.Identity;
+            foreach (var node in model.DefaultScene.VisualChildren)
             {
-                ProcessNode(factory, graphicsDevice, fallbackTexture, node, entities);
+                ProcessNode(factory, graphicsDevice, fallbackTexture, node, entities, currentTransform);
             }
 
             return new Model(entities);
         }
 
-        private static void ProcessNode(ResourceFactory factory, GraphicsDevice graphicsDevice, TextureInfo fallbackTexture, Node node, List<Entity> entities)
+        private static void ProcessNode(ResourceFactory factory, GraphicsDevice graphicsDevice, TextureInfo fallbackTexture, Node node, List<Entity> entities, Matrix4x4 parentTransform)
         {
             var mesh = node.Mesh;
-            if (mesh is null)
+            var transform = node.LocalTransform.Matrix * parentTransform;
+            if (mesh is not null)
             {
-                return;
+                foreach (var primitive in mesh.Primitives)
+                {
+                    if (primitive.DrawPrimitiveType != SharpGLTF.Schema2.PrimitiveType.TRIANGLES)
+                    {
+                        continue;
+                    }
+
+                    SharpGLTF.Memory.IAccessorArray<Vector3> positions = primitive.GetVertexAccessor("POSITION").AsVector3Array();
+                    SharpGLTF.Memory.IAccessorArray<uint> indices = primitive.GetIndexAccessor().AsIndicesArray();
+
+                    var normals = primitive.GetVertexAccessor("NORMAL")?.AsVector3Array()
+                        ?? GenerateNormals(positions, indices);
+
+                    var uvs = primitive.GetVertexAccessor("TEXCOORD_0")?.AsVector2Array()
+                        ?? ((IReadOnlyList<Vector2>)new Vector2[positions.Count]);
+
+                    var tangents = primitive.GetVertexAccessor("TANGENT")?.AsVector4Array()
+                        ?? GenerateTangents(positions, normals, uvs, indices);
+
+                    TexVertex[] vertices = new TexVertex[positions.Count];
+                    List<IndexTriangle> triangles = new List<IndexTriangle>();
+
+                    for (int i = 0; i < positions.Count; i++)
+                    {
+                        vertices[i] = new TexVertex(
+                            positions[i],
+                            normals[i],
+                            uvs[i],
+                            tangents[i]);
+                    }
+                    foreach ((int i1, int i2, int i3) in primitive.GetTriangleIndices())
+                    {
+                        triangles.Add(new IndexTriangle(
+                            (ushort)i2,
+                            (ushort)i1,
+                            (ushort)i3));
+                    }
+
+                    TexMesh texMesh = new TexMesh(vertices, triangles.ToArray());
+                    MeshInfo texMeshInfo = MeshInfo.Create(texMesh, graphicsDevice);
+
+                    // TODO: Don't create new textures for each 
+                    TextureInfo albedo = GetTexture(primitive.Material, factory, graphicsDevice, "BaseColor", fallbackTexture);
+                    TextureInfo metallicRoughness = GetTexture(primitive.Material, factory, graphicsDevice, "MetallicRoughness", fallbackTexture);
+                    TextureInfo normalMap = GetTexture(primitive.Material, factory, graphicsDevice, "Normal", fallbackTexture);
+                    // TODO: Also get Emissive, alpha mode, double-sided
+
+                    // TODO: Replace hardcoded texture indices
+                    Entity entity = new Entity(texMeshInfo, albedo, metallicRoughness, normalMap, transform);
+                    entities.Add(entity);
+                }
             }
-            var transform = node.LocalTransform.Matrix;
-            foreach (var primitive in mesh.Primitives)
+
+            foreach (var childNode in node.VisualChildren)
             {
-                if (primitive.DrawPrimitiveType != SharpGLTF.Schema2.PrimitiveType.TRIANGLES)
-                {
-                    continue;
-                }
-
-                SharpGLTF.Memory.IAccessorArray<Vector3> positions = primitive.GetVertexAccessor("POSITION").AsVector3Array();
-                SharpGLTF.Memory.IAccessorArray<uint> indices = primitive.GetIndexAccessor().AsIndicesArray();
-
-                var normals = primitive.GetVertexAccessor("NORMAL")?.AsVector3Array()
-                    ?? GenerateNormals(positions, indices);
-
-                var uvs = primitive.GetVertexAccessor("TEXCOORD_0")?.AsVector2Array()
-                    ?? ((IReadOnlyList<Vector2>)new Vector2[positions.Count]);
-
-                var tangents = primitive.GetVertexAccessor("TANGENT")?.AsVector4Array()
-                    ?? GenerateTangents(positions, normals, uvs, indices);
-
-                TexVertex[] vertices = new TexVertex[positions.Count];
-                List<IndexTriangle> triangles = new List<IndexTriangle>();
-
-                for (int i = 0; i < positions.Count; i++)
-                {
-                    vertices[i] = new TexVertex(
-                        Vector3.Transform(positions[i], transform),
-                        normals[i],
-                        uvs[i],
-                        tangents[i]);
-                }
-                foreach ((int i1, int i2, int i3) in primitive.GetTriangleIndices())
-                {
-                    triangles.Add(new IndexTriangle(
-                        (ushort)i2,
-                        (ushort)i1,
-                        (ushort)i3));
-                }
-
-                TexMesh texMesh = new TexMesh(vertices, triangles.ToArray());
-                MeshInfo texMeshInfo = MeshInfo.Create(texMesh, graphicsDevice);
-
-                // TODO: Don't create new textures for each 
-                TextureInfo albedo = GetTexture(primitive.Material, factory, graphicsDevice, "BaseColor", fallbackTexture);
-                TextureInfo metallicRoughness = GetTexture(primitive.Material, factory, graphicsDevice, "MetallicRoughness", fallbackTexture);
-                TextureInfo normalMap = GetTexture(primitive.Material, factory, graphicsDevice, "Normal", fallbackTexture);
-                // TODO: Also get Emissive, alpha mode, double-sided
-
-                // TODO: Replace hardcoded texture indices
-                Entity entity = new(texMeshInfo, albedo, metallicRoughness, normalMap, Matrix4x4.Identity);
-                entities.Add(entity);
+                ProcessNode(factory, graphicsDevice, fallbackTexture, childNode, entities, transform);
             }
         }
 
