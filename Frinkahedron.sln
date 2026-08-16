@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frinkahedron.VeldridImpleme
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frinkahedron.WinformsEditor", "Frinkahedron.WinformsEditor\Frinkahedron.WinformsEditor.csproj", "{FCE9A2D2-8D2D-45E7-AFC0-C6833E3D3CF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frinkahedron.WinUIEditor", "Frinkahedron.WinUIEditor\Frinkahedron.WinUIEditor.csproj", "{1D0E4FE4-97E7-4D01-BEA9-93BE01E52C22}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,12 @@ Global
 		{FCE9A2D2-8D2D-45E7-AFC0-C6833E3D3CF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCE9A2D2-8D2D-45E7-AFC0-C6833E3D3CF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCE9A2D2-8D2D-45E7-AFC0-C6833E3D3CF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D0E4FE4-97E7-4D01-BEA9-93BE01E52C22}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{1D0E4FE4-97E7-4D01-BEA9-93BE01E52C22}.Debug|Any CPU.Build.0 = Debug|x64
+		{1D0E4FE4-97E7-4D01-BEA9-93BE01E52C22}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{1D0E4FE4-97E7-4D01-BEA9-93BE01E52C22}.Release|Any CPU.ActiveCfg = Release|x64
+		{1D0E4FE4-97E7-4D01-BEA9-93BE01E52C22}.Release|Any CPU.Build.0 = Release|x64
+		{1D0E4FE4-97E7-4D01-BEA9-93BE01E52C22}.Release|Any CPU.Deploy.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

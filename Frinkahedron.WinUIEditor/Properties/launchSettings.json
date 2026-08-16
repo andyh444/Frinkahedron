@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Frinkahedron.WinUIEditor (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Frinkahedron.WinUIEditor (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
