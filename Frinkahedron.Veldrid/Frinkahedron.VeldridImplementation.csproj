@@ -8,9 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.6" />
-    <PackageReference Include="Veldrid" Version="4.9.0" />
+    <PackageReference Include="Veldrid" Version="4.9.1-g3ed7e8fdff" />
     <PackageReference Include="Veldrid.Spirv" Version="1.0.15" />
-    <PackageReference Include="Veldrid.ImageSharp" Version="4.9.0" />
+    <PackageReference Include="Veldrid.ImageSharp" Version="4.9.1-g3ed7e8fdff" />
   </ItemGroup>
 
   <ItemGroup>
