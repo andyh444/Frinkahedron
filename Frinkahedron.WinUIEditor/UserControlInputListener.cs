@@ -94,7 +94,7 @@ namespace Frinkahedron.WinUIEditor
                 input.NewKeyUp(GetFrinkKey(keyUp));
             }
 
-            //input.SetMousePosition(currentMousePosition, new Vector2(control.Width, control.Height));
+            input.SetMousePosition(currentMousePosition, new Vector2(control.ActualSize.X, control.ActualSize.Y));
             input.SetScrollDelta(currentMouseDelta);
 
             mouseButtonsDown.Clear();

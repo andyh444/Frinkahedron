@@ -15,6 +15,9 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Controls\VeldridPanel.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\Frinkahedron.TestApp\SceneBuilder_Extensions.cs" Link="SceneBuilder_Extensions.cs" />
   </ItemGroup>
 
@@ -46,6 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Frinkahedron.Veldrid\Frinkahedron.VeldridImplementation.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Controls\VeldridPanel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!--

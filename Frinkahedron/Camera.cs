@@ -57,6 +57,24 @@ namespace Frinkahedron
                 new OrthographicProjection(width, screenAspectRatio, 1.0f, 1000f));
         }
 
+        public void SetAspectRatio(float screenAspectRatio)
+        {
+            if (ProjectionType == ProjectionType.Perspective)
+            {
+                PerspectiveProjection proj = (PerspectiveProjection)Projection;
+                MakePerspective(proj.FoV, screenAspectRatio, proj.Near, proj.Far);
+            }
+            else if (ProjectionType == ProjectionType.Orthographic)
+            {
+                OrthographicProjection proj = (OrthographicProjection)Projection;
+                MakeOrtho(proj.Width, screenAspectRatio, proj.Near, proj.Far);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public void MakePerspective(float fov, float aspectRatio, float near, float far)
         {
             Projection = new PerspectiveProjection(fov, aspectRatio, near, far);
