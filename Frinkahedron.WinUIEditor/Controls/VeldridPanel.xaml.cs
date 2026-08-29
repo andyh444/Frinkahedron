@@ -2,6 +2,7 @@ using Frinkahedron.Core;
 using Frinkahedron.Core.Template;
 using Frinkahedron.TestApp;
 using Frinkahedron.VeldridImplementation;
+using Frinkahedron.WinUIEditor.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -20,131 +21,59 @@ using Veldrid;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using Windows.Security.Cryptography.Certificates;
 
 namespace Frinkahedron.WinUIEditor.Controls;
 
 public sealed partial class VeldridPanel : UserControl
 {
-    private GraphicsDevice graphicsDevice;
     private Swapchain? swapchain;
-    private GraphicsResources? graphicsResources;
-    private Scene scene;
-    private GameState gameState;
-    private IAssetManager assetManager;
-    private UserControlInputListener? inputListener;
+    private SceneRunner? sceneRunner;
+    private UserControlInputListener inputListener;
 
     public VeldridPanel()
     {
         InitializeComponent();
-
-        var options = new GraphicsDeviceOptions
-        {
-            HasMainSwapchain = false,
-            SyncToVerticalBlank = true,
-            PreferDepthRangeZeroToOne = true,
-            PreferStandardClipSpaceYDirection = true,
-        };
-        graphicsDevice = GraphicsDevice.CreateD3D11(options);
-
+        var graphicsDevice = GraphicsService.Current.GraphicsDevice;
         CompositionTarget.Rendering += CompositionTarget_Rendering;
-
-        scene = CreateScene(1920f / 1080f);
-        gameState = new GameState(0.01f, scene);
-        assetManager = FromFolderAssetManager.LoadAssets(graphicsDevice.ResourceFactory, graphicsDevice, "C:\\Users\\Andy\\source\\repos\\Frinkahedron\\Frinkahedron.TestApp\\Assets"); // TODO Fix
-
         inputListener = new UserControlInputListener(this);
     }
 
     private void CompositionTarget_Rendering(object? sender, object e)
     {
-        if (inputListener is null)
+        if (inputListener is null || sceneRunner is null)
         {
             return;
         }
-        inputListener.UpdateInput(gameState.Input);
-        scene.Update(gameState);
+        sceneRunner.Update(inputListener.UpdateInput);
         Draw();
     }
 
     private void renderPanel_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        InitialiseSwapchain();
+        if (sceneRunner is null || swapchain is null)
+        {
+            return;
+        }
+        var gd = GraphicsService.Current.GraphicsDevice;
+        sceneRunner.SizeChanged(gd, renderPanel.ActualSize, swapchain);
+        swapchain.Resize((uint)renderPanel.ActualSize.X, (uint)renderPanel.ActualSize.Y);
     }
 
     private void renderPanel_Loaded(object sender, RoutedEventArgs e)
     {
-        InitialiseSwapchain();
-    }
-
-    private Scene CreateScene(float aspectRatio)
-    {
-        if (File.Exists($@"C:\tmp\tempgame.json"))
-        {
-            using var fs = File.OpenRead($@"C:\tmp\tempgame.json");
-
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, IncludeFields = true, };
-            options.Converters.Add(new Vector3Converter());
-            var template = JsonSerializer.Deserialize<GameTemplate>(fs, options);
-
-            return template.Levels[0].ToScene(template, new Vector3(0, 0, -2), new Vector3(0, 0, 1), aspectRatio);
-        }
-        else
-        {
-            SceneBuilder sb = new SceneBuilder();
-            sb.AddBigBoxes();
-            sb.AddBasicCar();
-            sb.AddCrateTower(new Vector3(0, -14, 0));
-
-            var scene = sb.ToScene(new Vector3(0, 0, -2), new Vector3(0, 0, 1), aspectRatio);
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
-            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
-
-            return scene;
-        }
-    }
-
-    private void InitialiseSwapchain()
-    {
-        scene.Camera.SetAspectRatio(renderPanel.ActualSize.X / renderPanel.ActualSize.Y);
-
-        var swapChainSource = SwapchainSource.CreateWinUI3(renderPanel, 96);
-        var swapChainDescription = new SwapchainDescription
-        {
-            Source = swapChainSource,
-            Width = (uint)renderPanel.ActualSize.X,
-            Height = (uint)renderPanel.ActualSize.Y,
-            SyncToVerticalBlank = true,
-            DepthFormat = PixelFormat.D32_Float_S8_UInt
-        };
-
-        swapchain = graphicsDevice.ResourceFactory.CreateSwapchain(swapChainDescription);
-        graphicsResources?.Dispose();
-        graphicsResources = GraphicsResources.CreateResources(graphicsDevice, (int)renderPanel.ActualSize.X, (int)renderPanel.ActualSize.Y, assetManager, swapchain);
-
-        //bool focus = panel.Focus(FocusState.Programmatic);
+        var gd = GraphicsService.Current.GraphicsDevice;
+        swapchain = GraphicsService.Current.CreateSwapchain(renderPanel);
+        sceneRunner = new SceneRunner(gd, ActualSize, swapchain);
     }
 
     private void Draw()
     {
-        if (swapchain is null || graphicsResources is null)
+        if (swapchain is null || sceneRunner is null)
         {
             return;
         }
-        VeldridRenderContext context = new VeldridRenderContext();
-        scene.Draw(context);
-
-        graphicsResources.CommandList.Begin();
-        foreach (var renderPass in graphicsResources.RenderPasses)
-        {
-            renderPass.RenderScene(graphicsDevice, graphicsResources.CommandList, graphicsResources, scene, context.DrawInstructions);
-        }
-        graphicsResources.CommandList.End();
-        graphicsDevice.SubmitCommands(graphicsResources.CommandList);
-        graphicsDevice.SwapBuffers(swapchain);
+        var gd = GraphicsService.Current.GraphicsDevice;
+        sceneRunner.Draw(gd, swapchain);
     }
 }
