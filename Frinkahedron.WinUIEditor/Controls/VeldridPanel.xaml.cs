@@ -3,6 +3,7 @@ using Frinkahedron.Core.Template;
 using Frinkahedron.TestApp;
 using Frinkahedron.VeldridImplementation;
 using Frinkahedron.WinUIEditor.Services;
+using Frinkahedron.WinUIEditor.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -28,7 +29,7 @@ namespace Frinkahedron.WinUIEditor.Controls;
 public sealed partial class VeldridPanel : UserControl
 {
     private Swapchain? swapchain;
-    private SceneRunner? sceneRunner;
+    private RenderViewModel renderViewModel;
     private UserControlInputListener inputListener;
 
     public VeldridPanel()
@@ -37,26 +38,28 @@ public sealed partial class VeldridPanel : UserControl
         var graphicsDevice = GraphicsService.Current.GraphicsDevice;
         CompositionTarget.Rendering += CompositionTarget_Rendering;
         inputListener = new UserControlInputListener(this);
+
+        renderViewModel = new TestSceneViewModel();
     }
 
     private void CompositionTarget_Rendering(object? sender, object e)
     {
-        if (inputListener is null || sceneRunner is null)
+        if (inputListener is null || renderViewModel is null)
         {
             return;
         }
-        sceneRunner.Update(inputListener.UpdateInput);
+        renderViewModel.Update(inputListener.UpdateInput);
         Draw();
     }
 
     private void renderPanel_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (sceneRunner is null || swapchain is null)
+        if (renderViewModel is null || swapchain is null)
         {
             return;
         }
         var gd = GraphicsService.Current.GraphicsDevice;
-        sceneRunner.SizeChanged(gd, renderPanel.ActualSize, swapchain);
+        renderViewModel.SizeChanged(gd, renderPanel.ActualSize, swapchain);
         swapchain.Resize((uint)renderPanel.ActualSize.X, (uint)renderPanel.ActualSize.Y);
     }
 
@@ -64,16 +67,16 @@ public sealed partial class VeldridPanel : UserControl
     {
         var gd = GraphicsService.Current.GraphicsDevice;
         swapchain = GraphicsService.Current.CreateSwapchain(renderPanel);
-        sceneRunner = new SceneRunner(gd, ActualSize, swapchain);
+        renderViewModel.Initialise(gd, ActualSize, swapchain);
     }
 
     private void Draw()
     {
-        if (swapchain is null || sceneRunner is null)
+        if (swapchain is null || renderViewModel is null)
         {
             return;
         }
         var gd = GraphicsService.Current.GraphicsDevice;
-        sceneRunner.Draw(gd, swapchain);
+        renderViewModel.Draw(gd, swapchain);
     }
 }
