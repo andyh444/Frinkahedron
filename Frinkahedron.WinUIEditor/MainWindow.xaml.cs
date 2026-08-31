@@ -2,6 +2,7 @@ using Frinkahedron.Core;
 using Frinkahedron.Core.Template;
 using Frinkahedron.TestApp;
 using Frinkahedron.VeldridImplementation;
+using Frinkahedron.WinUIEditor.ViewModels;
 using Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -35,7 +36,12 @@ namespace Frinkahedron.WinUIEditor
         public MainWindow()
         {
             InitializeComponent();
-            templateView.DataContext = new GameObjectTemplateViewModel(new GameObjectTemplate());
+            MainViewModel viewModel = new MainViewModel();
+
+            templateView.DataContext = viewModel.GameObjectTemplate;
+            veldridPanel.SetViewModel(viewModel.Renderer);
         }
+
+        
     }
 }

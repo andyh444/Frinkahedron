@@ -12,7 +12,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 {
     internal abstract class RenderViewModelBase : ViewModelBase
     {
-        public abstract void Initialise(GraphicsDevice graphicsDevice, Vector2 initialSize, Swapchain swapchain);
+        public abstract Task Initialise(GraphicsDevice graphicsDevice, Vector2 initialSize, Swapchain swapchain);
 
         public abstract void SizeChanged(GraphicsDevice graphicsDevice, Vector2 newSize, Swapchain swapchain);
 

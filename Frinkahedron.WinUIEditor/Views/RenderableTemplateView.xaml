@@ -20,6 +20,6 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <local:TransformTemplateView Grid.Row="2" DataContext="{Binding TransformTemplateViewModel}" />
+        <local:TransformTemplateView Grid.Row="2" DataContext="{Binding TransformTemplate}" />
     </Grid>
 </UserControl>

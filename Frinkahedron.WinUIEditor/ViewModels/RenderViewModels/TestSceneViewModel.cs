@@ -28,7 +28,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
         {
         }
 
-        public override void Initialise(GraphicsDevice graphicsDevice, Vector2 initialSize, Swapchain swapchain)
+        public override async Task Initialise(GraphicsDevice graphicsDevice, Vector2 initialSize, Swapchain swapchain)
         {
             if (state is not null)
             {
@@ -36,7 +36,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
             }
             var scene = CreateScene(initialSize.X / initialSize.Y);
             var gameState = new GameState(0.01f, scene);
-            var assetManager = FromFolderAssetManager.LoadAssets(graphicsDevice.ResourceFactory, graphicsDevice, "C:\\Users\\Andy\\source\\repos\\Frinkahedron\\Frinkahedron.TestApp\\Assets"); // TODO Fix
+            var assetManager = await Task.Run(() => FromFolderAssetManager.LoadAssets(graphicsDevice.ResourceFactory, graphicsDevice, "C:\\Users\\Andy\\source\\repos\\Frinkahedron\\Frinkahedron.TestApp\\Assets")); // TODO Fix
             var graphicsResources = GraphicsResources.CreateResources(graphicsDevice, (int)initialSize.X, (int)initialSize.Y, assetManager, swapchain);
 
             state = new State(scene, gameState, assetManager, graphicsResources);

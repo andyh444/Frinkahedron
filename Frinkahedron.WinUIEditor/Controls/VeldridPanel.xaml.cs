@@ -30,7 +30,7 @@ namespace Frinkahedron.WinUIEditor.Controls;
 public sealed partial class VeldridPanel : UserControl
 {
     private Swapchain? swapchain;
-    private RenderViewModelBase renderViewModel;
+    private RenderViewModelBase? renderViewModel;
     private UserControlInputListener inputListener;
 
     public VeldridPanel()
@@ -39,8 +39,13 @@ public sealed partial class VeldridPanel : UserControl
         var graphicsDevice = GraphicsService.Current.GraphicsDevice;
         CompositionTarget.Rendering += CompositionTarget_Rendering;
         inputListener = new UserControlInputListener(this);
+    }
 
-        renderViewModel = new TestSceneViewModel();
+    internal void SetViewModel(RenderViewModelBase viewModel)
+    {
+        // TODO remove
+        renderViewModel = viewModel;
+        DataContext = viewModel;
     }
 
     private void CompositionTarget_Rendering(object? sender, object e)
@@ -64,11 +69,11 @@ public sealed partial class VeldridPanel : UserControl
         swapchain.Resize((uint)renderPanel.ActualSize.X, (uint)renderPanel.ActualSize.Y);
     }
 
-    private void renderPanel_Loaded(object sender, RoutedEventArgs e)
+    private async void renderPanel_Loaded(object sender, RoutedEventArgs e)
     {
         var gd = GraphicsService.Current.GraphicsDevice;
         swapchain = GraphicsService.Current.CreateSwapchain(renderPanel);
-        renderViewModel.Initialise(gd, ActualSize, swapchain);
+        await renderViewModel.Initialise(gd, ActualSize, swapchain);
     }
 
     private void Draw()

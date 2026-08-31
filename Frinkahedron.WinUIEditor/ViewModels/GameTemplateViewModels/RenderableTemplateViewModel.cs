@@ -33,13 +33,13 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 
         public ObservableCollection<EnabledIndexViewModel> EnabledIndices => enabledIndices;
 
-        public TransformTemplateViewModel TransformTemplateViewModel { get; }
+        public TransformTemplateViewModel TransformTemplate { get; }
 
         public RenderableTemplateViewModel(ModelEntitiesRenderableTemplate model)
         {
             this.model = model;
             enabledIndices = new ObservableCollection<EnabledIndexViewModel>(this.model.EnabledIndices.Select((x, i) => new EnabledIndexViewModel(model.EnabledIndices, i)));
-            TransformTemplateViewModel = new TransformTemplateViewModel(model.Transform);
+            TransformTemplate = new TransformTemplateViewModel(model.Transform);
         }
     }
 }
