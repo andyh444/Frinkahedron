@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 using Veldrid;
 using Windows.Security.Cryptography.Certificates;
 
-namespace Frinkahedron.WinUIEditor.ViewModels
+namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 {
-    internal class TestSceneViewModel : RenderViewModel
+    internal class TestSceneViewModel : RenderViewModelBase
     {
         private record State(Scene Scene, GameState GameState, IAssetManager AssetManager, GraphicsResources GraphicsResources)
         {

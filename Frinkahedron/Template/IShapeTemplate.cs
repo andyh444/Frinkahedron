@@ -6,6 +6,7 @@ namespace Frinkahedron.Core.Template
 {
     [JsonPolymorphic]
     [JsonDerivedType(typeof(BoxTemplate), nameof(BoxTemplate))]
+    [JsonDerivedType(typeof(SphereTemplate), nameof(SphereTemplate))]
     public interface IShapeTemplate
     {
         IShape ToShape();
@@ -16,5 +17,12 @@ namespace Frinkahedron.Core.Template
         public Vector3 Dimensions { get; set; }
 
         public IShape ToShape() => new Box(Dimensions);
+    }
+
+    public class SphereTemplate : IShapeTemplate
+    {
+        public float Radius { get; set; }
+
+        public IShape ToShape() => new Sphere(Radius);
     }
 }

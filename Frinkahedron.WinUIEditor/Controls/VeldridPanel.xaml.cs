@@ -4,6 +4,7 @@ using Frinkahedron.TestApp;
 using Frinkahedron.VeldridImplementation;
 using Frinkahedron.WinUIEditor.Services;
 using Frinkahedron.WinUIEditor.ViewModels;
+using Frinkahedron.WinUIEditor.ViewModels.RenderViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -29,7 +30,7 @@ namespace Frinkahedron.WinUIEditor.Controls;
 public sealed partial class VeldridPanel : UserControl
 {
     private Swapchain? swapchain;
-    private RenderViewModel renderViewModel;
+    private RenderViewModelBase renderViewModel;
     private UserControlInputListener inputListener;
 
     public VeldridPanel()
@@ -44,7 +45,7 @@ public sealed partial class VeldridPanel : UserControl
 
     private void CompositionTarget_Rendering(object? sender, object e)
     {
-        if (inputListener is null || renderViewModel is null)
+        if (renderViewModel is null)
         {
             return;
         }

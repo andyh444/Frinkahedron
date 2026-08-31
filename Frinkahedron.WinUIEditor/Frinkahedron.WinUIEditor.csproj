@@ -15,6 +15,10 @@
   
   <ItemGroup>
     <None Remove="Controls\VeldridPanel.xaml" />
+    <None Remove="Views\GameObjectTemplateView.xaml" />
+    <None Remove="Views\RenderableTemplateView.xaml" />
+    <None Remove="Views\Shapes\BoxShapeView.xaml" />
+    <None Remove="Views\TransformTemplateView.xaml" />
   </ItemGroup>
   
   <ItemGroup>
@@ -36,7 +40,34 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Page Update="Views\GameObjectTemplateView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Page Update="Views\RenderableTemplateView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  
+  <ItemGroup>
     <Page Update="Controls\VeldridPanel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\Shapes\SphereShapeView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Page Update="Views\TransformTemplateView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Page Update="Views\Shapes\BoxShapeView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

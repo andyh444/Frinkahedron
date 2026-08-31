@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Frinkahedron.WinUIEditor.Views.TransformTemplateView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Frinkahedron.WinUIEditor.Views"
+    xmlns:vm="using:Frinkahedron.WinUIEditor.ViewModels"
+    xmlns:gtvm="using:Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:DataType="gtvm:TransformTemplateViewModel"
+    mc:Ignorable="d">
+
+    <Grid RowDefinitions="1*,1*,1*" ColumnDefinitions="Auto,Auto,Auto,Auto" RowSpacing="13" ColumnSpacing="3">
+        <TextBlock Text="Translation" Grid.Row="0" Grid.Column="0"/>
+        <TextBlock Text="Rotation [deg]" Grid.Row="1" Grid.Column="0"/>
+        <TextBlock Text="Scale" Grid.Row="2" Grid.Column="0"/>
+
+        <NumberBox SmallChange="0.1" Value="{Binding TranslationX, Mode=TwoWay}" Grid.Row="0" Grid.Column="1"/>
+        <NumberBox SmallChange="0.1" Value="{Binding TranslationY, Mode=TwoWay}" Grid.Row="0" Grid.Column="2"/>
+        <NumberBox SmallChange="0.1" Value="{Binding TranslationZ, Mode=TwoWay}" Grid.Row="0" Grid.Column="3"/>
+
+        <NumberBox SmallChange="0.1" Value="{Binding RotationX, Mode=TwoWay}" Grid.Row="1" Grid.Column="1"/>
+        <NumberBox SmallChange="0.1" Value="{Binding RotationY, Mode=TwoWay}" Grid.Row="1" Grid.Column="2"/>
+        <NumberBox SmallChange="0.1" Value="{Binding RotationZ, Mode=TwoWay}" Grid.Row="1" Grid.Column="3"/>
+
+        <NumberBox SmallChange="0.1" Value="{Binding ScaleX, Mode=TwoWay}" Grid.Row="2" Grid.Column="1"/>
+        <NumberBox SmallChange="0.1" Value="{Binding ScaleY, Mode=TwoWay}" Grid.Row="2" Grid.Column="2"/>
+        <NumberBox SmallChange="0.1" Value="{Binding ScaleZ, Mode=TwoWay}" Grid.Row="2" Grid.Column="3"/>
+    </Grid>
+</UserControl>

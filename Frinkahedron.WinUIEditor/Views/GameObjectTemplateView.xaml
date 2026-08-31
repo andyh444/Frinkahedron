@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Frinkahedron.WinUIEditor.Views.GameObjectTemplateView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Frinkahedron.WinUIEditor.Views"
+    xmlns:shapes="using:Frinkahedron.WinUIEditor.Views.Shapes"
+    xmlns:vm="using:Frinkahedron.WinUIEditor.ViewModels"
+    xmlns:gtvm="using:Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels"
+    xmlns:svm="using:Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels.Shapes"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:DataType="gtvm:GameObjectTemplateViewModel"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="BoxTemplate" x:DataType="svm:BoxShapeViewModel">
+            <shapes:BoxShapeView DataContext="{Binding}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="SphereTemplate" x:DataType="svm:SphereShapeViewModel">
+            <shapes:SphereShapeView DataContext="{Binding}" />
+        </DataTemplate>
+
+        <svm:ShapeTemplateSelector
+            x:Key="ShapeTemplateSelector"
+            BoxTemplate="{StaticResource BoxTemplate}"
+            SphereTemplate="{StaticResource SphereTemplate}"/>
+
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,Auto">
+        <local:RenderableTemplateView Grid.Row="0" DataContext="{Binding RenderableTemplate}"/>
+        <ComboBox Grid.Row="1" ItemsSource="{Binding AvailableShapes}" SelectedItem="{Binding Shape, Mode=TwoWay}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="gtvm:ShapeViewModelBase">
+                    <TextBlock Text="{Binding DisplayName}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ContentControl Grid.Row="2" Content="{Binding Shape, Mode=TwoWay}" ContentTemplateSelector="{StaticResource ShapeTemplateSelector}" />
+    </Grid>
+</UserControl>

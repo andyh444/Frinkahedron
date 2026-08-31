@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:Frinkahedron.WinUIEditor.Controls"
+    xmlns:views="using:Frinkahedron.WinUIEditor.Views"
     mc:Ignorable="d"
     Title="Frinkahedron.WinUIEditor"
     >
@@ -16,6 +17,10 @@
     </Window.SystemBackdrop>
 
     <Grid ColumnDefinitions="1*,2*">
+        <views:GameObjectTemplateView
+            x:Name="templateView"
+            Grid.Column="0" />
+
         <controls:VeldridPanel
             x:Name="veldridPanel"
             Grid.Column="1"
