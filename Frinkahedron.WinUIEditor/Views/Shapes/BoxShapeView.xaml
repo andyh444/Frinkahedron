@@ -14,8 +14,8 @@
 
     <Grid ColumnDefinitions="Auto,Auto,Auto,Auto">
         <TextBlock Grid.Column="0" Text="Dimensions"/>
-        <NumberBox Grid.Column="1" Value="{Binding DimX}"/>
-        <NumberBox Grid.Column="2" Value="{Binding DimY}"/>
-        <NumberBox Grid.Column="3" Value="{Binding DimZ}"/>
+        <NumberBox Grid.Column="1" Value="{Binding DimX, Mode=TwoWay}"/>
+        <NumberBox Grid.Column="2" Value="{Binding DimY, Mode=TwoWay}"/>
+        <NumberBox Grid.Column="3" Value="{Binding DimZ, Mode=TwoWay}"/>
     </Grid>
 </UserControl>

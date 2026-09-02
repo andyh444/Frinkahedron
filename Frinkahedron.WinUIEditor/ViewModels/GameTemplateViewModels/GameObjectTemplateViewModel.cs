@@ -12,6 +12,8 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 {
     internal sealed class GameObjectTemplateViewModel : ViewModelBase
     {
+        public event Action? ObjectChanged;
+
         public GameObjectTemplate Model { get; }
 
         public RenderableTemplateViewModel RenderableTemplate { get; }
@@ -28,8 +30,20 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
         {
             Model = model;
             AvailableShapes = GetAvailableShapes(model.Collider);
-
             RenderableTemplate = new RenderableTemplateViewModel(Model.Renderable as ModelEntitiesRenderableTemplate ?? new ModelEntitiesRenderableTemplate());
+
+            this.PropertyChanged += (o, e) => FireObjectChanged();
+            foreach (var shape in AvailableShapes)
+            {
+                shape.PropertyChanged += (o, e) => FireObjectChanged();
+            }
+            RenderableTemplate.PropertyChanged += (o, e) => FireObjectChanged();
+            RenderableTemplate.TransformTemplate.PropertyChanged += (o, e) => FireObjectChanged();
+        }
+
+        private void FireObjectChanged()
+        {
+            ObjectChanged?.Invoke();
         }
 
         private ObservableCollection<ShapeViewModelBase> GetAvailableShapes(IShapeTemplate? modelShape)

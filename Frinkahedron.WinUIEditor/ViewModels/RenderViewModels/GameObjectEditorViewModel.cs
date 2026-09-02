@@ -26,14 +26,12 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
         public GameObjectEditorViewModel(GameObjectTemplateViewModel model)
         {
             Model = model;
-            Model.PropertyChanged += Model_PropertyChanged;
-            Model.RenderableTemplate.PropertyChanged += Model_PropertyChanged;
-            Model.RenderableTemplate.TransformTemplate.PropertyChanged += Model_PropertyChanged;
+            Model.ObjectChanged += Model_PropertyChanged;
 
             behaviour = new OrbitalCameraMouseBehaviour();
         }
 
-        private void Model_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void Model_PropertyChanged()
         {
             SetCurrentObject(Model.Model.ToGameObject(new TransformTemplate(), [behaviour], -1));
         }
