@@ -69,7 +69,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             {
                 new QuadVertex(new Vector2(-1, 1), new Vector2(0, 0)),
                 new QuadVertex(new Vector2(1, 1), new Vector2(1, 0)),
-                new QuadVertex(new Vector2(-0.5f, -0.5f), new Vector2(0, 1)),
+                new QuadVertex(new Vector2(-1, -1), new Vector2(0, 1)),
                 new QuadVertex(new Vector2(1, -1), new Vector2(1, 1))
             };
             ushort[] indices = [0, 1, 2, 3];
