@@ -11,6 +11,7 @@ namespace Frinkahedron.VeldridImplementation
         public required MeshInfo CylinderInfo { get; init; }
         public required MeshInfo DiscInfo { get; init; }
         public required WireframeInfo CubeWireframeInfo { get; init; }
+        public required WireframeInfo SphereWireframeInfo { get; init; }
 
         public static Primitives Create(GraphicsDevice graphicsDevice)
         {
@@ -20,6 +21,14 @@ namespace Frinkahedron.VeldridImplementation
             var discInfo = MeshInfo.Create(CreateUnitDiscMesh(24), graphicsDevice);
 
             var cubeWireInfo = WireframeInfo.Create(CreateUnitWireframeCube(RgbaFloat.White), graphicsDevice);
+            var sphereWireInfo = WireframeInfo.Create(
+                WireframeMesh.Combine(
+                    [
+                        CreateUnitWireframeRing(RgbaFloat.White, Vector3.UnitX),
+                        CreateUnitWireframeRing(RgbaFloat.White, Vector3.UnitY),
+                        CreateUnitWireframeRing(RgbaFloat.White, Vector3.UnitZ),
+                    ]),
+                graphicsDevice);
 
             return new Primitives
             {
@@ -28,6 +37,7 @@ namespace Frinkahedron.VeldridImplementation
                 CylinderInfo = cylinderInfo,
                 DiscInfo = discInfo,
                 CubeWireframeInfo = cubeWireInfo,
+                SphereWireframeInfo = sphereWireInfo,
             };
         }
 
@@ -37,6 +47,8 @@ namespace Frinkahedron.VeldridImplementation
             SphereInfo.Dispose();
             CylinderInfo.Dispose();
             DiscInfo.Dispose();
+            CubeWireframeInfo.Dispose();
+            SphereWireframeInfo.Dispose();
         }
 
         /*private static Mesh CreateQuadMesh()
@@ -53,6 +65,31 @@ namespace Frinkahedron.VeldridImplementation
 
             return new Mesh(quadVertices, quadIndices);
         }*/
+
+        private static WireframeMesh CreateUnitWireframeRing(RgbaFloat colour, Vector3 normal)
+        {
+            const int STEPS = 64;
+
+            Vector4 c = colour.ToVector4();
+
+            ColourVertex[] vertices = new ColourVertex[STEPS];
+            IndexLine[] indices = new IndexLine[STEPS];
+
+            Vector3 reference = MathF.Abs(Vector3.Dot(normal, Vector3.UnitX)) > 0.99f
+                ? Vector3.UnitY
+                : Vector3.UnitX;
+            Vector3 firstPoint = Vector3.Normalize(Vector3.Cross(normal, reference));
+
+            for (int i = 0; i < STEPS; i++)
+            {
+                float angle = 2 * MathF.PI * i / STEPS;
+                var rot = Quaternion.CreateFromAxisAngle(normal, angle);
+
+                vertices[i] = new ColourVertex(Vector3.Transform(firstPoint, rot), c);
+                indices[i] = new IndexLine((ushort)i, (ushort)((i + 1) % STEPS));
+            }
+            return new WireframeMesh(vertices, indices);
+        }
 
         private static WireframeMesh CreateUnitWireframeCube(RgbaFloat colour)
         {
@@ -300,7 +337,5 @@ namespace Frinkahedron.VeldridImplementation
             }
             return new TexMesh(vertList.ToArray(), triangleList.ToArray());
         }
-
-        
     }
 }
