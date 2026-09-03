@@ -1,4 +1,5 @@
 ﻿using Frinkahedron.Core;
+using Frinkahedron.Core.Meshes;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;

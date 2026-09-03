@@ -1,4 +1,4 @@
-﻿using Frinkahedron.Core;
+﻿using Frinkahedron.Core.Meshes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

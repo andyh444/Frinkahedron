@@ -1,4 +1,4 @@
-﻿using Frinkahedron.Core;
+﻿using Frinkahedron.Core.Meshes;
 using Veldrid;
 
 namespace Frinkahedron.VeldridImplementation

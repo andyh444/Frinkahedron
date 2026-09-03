@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using Veldrid;
-using Frinkahedron.Core;
+using Frinkahedron.Core.Meshes;
 
 namespace Frinkahedron.VeldridImplementation
 {

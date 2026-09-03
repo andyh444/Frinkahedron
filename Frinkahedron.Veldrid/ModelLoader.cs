@@ -1,4 +1,4 @@
-﻿using Frinkahedron.Core;
+﻿using Frinkahedron.Core.Meshes;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Schema2;
