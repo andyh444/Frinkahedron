@@ -9,13 +9,25 @@ using Veldrid;
 
 namespace Frinkahedron.VeldridImplementation
 {
-    public class MeshInfo : IDisposable
+    public abstract class MeshInfo : IDisposable
+    {
+        public static MeshInfo<TVertex> Create<TVertex>(ITriangleMesh<TVertex> mesh, GraphicsDevice graphicsDevice) where TVertex : unmanaged, IVertex
+        {
+            return MeshInfo<TVertex>.Create(mesh, graphicsDevice);
+        }
+
+        public abstract void Dispose();
+
+        public abstract void Draw(CommandList commandList);
+    }
+
+    public class MeshInfo<TVertex> : MeshInfo where TVertex : unmanaged, IVertex
     {
         private readonly DeviceBuffer _vertexBuffer;
         private readonly DeviceBuffer _indexBuffer;
-        private readonly TexMesh _mesh;
+        private readonly ITriangleMesh<TVertex> _mesh;
 
-        private MeshInfo(DeviceBuffer vertexBuffer, DeviceBuffer indexBuffer, TexMesh mesh)
+        private MeshInfo(DeviceBuffer vertexBuffer, DeviceBuffer indexBuffer, ITriangleMesh<TVertex> mesh)
         {
             _vertexBuffer = vertexBuffer;
             _indexBuffer = indexBuffer;
@@ -24,26 +36,34 @@ namespace Frinkahedron.VeldridImplementation
 
         public static VertexLayoutDescription GetVertexLayoutDescription()
         {
-            return new VertexLayoutDescription(
-                new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                new VertexElementDescription("Normal", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                new VertexElementDescription("TexCoord", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                new VertexElementDescription("Tangent", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4));
+            return new VertexLayoutDescription(TVertex.GetLayout().Select(x => new VertexElementDescription(x.description, VertexElementSemantic.TextureCoordinate, FormatFromCount(x.floatCount))).ToArray());
         }
 
-        public static MeshInfo Create(TexMesh mesh, GraphicsDevice graphicsDevice)
+        private static VertexElementFormat FormatFromCount(int floatCount)
+        {
+            return floatCount switch
+            {
+                1 => VertexElementFormat.Float1,
+                2 => VertexElementFormat.Float2,
+                3 => VertexElementFormat.Float3,
+                4 => VertexElementFormat.Float4,
+                _ => throw new ArgumentException()
+            };
+        }
+
+        public static MeshInfo<TVertex> Create(ITriangleMesh<TVertex> mesh, GraphicsDevice graphicsDevice)
         {
             ResourceFactory factory = graphicsDevice.ResourceFactory;
-            var vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Vertices.Length * TexVertex.SizeInBytes, BufferUsage.VertexBuffer));
+            var vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Vertices.Length * TVertex.SizeInBytes, BufferUsage.VertexBuffer));
             var indexBuffer = factory.CreateBuffer(new BufferDescription((uint)mesh.Triangles.Length * IndexTriangle.SizeInBytes, BufferUsage.IndexBuffer));
 
             graphicsDevice.UpdateBuffer(vertexBuffer, 0, mesh.Vertices);
             graphicsDevice.UpdateBuffer(indexBuffer, 0, mesh.Triangles);
 
-            return new MeshInfo(vertexBuffer, indexBuffer, mesh);
+            return new MeshInfo<TVertex>(vertexBuffer, indexBuffer, mesh);
         }
 
-        public void Draw(CommandList commandList)
+        public override void Draw(CommandList commandList)
         {
             commandList.SetVertexBuffer(0, _vertexBuffer);
             commandList.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
@@ -55,7 +75,7 @@ namespace Frinkahedron.VeldridImplementation
                 instanceStart: 0);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();

@@ -14,9 +14,9 @@ using Veldrid.OpenGLBinding;
 
 namespace Frinkahedron.VeldridImplementation
 {
-    public class Entity(MeshInfo mesh, TextureInfo colourTexture, TextureInfo metallicRoughnessMap, TextureInfo normalMap, Matrix4x4 transform) : IDisposable
+    public class Entity(MeshInfo<TexVertex> mesh, TextureInfo colourTexture, TextureInfo metallicRoughnessMap, TextureInfo normalMap, Matrix4x4 transform) : IDisposable
     {
-        public MeshInfo Mesh { get; } = mesh;
+        public MeshInfo<TexVertex> Mesh { get; } = mesh;
 
         public TextureInfo ColourTexture { get; } = colourTexture;
         public TextureInfo MetallicRoughnessMap { get; } = metallicRoughnessMap;
@@ -98,7 +98,7 @@ namespace Frinkahedron.VeldridImplementation
                     }
 
                     TexMesh texMesh = new TexMesh(vertices, triangles.ToArray());
-                    MeshInfo texMeshInfo = MeshInfo.Create(texMesh, graphicsDevice);
+                    var texMeshInfo = MeshInfo.Create(texMesh, graphicsDevice);
 
                     // TODO: Don't create new textures for each 
                     TextureInfo albedo = GetTexture(primitive.Material, factory, graphicsDevice, "BaseColor", fallbackTexture);

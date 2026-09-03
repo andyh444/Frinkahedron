@@ -56,7 +56,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             //pipelineDescription.ResourceLayouts = System.Array.Empty<ResourceLayout>();
 
             pipelineDescription.ShaderSet = new ShaderSetDescription(
-                vertexLayouts: new VertexLayoutDescription[] { MeshInfo.GetVertexLayoutDescription() },
+                vertexLayouts: new VertexLayoutDescription[] { MeshInfo<TexVertex>.GetVertexLayoutDescription() },
                 shaders: shaders);
 
             pipelineDescription.Outputs = frameBuffer.OutputDescription;

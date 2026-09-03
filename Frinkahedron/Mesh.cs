@@ -8,7 +8,14 @@ using System.Threading.Tasks;
 
 namespace Frinkahedron.Core
 {
-    public struct ColourVertex
+    public interface IVertex
+    {
+        static abstract uint SizeInBytes { get; }
+
+        static abstract IEnumerable<(string description, int floatCount)> GetLayout();
+    }
+
+    public struct ColourVertex : IVertex
     {
         public Vector3 Position;
         public Vector4 Colour;
@@ -20,9 +27,15 @@ namespace Frinkahedron.Core
         }
 
         public static uint SizeInBytes => sizeof(float) * (3 + 4);
+
+        public static IEnumerable<(string description, int floatCount)> GetLayout()
+        {
+            yield return ("Position", 3);
+            yield return ("Colour", 4);
+        }
     }
 
-    public struct TexVertex
+    public struct TexVertex : IVertex
     {
         public Vector3 Position;
         public Vector3 Normal;
@@ -36,7 +49,36 @@ namespace Frinkahedron.Core
             TexCoord = texCoord;
             Tangent = tangent;
         }
+
         public static uint SizeInBytes => sizeof(float) * (3 + 3 + 2 + 4);
+
+        public static IEnumerable<(string description, int floatCount)> GetLayout()
+        {
+            yield return ("Position", 3);
+            yield return ("Normal", 3);
+            yield return ("TexCoord", 2);
+            yield return ("Colour", 4);
+        }
+    }
+
+    public struct TexVertex2 : IVertex
+    {
+        public Vector2 Position;
+        public Vector2 TexCoord;
+
+        public TexVertex2(Vector2 position, Vector2 texCoord)
+        {
+            Position = position;
+            TexCoord = texCoord;
+        }
+
+        public static uint SizeInBytes => sizeof(float) * (3 + 2);
+
+        public static IEnumerable<(string description, int floatCount)> GetLayout()
+        {
+            yield return ("Position", 2);
+            yield return ("TexCoord", 2);
+        }
     }
 
     public readonly struct IndexTriangle(ushort index1, ushort index2, ushort index3)
@@ -56,15 +98,29 @@ namespace Frinkahedron.Core
         public static uint SizeInBytes => sizeof(ushort) * 2;
     }
 
+    public interface ITriangleMesh<TVertex> where TVertex : unmanaged, IVertex
+    {
+        TVertex[] Vertices { get; }
+
+        IndexTriangle[] Triangles { get; }
+    }
+
     public sealed class BasicMesh(Vector3[] vertices, IndexTriangle[] indexTriangles)
     {
         public Vector3[] Vertices { get; } = vertices;
-        public IndexTriangle[] IndexTriangles { get; } = indexTriangles;
+        public IndexTriangle[] Triangles { get; } = indexTriangles;
     }
 
-    public sealed class TexMesh(TexVertex[] vertices, IndexTriangle[] indices)
+    public sealed class TexMesh(TexVertex[] vertices, IndexTriangle[] indices) : ITriangleMesh<TexVertex>
     {
         public TexVertex[] Vertices { get; } = vertices;
+
+        public IndexTriangle[] Triangles { get; } = indices;
+    }
+
+    public sealed class TexMesh2(TexVertex2[] vertices, IndexTriangle[] indices) : ITriangleMesh<TexVertex2>
+    {
+        public TexVertex2[] Vertices { get; } = vertices;
 
         public IndexTriangle[] Triangles { get; } = indices;
     }

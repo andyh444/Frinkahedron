@@ -43,9 +43,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
         public required Pipeline Pipeline { get; init; }
 
-        public required DeviceBuffer VertexBuffer { get; init; }
-
-        public required DeviceBuffer IndexBuffer { get; init; }
+        public required MeshInfo<TexVertex2> QuadMesh { get; init; }
 
         public List<(TextureInfo texture, PostProcessSettings settings)> Textures { get; } = new List<(TextureInfo texture, PostProcessSettings settings)>();
 
@@ -65,19 +63,22 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 "main");
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
 
-            QuadVertex[] vertices = new[]
+            TexVertex2[] vertices = new[]
             {
-                new QuadVertex(new Vector2(-1, 1), new Vector2(0, 0)),
-                new QuadVertex(new Vector2(1, 1), new Vector2(1, 0)),
-                new QuadVertex(new Vector2(-1, -1), new Vector2(0, 1)),
-                new QuadVertex(new Vector2(1, -1), new Vector2(1, 1))
+                new TexVertex2(new Vector2(-1, 1), new Vector2(0, 0)),
+                new TexVertex2(new Vector2(1, 1), new Vector2(1, 0)),
+                new TexVertex2(new Vector2(-1, -1), new Vector2(0, 1)),
+                new TexVertex2(new Vector2(1, -1), new Vector2(1, 1))
             };
-            ushort[] indices = [0, 1, 2, 3];
+            IndexTriangle[] triangles = new IndexTriangle[]
+            {
+                new IndexTriangle(0, 1, 2),
+                new IndexTriangle(1, 2, 3),
+            };
 
-            var vertexBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.VertexBuffer));
-            var indexBuffer = factory.CreateBuffer(new BufferDescription(8, BufferUsage.IndexBuffer));
-            graphicsDevice.UpdateBuffer(vertexBuffer, 0, vertices);
-            graphicsDevice.UpdateBuffer(indexBuffer, 0, indices);
+            TexMesh2 mesh = new TexMesh2(vertices, triangles);
+
+            var quad = MeshInfo.Create(mesh, graphicsDevice);
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
             pipelineDescription.BlendState = BlendStateDescription.SingleAdditiveBlend;
@@ -94,12 +95,10 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 depthClipEnabled: false,
                 scissorTestEnabled: false);
 
-            pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleStrip;
+            pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
             pipelineDescription.ShaderSet = new ShaderSetDescription(
-                vertexLayouts: new VertexLayoutDescription[] { new VertexLayoutDescription(
-                    new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                    new VertexElementDescription("TexCoord", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)) },
+                vertexLayouts: new VertexLayoutDescription[] { MeshInfo<TexVertex2>.GetVertexLayoutDescription() },
                 shaders: shaders);
 
             pipelineDescription.Outputs = swapchain?.Framebuffer.OutputDescription ?? graphicsDevice.SwapchainFramebuffer.OutputDescription;
@@ -117,8 +116,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
             return new FullScreenQuadRenderPass()
             {
-                IndexBuffer = indexBuffer,
-                VertexBuffer = vertexBuffer,
+                QuadMesh = quad,
                 Pipeline = pipeline,
                 Shaders = shaders,
                 Swapchain = swapchain,
@@ -131,8 +129,6 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             commandList.SetFramebuffer(Swapchain?.Framebuffer ?? graphicsDevice.SwapchainFramebuffer);
             commandList.ClearColorTarget(0, RgbaFloat.Black);
             commandList.SetPipeline(Pipeline);
-            commandList.SetVertexBuffer(0, VertexBuffer);
-            commandList.SetIndexBuffer(IndexBuffer, IndexFormat.UInt16);
             foreach ((var texture, var settings) in Textures)
             {
                 // set 0: texture resource set (contains texture + sampler)
@@ -141,14 +137,13 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 commandList.SetGraphicsResourceSet(1, PostProcessSettingsBufferInfo.ResourceSet);
                 PostProcessSettings thisSettings = settings;
                 commandList.UpdateBuffer(PostProcessSettingsBufferInfo.DeviceBuffer, 0, ref thisSettings);
-                commandList.DrawIndexed(4, 1, 0, 0, 0);
+                QuadMesh.Draw(commandList);
             }
         }
 
         public void Dispose()
         {
-            IndexBuffer.Dispose();
-            VertexBuffer.Dispose();
+            QuadMesh.Dispose();
             Pipeline.Dispose();
             PostProcessSettingsBufferInfo.Dispose();
             foreach (var shader in Shaders)

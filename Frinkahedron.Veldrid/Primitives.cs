@@ -6,10 +6,10 @@ namespace Frinkahedron.VeldridImplementation
 {
     public sealed class Primitives : IDisposable
     {
-        public required MeshInfo CubeInfo { get; init; }
-        public required MeshInfo SphereInfo { get; init; }
-        public required MeshInfo CylinderInfo { get; init; }
-        public required MeshInfo DiscInfo { get; init; }
+        public required MeshInfo<TexVertex> CubeInfo { get; init; }
+        public required MeshInfo<TexVertex> SphereInfo { get; init; }
+        public required MeshInfo<TexVertex> CylinderInfo { get; init; }
+        public required MeshInfo<TexVertex> DiscInfo { get; init; }
         public required WireframeInfo CubeWireframeInfo { get; init; }
         public required WireframeInfo SphereWireframeInfo { get; init; }
 
