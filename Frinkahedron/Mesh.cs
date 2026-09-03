@@ -35,14 +35,14 @@ namespace Frinkahedron.Core
         }
     }
 
-    public struct TexVertex : IVertex
+    public struct TexVertex3 : IVertex
     {
         public Vector3 Position;
         public Vector3 Normal;
         public Vector2 TexCoord;
         public Vector4 Tangent;
 
-        public TexVertex(Vector3 position, Vector3 normal, Vector2 texCoord, Vector4 tangent)
+        public TexVertex3(Vector3 position, Vector3 normal, Vector2 texCoord, Vector4 tangent)
         {
             Position = position;
             Normal = Vector3.Normalize(normal);
@@ -111,9 +111,9 @@ namespace Frinkahedron.Core
         public IndexTriangle[] Triangles { get; } = indexTriangles;
     }
 
-    public sealed class TexMesh(TexVertex[] vertices, IndexTriangle[] indices) : ITriangleMesh<TexVertex>
+    public sealed class TexMesh(TexVertex3[] vertices, IndexTriangle[] indices) : ITriangleMesh<TexVertex3>
     {
-        public TexVertex[] Vertices { get; } = vertices;
+        public TexVertex3[] Vertices { get; } = vertices;
 
         public IndexTriangle[] Triangles { get; } = indices;
     }

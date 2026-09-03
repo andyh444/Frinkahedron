@@ -63,7 +63,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
             pipelineDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
             pipelineDescription.ShaderSet = new ShaderSetDescription(
-                vertexLayouts: new VertexLayoutDescription[] { MeshInfo<TexVertex>.GetVertexLayoutDescription() },
+                vertexLayouts: new VertexLayoutDescription[] { MeshInfo<TexVertex3>.GetVertexLayoutDescription() },
                 shaders: shaders);
 
             pipelineDescription.Outputs = frameBuffer.OutputDescription;

@@ -6,10 +6,10 @@ namespace Frinkahedron.VeldridImplementation
 {
     public sealed class Primitives : IDisposable
     {
-        public required MeshInfo<TexVertex> CubeInfo { get; init; }
-        public required MeshInfo<TexVertex> SphereInfo { get; init; }
-        public required MeshInfo<TexVertex> CylinderInfo { get; init; }
-        public required MeshInfo<TexVertex> DiscInfo { get; init; }
+        public required MeshInfo<TexVertex3> CubeInfo { get; init; }
+        public required MeshInfo<TexVertex3> SphereInfo { get; init; }
+        public required MeshInfo<TexVertex3> CylinderInfo { get; init; }
+        public required MeshInfo<TexVertex3> DiscInfo { get; init; }
         public required WireframeInfo CubeWireframeInfo { get; init; }
         public required WireframeInfo SphereWireframeInfo { get; init; }
 
@@ -132,43 +132,43 @@ namespace Frinkahedron.VeldridImplementation
 
         private static TexMesh CreateUnitCubeMesh()
         {
-            TexVertex[] vertices =
+            TexVertex3[] vertices =
             {
                 // Front
-                new TexVertex(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 0), new Vector4(1, 0, 0, 1)),
-                new TexVertex(new Vector3( 0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 0), new Vector4(1, 0, 0, 1)),
-                new TexVertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 1), new Vector4(1, 0, 0, 1)),
-                new TexVertex(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 1), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 0), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3( 0.5f,  0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 0), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(0, 1), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, 0, 1), new Vector2(1, 1), new Vector4(1, 0, 0, 1)),
 
                 // Back
-                new TexVertex(new Vector3( 0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 0), new Vector4(-1, 0, 0, 1)),
-                new TexVertex(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 0), new Vector4(-1, 0, 0, 1)),
-                new TexVertex(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 1), new Vector4(-1, 0, 0, 1)),
-                new TexVertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 1), new Vector4(-1, 0, 0, 1)),
+                new TexVertex3(new Vector3( 0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 0), new Vector4(-1, 0, 0, 1)),
+                new TexVertex3(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 0), new Vector4(-1, 0, 0, 1)),
+                new TexVertex3(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(0, 1), new Vector4(-1, 0, 0, 1)),
+                new TexVertex3(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, 0, -1), new Vector2(1, 1), new Vector4(-1, 0, 0, 1)),
 
                 // Left
-                new TexVertex(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 0), new Vector4(0, 0, -1, 1)),
-                new TexVertex(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 0), new Vector4(0, 0, -1, 1)),
-                new TexVertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 1), new Vector4(0, 0, -1, 1)),
-                new TexVertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 1), new Vector4(0, 0, -1, 1)),
+                new TexVertex3(new Vector3(-0.5f,  0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 0), new Vector4(0, 0, -1, 1)),
+                new TexVertex3(new Vector3(-0.5f,  0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 0), new Vector4(0, 0, -1, 1)),
+                new TexVertex3(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(-1, 0, 0), new Vector2(0, 1), new Vector4(0, 0, -1, 1)),
+                new TexVertex3(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(-1, 0, 0), new Vector2(1, 1), new Vector4(0, 0, -1, 1)),
 
                 // Right
-                new TexVertex(new Vector3(0.5f,  0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 0), new Vector4(0, 0, 1, 1)),
-                new TexVertex(new Vector3(0.5f,  0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 0), new Vector4(0, 0, 1, 1)),
-                new TexVertex(new Vector3(0.5f, -0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 1), new Vector4(0, 0, 1, 1)),
-                new TexVertex(new Vector3(0.5f, -0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 1), new Vector4(0, 0, 1, 1)),
+                new TexVertex3(new Vector3(0.5f,  0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 0), new Vector4(0, 0, 1, 1)),
+                new TexVertex3(new Vector3(0.5f,  0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 0), new Vector4(0, 0, 1, 1)),
+                new TexVertex3(new Vector3(0.5f, -0.5f,  0.5f), new Vector3(1, 0, 0), new Vector2(0, 1), new Vector4(0, 0, 1, 1)),
+                new TexVertex3(new Vector3(0.5f, -0.5f, -0.5f), new Vector3(1, 0, 0), new Vector2(1, 1), new Vector4(0, 0, 1, 1)),
 
                 // Top
-                new TexVertex(new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(0, 0), new Vector4(1, 0, 0, 1)),
-                new TexVertex(new Vector3( 0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(1, 0), new Vector4(1, 0, 0, 1)),
-                new TexVertex(new Vector3(-0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(0, 1), new Vector4(1, 0, 0, 1)),
-                new TexVertex(new Vector3( 0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(1, 1), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(0, 0), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3( 0.5f, 0.5f, -0.5f), new Vector3(0, 1, 0), new Vector2(1, 0), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3(-0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(0, 1), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3( 0.5f, 0.5f,  0.5f), new Vector3(0, 1, 0), new Vector2(1, 1), new Vector4(1, 0, 0, 1)),
 
                 // Bottom
-                new TexVertex(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(0, 0), new Vector4(1, 0, 0, 1)),
-                new TexVertex(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(1, 0), new Vector4(1, 0, 0, 1)),
-                new TexVertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(0, 1), new Vector4(1, 0, 0, 1)),
-                new TexVertex(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(1, 1), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3(-0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(0, 0), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3( 0.5f, -0.5f,  0.5f), new Vector3(0, -1, 0), new Vector2(1, 0), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(0, 1), new Vector4(1, 0, 0, 1)),
+                new TexVertex3(new Vector3( 0.5f, -0.5f, -0.5f), new Vector3(0, -1, 0), new Vector2(1, 1), new Vector4(1, 0, 0, 1)),
             };
 
             IndexTriangle[] triangles =
@@ -186,12 +186,12 @@ namespace Frinkahedron.VeldridImplementation
 
         public static TexMesh CreateUnitDiscMesh(int segments)
         {
-            var vertList = new List<TexVertex>();
+            var vertList = new List<TexVertex3>();
             var triangleList = new List<IndexTriangle>();
 
             Vector3 normal = Vector3.UnitY;
             Vector4 tangent = new Vector4(1, 0, 0, 1);
-            TexVertex centre = new TexVertex(new Vector3(), normal, new Vector2(0.5f, 0.5f), new Vector4(1, 0, 0, 1));
+            TexVertex3 centre = new TexVertex3(new Vector3(), normal, new Vector2(0.5f, 0.5f), new Vector4(1, 0, 0, 1));
             vertList.Add(centre);
 
             float radius = 1f;
@@ -204,7 +204,7 @@ namespace Frinkahedron.VeldridImplementation
 
                 Vector3 position = new Vector3(radius * sinTheta, 0, radius * cosTheta);
                 Vector4 thisTangent = new Vector4(cosTheta, 0, -sinTheta, 1);
-                vertList.Add(new TexVertex(position, normal, new Vector2(0.5f + radius * sinTheta, 0.5f + radius * cosTheta), thisTangent));
+                vertList.Add(new TexVertex3(position, normal, new Vector2(0.5f + radius * sinTheta, 0.5f + radius * cosTheta), thisTangent));
                 triangleList.Add(new IndexTriangle(
                     0, // centre
                     (ushort)(i + 1), // this one
@@ -216,7 +216,7 @@ namespace Frinkahedron.VeldridImplementation
 
         public static TexMesh CreateUnitCylinderMesh(int segments, Vector4 topColour, Vector4 bottomColour)
         {
-            var vertList = new List<TexVertex>();
+            var vertList = new List<TexVertex3>();
             var triangleList = new List<IndexTriangle>();
 
             float halfHeight = 0.5f;
@@ -239,7 +239,7 @@ namespace Frinkahedron.VeldridImplementation
                 Vector3 tangentVec = new Vector3(-cosTheta, 0, sinTheta);
                 Vector4 tangent = new Vector4(tangentVec, 1f);
 
-                vertList.Add(new TexVertex(position, normal, new Vector2((float)i / segments, 0), tangent));
+                vertList.Add(new TexVertex3(position, normal, new Vector2((float)i / segments, 0), tangent));
             }
 
             // bottom circle
@@ -259,7 +259,7 @@ namespace Frinkahedron.VeldridImplementation
                 Vector3 tangentVec = new Vector3(-cosTheta, 0, sinTheta);
                 Vector4 tangent = new Vector4(tangentVec, 1f);
 
-                vertList.Add(new TexVertex(position, normal, new Vector2((float)i / segments, 1), tangent));
+                vertList.Add(new TexVertex3(position, normal, new Vector2((float)i / segments, 1), tangent));
             }
 
             int bottomStart = segments;
@@ -289,7 +289,7 @@ namespace Frinkahedron.VeldridImplementation
         /// <param name="indices">Output triangle indices</param>
         public static TexMesh CreateUnitUVSphere(int longitudeSegments, int latitudeSegments, Vector4 topColor, Vector4 bottomColour)
         {
-            var vertList = new List<TexVertex>();
+            var vertList = new List<TexVertex3>();
             var triangleList = new List<IndexTriangle>();
             float radius = 1f;
             // Generate vertices
@@ -318,7 +318,7 @@ namespace Frinkahedron.VeldridImplementation
                     Vector4 tangent = new Vector4(tangentVec, 1f);
 
 
-                    vertList.Add(new TexVertex(pos, normal, new Vector2(phi / (2f * MathF.PI), theta / MathF.PI), tangent));
+                    vertList.Add(new TexVertex3(pos, normal, new Vector2(phi / (2f * MathF.PI), theta / MathF.PI), tangent));
                 }
             }
 

@@ -14,9 +14,9 @@ using Veldrid.OpenGLBinding;
 
 namespace Frinkahedron.VeldridImplementation
 {
-    public class Entity(MeshInfo<TexVertex> mesh, TextureInfo colourTexture, TextureInfo metallicRoughnessMap, TextureInfo normalMap, Matrix4x4 transform) : IDisposable
+    public class Entity(MeshInfo<TexVertex3> mesh, TextureInfo colourTexture, TextureInfo metallicRoughnessMap, TextureInfo normalMap, Matrix4x4 transform) : IDisposable
     {
-        public MeshInfo<TexVertex> Mesh { get; } = mesh;
+        public MeshInfo<TexVertex3> Mesh { get; } = mesh;
 
         public TextureInfo ColourTexture { get; } = colourTexture;
         public TextureInfo MetallicRoughnessMap { get; } = metallicRoughnessMap;
@@ -78,12 +78,12 @@ namespace Frinkahedron.VeldridImplementation
                     var tangents = primitive.GetVertexAccessor("TANGENT")?.AsVector4Array()
                         ?? GenerateTangents(positions, normals, uvs, indices);
 
-                    TexVertex[] vertices = new TexVertex[positions.Count];
+                    TexVertex3[] vertices = new TexVertex3[positions.Count];
                     List<IndexTriangle> triangles = new List<IndexTriangle>();
 
                     for (int i = 0; i < positions.Count; i++)
                     {
-                        vertices[i] = new TexVertex(
+                        vertices[i] = new TexVertex3(
                             positions[i],
                             normals[i],
                             uvs[i],
