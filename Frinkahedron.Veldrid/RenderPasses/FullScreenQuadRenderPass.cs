@@ -64,22 +64,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
                 "main");
             var shaders = factory.CreateFromSpirv(vertexShaderDesc, fragmentShaderDesc);
 
-            TexVertex2[] vertices = new[]
-            {
-                new TexVertex2(new Vector2(-1, 1), new Vector2(0, 0)),
-                new TexVertex2(new Vector2(1, 1), new Vector2(1, 0)),
-                new TexVertex2(new Vector2(-1, -1), new Vector2(0, 1)),
-                new TexVertex2(new Vector2(1, -1), new Vector2(1, 1))
-            };
-            IndexTriangle[] triangles = new IndexTriangle[]
-            {
-                new IndexTriangle(0, 1, 2),
-                new IndexTriangle(1, 2, 3),
-            };
-
-            TexMesh2 mesh = new TexMesh2(vertices, triangles);
-
-            var quad = MeshInfo.Create(mesh, graphicsDevice);
+            var quad = MeshInfo.Create(TexMesh2Factory.CreateUnitQuad(1f), graphicsDevice);
 
             GraphicsPipelineDescription pipelineDescription = new GraphicsPipelineDescription();
             pipelineDescription.BlendState = BlendStateDescription.SingleAdditiveBlend;
