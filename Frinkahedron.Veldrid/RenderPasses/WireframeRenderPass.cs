@@ -100,12 +100,7 @@ namespace Frinkahedron.VeldridImplementation.RenderPasses
 
         private void DoDrawInstruction(DrawInstruction instruction, CommandList commandList, GraphicsResources graphicsResources, IAssetManager assetManager)
         {
-            WireframeInfo? info = instruction.Primitive switch
-            {
-                Primitive.Box => graphicsResources.Primitives.CubeWireframeInfo,
-                Primitive.Ellipsoid => graphicsResources.Primitives.SphereWireframeInfo,
-                _ => null,
-            };
+            WireframeInfo? info = graphicsResources.Primitives.WireframePrimitives.GetValueOrDefault(instruction.Primitive);
 
             if (info is not null)
             {
