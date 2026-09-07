@@ -28,6 +28,7 @@ namespace Frinkahedron.Core
 #if DEBUG
             Collider?.Draw(renderer, Position.ToMatrix());
 #endif
+            Behaviour?.Draw(this, renderer);
         }
     }
 }

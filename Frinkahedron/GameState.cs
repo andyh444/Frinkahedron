@@ -9,10 +9,17 @@
         public Scene Scene { get; }
 
         public GameState(float deltaTime, Scene scene)
+            :this(deltaTime, scene, new Input())
+        {
+        }
+
+        private GameState(float deltaTime, Scene scene, Input input)
         {
             DeltaTime = deltaTime;
-            Input = new Input();
+            Input = input;
             Scene = scene;
         }
+
+        public GameState WithNewScene(Scene scene) => new GameState(DeltaTime, scene, Input);
     }
 }

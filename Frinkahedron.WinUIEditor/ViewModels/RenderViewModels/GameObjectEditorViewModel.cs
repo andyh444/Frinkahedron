@@ -1,7 +1,10 @@
 ﻿using Frinkahedron.Core;
+using Frinkahedron.Core.Colliders;
+using Frinkahedron.Core.Physics;
 using Frinkahedron.Core.Template;
 using Frinkahedron.VeldridImplementation;
 using Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels;
+using Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels.Shapes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,17 +12,102 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
+using Windows.Devices.Radios;
 
 namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 {
     internal class GameObjectEditorViewModel : RenderViewModelBase
     {
+        private class DimensionsGizmoBehaviour : Behaviour
+        {
+            private bool mouseOver;
+            private bool mouseDragged;
+
+            public GameObjectTemplateViewModel? ViewModel { get; set; }
+
+            public GameObject? EditableObject { get; set; }
+
+            public override void Update(GameObject self, GameState gameState)
+            {
+                base.Update(self, gameState);
+                mouseOver = false;
+
+                if (EditableObject is null || ViewModel is null)
+                {
+                    return;
+                }
+
+                if (EditableObject.Collider is Box box)
+                {
+                    Sphere sph = new Sphere(3f);
+
+                    (var rayPos, var rayDir) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
+                    var position = new Position(EditableObject.Position.Centre + new Vector3(0.6f * box.Dimensions.X, 0, 0), Quaternion.Identity);
+                    mouseOver = sph.RayIntersection(position, rayPos, rayDir, out _, out _);
+                }
+
+                if (gameState.Input.IsMouseButtonDown(MouseButton.Left))
+                {
+                    if (mouseOver)
+                    {
+                        mouseDragged = true;
+                    }
+                }
+                else if (mouseDragged)
+                {
+                    mouseDragged = false;
+                }
+
+                if (mouseDragged)
+                {
+                    var mouseDelta = gameState.Input.GetMouseDelta();
+                    var length = mouseDelta.Length();
+
+                    if (ViewModel.Shape is BoxShapeViewModel bsvm)
+                    {
+                        bsvm.DimX += 0.1f * length;
+                    }
+                }
+            }
+
+            public override void Draw(GameObject self, IRenderContext renderer)
+            {
+                base.Draw(self, renderer);
+
+                if (EditableObject is null || ViewModel is null)
+                {
+                    return;
+                }
+
+                if (EditableObject.Collider is Box box)
+                {
+                    var position = new Position(EditableObject.Position.Centre
+                        + new Vector3(0.6f * box.Dimensions.X, 0, 0), Quaternion.Identity);
+
+                    float radius = 3f;
+                    if (mouseOver)
+                    {
+                        radius = 5f;
+                    }
+                    if (mouseDragged)
+                    {
+                        radius = 7f;
+                    }
+                    var transform = Matrix4x4.CreateScale(radius) * position.ToMatrix();
+
+                    renderer.DrawPrimitiveWireframe(Primitive.Ellipsoid, transform);
+                }
+            }
+        }
+
+
         private Scene? scene;
         private GameState? gameState;
         private IAssetManager? assetManager;
         private GraphicsResources? graphicsResources;
         private Vector2 size;
-        private OrbitalCameraMouseBehaviour behaviour;
+        private OrbitalCameraMouseBehaviour camBehaviour;
+        private DimensionsGizmoBehaviour gizmoBehaviour;
 
         public GameObjectTemplateViewModel Model { get; }
 
@@ -28,12 +116,13 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
             Model = model;
             Model.ObjectChanged += Model_PropertyChanged;
 
-            behaviour = new OrbitalCameraMouseBehaviour();
+            camBehaviour = new OrbitalCameraMouseBehaviour();
+            gizmoBehaviour = new DimensionsGizmoBehaviour();
         }
 
         private void Model_PropertyChanged()
         {
-            SetCurrentObject(Model.Model.ToGameObject(new TransformTemplate(), [behaviour], -1));
+            SetCurrentObject(Model.Model.ToGameObject(new TransformTemplate(), [camBehaviour], -1));
         }
 
         public override void Draw(GraphicsDevice graphicsDevice, Swapchain swapchain)
@@ -60,7 +149,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
         {
             size = initialSize;
 
-            SetCurrentObject(Model.Model.ToGameObject(new TransformTemplate(), [behaviour], -1));
+            SetCurrentObject(Model.Model.ToGameObject(new TransformTemplate(), [camBehaviour], -1));
 
             assetManager = await Task.Run(() => FromFolderAssetManager.LoadAssets(graphicsDevice.ResourceFactory, graphicsDevice, "C:\\Users\\Andy\\source\\repos\\Frinkahedron\\Frinkahedron.TestApp\\Assets")); // TODO Fix
             graphicsResources = GraphicsResources.CreateResources(graphicsDevice, (int)initialSize.X, (int)initialSize.Y, assetManager, swapchain);
@@ -98,7 +187,11 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
             scene.CollisionsEnabled = false;
             scene.AddObject(obj);
 
-            gameState = new GameState(0.001f, scene);
+            gizmoBehaviour.ViewModel = Model;
+            gizmoBehaviour.EditableObject = obj;
+            scene.AddObject(new GameObject(new Vector3(), gizmoBehaviour));
+
+            gameState = gameState?.WithNewScene(scene) ?? new GameState(0.01f, scene);
 
             // TODO: This can be called multiple times in a single frame which is problematic as the objects don't get removed/added til the end of the frame
             /*if (currentObj is not null)

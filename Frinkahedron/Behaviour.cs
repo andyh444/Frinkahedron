@@ -10,6 +10,10 @@ namespace Frinkahedron.Core
         public virtual void Update(GameObject self, GameState gameState)
         {
         }
+
+        public virtual void Draw(GameObject self, IRenderContext renderer)
+        {
+        }
     }
 
     public class OrbitalCameraMouseBehaviour : Behaviour
