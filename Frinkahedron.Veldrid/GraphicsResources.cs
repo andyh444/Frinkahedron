@@ -17,17 +17,11 @@ namespace Frinkahedron.VeldridImplementation
 
         public required IAssetManager AssetManager { get; init; }
 
-        public required MainRenderPass MainRenderPass { get; init; }
+        public required IReadOnlyList<IRenderPass> RenderPasses { get; init; }// [ShadowRenderPass, MainRenderPass, WireframeRenderPass, ObjectHighlightRenderPass, QuadRenderPass];
 
-        public required DirectionalShadowRenderPass ShadowRenderPass { get; init; }
+        public required int ScreenWidth { get; init; }
 
-        public required FullScreenQuadRenderPass QuadRenderPass { get; init; }
-
-        public required WireframeRenderPass WireframeRenderPass { get; init; }
-
-        public required ObjectHighlightRenderPass ObjectHighlightRenderPass { get; init; }
-
-        public IEnumerable<IRenderPass> RenderPasses => [ShadowRenderPass, MainRenderPass, WireframeRenderPass, ObjectHighlightRenderPass, QuadRenderPass];
+        public required int ScreenHeight { get; init; }
 
         public static GraphicsResources CreateResources(GraphicsDevice graphicsDevice, int screenWidth, int screenHeight, IAssetManager assetManager, Swapchain? swapchain = null)
         {
@@ -58,17 +52,17 @@ namespace Frinkahedron.VeldridImplementation
             quadRenderPass.Textures.Add((colourTexture, new FullScreenQuadRenderPass.PostProcessSettings { enableFXAA = 1 }));
             quadRenderPass.Textures.Add((highlightColourTexture, new FullScreenQuadRenderPass.PostProcessSettings { enableMean = 1, meanRadius = 2 }));
 
+            ScreenMesh2RenderPass screenMesh2RenderPass = ScreenMesh2RenderPass.Create(factory, graphicsDevice, assetManager, swapchain.Framebuffer);
 
             return new GraphicsResources
             {
                 CommandList = factory.CreateCommandList(),
                 Primitives = Primitives.Create(graphicsDevice),
                 AssetManager = assetManager,
-                MainRenderPass = mainRenderPass,
-                ShadowRenderPass = directionalShadowRenderPass,
-                WireframeRenderPass = wireframeRenderPass,
-                ObjectHighlightRenderPass = highlightRenderPass,
-                QuadRenderPass = quadRenderPass
+
+                RenderPasses = [directionalShadowRenderPass, mainRenderPass, wireframeRenderPass, highlightRenderPass, quadRenderPass, screenMesh2RenderPass],
+                ScreenWidth = screenWidth,
+                ScreenHeight = screenHeight,
             };
         }
 
@@ -107,8 +101,10 @@ namespace Frinkahedron.VeldridImplementation
         {
             CommandList.Dispose();
             Primitives.Dispose();
-            MainRenderPass.Dispose();
-            ShadowRenderPass.Dispose();
+            foreach (var renderPass in RenderPasses)
+            {
+                renderPass.Dispose();
+            }
         }
     }
 }

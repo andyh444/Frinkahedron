@@ -37,7 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Assets\Shaders\" />
     <Folder Include="Assets\Textures\" />
   </ItemGroup>
 

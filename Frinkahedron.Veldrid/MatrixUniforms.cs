@@ -1,7 +1,28 @@
 ﻿using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Frinkahedron.VeldridImplementation
 {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Model2MatrixInfo
+    {
+        public Vector2 XAxis;
+        public Vector2 YAxis;
+        public Vector2 Translation;
+        public float Pad0;
+        public float Pad1;
+
+        public static Model2MatrixInfo FromMatrix3x2(Matrix3x2 matrix)
+        {
+            return new Model2MatrixInfo
+            {
+                XAxis = new Vector2(matrix.M11, matrix.M12),
+                YAxis = new Vector2(matrix.M21, matrix.M22),
+                Translation = new Vector2(matrix.M31, matrix.M32)
+            };
+        }
+    }
+
     public struct ModelMatrixInfo
     {
         public Matrix4x4 Model;

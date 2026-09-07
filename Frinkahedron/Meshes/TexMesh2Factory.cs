@@ -25,5 +25,22 @@ namespace Frinkahedron.Core.Meshes
             };
             return new TexMesh2(vertices, triangles);
         }
+
+        public static ColourMesh2 CreateUnitQuad(float halfDim, Vector4 colour)
+        {
+            ColourVertex2[] vertices = new[]
+            {
+                new ColourVertex2(new Vector2(-halfDim, halfDim), colour),
+                new ColourVertex2(new Vector2(halfDim, halfDim), colour),
+                new ColourVertex2(new Vector2(-halfDim, -halfDim), colour),
+                new ColourVertex2(new Vector2(halfDim, -halfDim), colour)
+            };
+            IndexTriangle[] triangles = new IndexTriangle[]
+            {
+                new IndexTriangle(0, 1, 2),
+                new IndexTriangle(1, 2, 3),
+            };
+            return new ColourMesh2(vertices, triangles);
+        }
     }
 }
