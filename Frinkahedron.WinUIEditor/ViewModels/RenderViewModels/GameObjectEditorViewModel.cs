@@ -60,12 +60,13 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 
                 if (mouseDragged)
                 {
-                    var mouseDelta = gameState.Input.GetMouseDelta();
-                    var length = mouseDelta.Length();
-
-                    if (ViewModel.Shape is BoxShapeViewModel bsvm)
+                    (var rayPos, var rayDir) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
+                    var plane = new Frinkahedron.Core.Maths.Plane(EditableObject.Position.Centre, Vector3.UnitZ);
+                    if (plane.RayPlaneIntersection(rayPos, rayDir, out Vector3 intersection)
+                        && ViewModel.Shape is BoxShapeViewModel bsvm)
                     {
-                        bsvm.DimX += 0.1f * length;
+                        // TODO This currently causes the screen to flicker because it creates a new scene each time
+                        bsvm.DimX = 2 * (intersection - plane.Point).X;
                     }
                 }
             }
@@ -108,6 +109,8 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
         private Vector2 size;
         private OrbitalCameraMouseBehaviour camBehaviour;
         private DimensionsGizmoBehaviour gizmoBehaviour;
+        private object renderLock;
+        private object updateLock;
 
         public GameObjectTemplateViewModel Model { get; }
 
@@ -118,6 +121,9 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 
             camBehaviour = new OrbitalCameraMouseBehaviour();
             gizmoBehaviour = new DimensionsGizmoBehaviour();
+
+            renderLock = new object();
+            updateLock = new object();
         }
 
         private void Model_PropertyChanged()
@@ -131,18 +137,21 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
             {
                 return;
             }
-            graphicsResources.CommandList.Begin();
-
-            VeldridRenderContext context = new VeldridRenderContext();
-            scene.Draw(context);
-            foreach (var renderPass in graphicsResources.RenderPasses)
+            lock (renderLock)
             {
-                renderPass.RenderScene(graphicsDevice, graphicsResources.CommandList, graphicsResources, scene, context.DrawInstructions);
-            }
+                graphicsResources.CommandList.Begin();
 
-            graphicsResources.CommandList.End();
-            graphicsDevice.SubmitCommands(graphicsResources.CommandList);
-            graphicsDevice.SwapBuffers(swapchain);
+                VeldridRenderContext context = new VeldridRenderContext();
+                scene.Draw(context);
+                foreach (var renderPass in graphicsResources.RenderPasses)
+                {
+                    renderPass.RenderScene(graphicsDevice, graphicsResources.CommandList, graphicsResources, scene, context.DrawInstructions);
+                }
+
+                graphicsResources.CommandList.End();
+                graphicsDevice.SubmitCommands(graphicsResources.CommandList);
+                graphicsDevice.SwapBuffers(swapchain);
+            }
         }
 
         public override async Task Initialise(GraphicsDevice graphicsDevice, Vector2 initialSize, Swapchain swapchain)
@@ -172,34 +181,42 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
             {
                 return;
             }
-            updateInput(gameState.Input);
-            scene.Update(gameState);
+            lock (updateLock)
+            {
+                updateInput(gameState.Input);
+                scene.Update(gameState);
+            }
         }
 
         private void SetCurrentObject(GameObject obj)
         {
-            scene = new Scene(new Vector3(), Vector3.UnitZ, size.X / size.Y, []);
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
-            scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
-            scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
-
-            scene.CollisionsEnabled = false;
-            scene.AddObject(obj);
-
-            gizmoBehaviour.ViewModel = Model;
-            gizmoBehaviour.EditableObject = obj;
-            scene.AddObject(new GameObject(new Vector3(), gizmoBehaviour));
-
-            gameState = gameState?.WithNewScene(scene) ?? new GameState(0.01f, scene);
-
-            // TODO: This can be called multiple times in a single frame which is problematic as the objects don't get removed/added til the end of the frame
-            /*if (currentObj is not null)
+            lock (renderLock)
             {
-                scene.RemoveObject(currentObj);
+                lock (updateLock)
+                {
+                    scene = new Scene(new Vector3(), Vector3.UnitZ, size.X / size.Y, []);
+                    scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
+                    scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
+                    scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
+                    scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
+
+                    scene.CollisionsEnabled = false;
+                    scene.AddObject(obj);
+
+                    gizmoBehaviour.ViewModel = Model;
+                    gizmoBehaviour.EditableObject = obj;
+                    scene.AddObject(new GameObject(new Vector3(), gizmoBehaviour));
+
+                    gameState = new GameState(0.01f, scene, gameState?.Input ?? new Input());
+                }
+                // TODO: This can be called multiple times in a single frame which is problematic as the objects don't get removed/added til the end of the frame
+                /*if (currentObj is not null)
+                {
+                    scene.RemoveObject(currentObj);
+                }
+                currentObj = obj;
+                scene.AddObject(obj);*/
             }
-            currentObj = obj;
-            scene.AddObject(obj);*/
         }
     }
 }

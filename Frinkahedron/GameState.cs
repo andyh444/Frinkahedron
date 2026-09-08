@@ -13,7 +13,7 @@
         {
         }
 
-        private GameState(float deltaTime, Scene scene, Input input)
+        public GameState(float deltaTime, Scene scene, Input input)
         {
             DeltaTime = deltaTime;
             Input = input;

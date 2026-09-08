@@ -1,4 +1,5 @@
-﻿using Frinkahedron.Core.Template;
+﻿using Frinkahedron.Core;
+using Frinkahedron.Core.Template;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,16 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 
         public bool Equals(ShapeViewModelBase? other)
             => DisplayName == other?.DisplayName;
+
+        public virtual IReadOnlyList<IGizmo> GetGizmos() => [];
+    }
+
+    public interface IGizmo
+    {
+        bool IsMouseOver(GameObject editableObject, Input input);
+
+        void OnDragged(GameObject editableObject, Input input);
+
+        void Draw(bool mouseOver, bool mouseDragged, GameObject editableObject, IRenderContext renderer);
     }
 }
