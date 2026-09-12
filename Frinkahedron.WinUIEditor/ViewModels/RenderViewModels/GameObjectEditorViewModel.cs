@@ -37,14 +37,13 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
                     return;
                 }
 
-                if (EditableObject.Collider is Box box)
+                if (ViewModel.Shape is null || !ViewModel.Shape.GetGizmos().Any())
                 {
-                    Sphere sph = new Sphere(3f);
-
-                    (var rayPos, var rayDir) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
-                    var position = new Position(EditableObject.Position.Centre + new Vector3(0.6f * box.Dimensions.X, 0, 0), Quaternion.Identity);
-                    mouseOver = sph.RayIntersection(position, rayPos, rayDir, out _, out _);
+                    return;
                 }
+
+                var gizmo = ViewModel.Shape.GetGizmos().First();
+                mouseOver = gizmo.IsMouseOver(EditableObject, gameState);
 
                 if (gameState.Input.IsMouseButtonDown(MouseButton.Left))
                 {
@@ -60,14 +59,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 
                 if (mouseDragged)
                 {
-                    (var rayPos, var rayDir) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
-                    var plane = new Frinkahedron.Core.Maths.Plane(EditableObject.Position.Centre, Vector3.UnitZ);
-                    if (plane.RayPlaneIntersection(rayPos, rayDir, out Vector3 intersection)
-                        && ViewModel.Shape is BoxShapeViewModel bsvm)
-                    {
-                        // TODO This currently causes the screen to flicker because it creates a new scene each time
-                        bsvm.DimX = 2 * (intersection - plane.Point).X;
-                    }
+                    gizmo.OnDragged(EditableObject, gameState);
                 }
             }
 
@@ -80,23 +72,14 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
                     return;
                 }
 
-                if (EditableObject.Collider is Box box)
+                if (ViewModel.Shape is null)
                 {
-                    var position = new Position(EditableObject.Position.Centre
-                        + new Vector3(0.6f * box.Dimensions.X, 0, 0), Quaternion.Identity);
+                    return;
+                }
 
-                    float radius = 3f;
-                    if (mouseOver)
-                    {
-                        radius = 5f;
-                    }
-                    if (mouseDragged)
-                    {
-                        radius = 7f;
-                    }
-                    var transform = Matrix4x4.CreateScale(radius) * position.ToMatrix();
-
-                    renderer.DrawPrimitiveWireframe(Primitive.Ellipsoid, transform);
+                foreach (var gizmo in ViewModel.Shape.GetGizmos())
+                {
+                    gizmo.Draw(mouseOver, mouseDragged, EditableObject, renderer);
                 }
             }
         }

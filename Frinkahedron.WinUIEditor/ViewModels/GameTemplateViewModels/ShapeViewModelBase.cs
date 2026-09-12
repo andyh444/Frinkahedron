@@ -22,9 +22,9 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 
     public interface IGizmo
     {
-        bool IsMouseOver(GameObject editableObject, Input input);
+        bool IsMouseOver(GameObject editableObject, GameState gameState);
 
-        void OnDragged(GameObject editableObject, Input input);
+        void OnDragged(GameObject editableObject, GameState gameState);
 
         void Draw(bool mouseOver, bool mouseDragged, GameObject editableObject, IRenderContext renderer);
     }
