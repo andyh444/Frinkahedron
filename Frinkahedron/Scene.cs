@@ -55,16 +55,7 @@ namespace Frinkahedron.Core
             gameState.DeltaTime /= TicksPerUpdate;
             for (int i = 0; i < TicksPerUpdate; i++)
             {
-                if (toRemove.Count > 0)
-                {
-                    objects.RemoveAll(toRemove.Contains);
-                    toRemove.Clear();
-                }
-
-                objects.AddRange(toAdd);
-                toAdd.Clear();
-
-
+                UpdateObjectsList();
                 foreach (var obj in Objects)
                 {
                     obj.Update(gameState);
@@ -76,6 +67,19 @@ namespace Frinkahedron.Core
                 gameState.Input.Clear();
             }
             gameState.DeltaTime = originalDeltaTime;
+            UpdateObjectsList();
+        }
+
+        private void UpdateObjectsList()
+        {
+            if (toRemove.Count > 0)
+            {
+                objects.RemoveAll(toRemove.Contains);
+                toRemove.Clear();
+            }
+
+            objects.AddRange(toAdd);
+            toAdd.Clear();
         }
 
         private void ResolveAllCollisions()

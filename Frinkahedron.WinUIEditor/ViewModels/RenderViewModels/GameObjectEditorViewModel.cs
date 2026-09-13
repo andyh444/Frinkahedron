@@ -179,7 +179,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
             {
                 lock (updateLock)
                 {
-                    scene = new Scene(new Vector3(), Vector3.UnitZ, size.X / size.Y, []);
+                    scene = new Scene(new Vector3(), Vector3.UnitZ, size.X / size.Y, []) { TicksPerUpdate = 1 };
                     scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
                     scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
                     scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
@@ -193,6 +193,9 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
                     scene.AddObject(new GameObject(new Vector3(), gizmoBehaviour));
 
                     gameState = new GameState(0.01f, scene, gameState?.Input ?? new Input());
+
+                    // call update immediately so that the objects have been added before the first draw
+                    scene.Update(gameState);
                 }
                 // TODO: This can be called multiple times in a single frame which is problematic as the objects don't get removed/added til the end of the frame
                 /*if (currentObj is not null)
