@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Frinkahedron.WinUIEditor.Utilities;
 
 namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 {
@@ -14,7 +15,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
         private GameObjectTemplateViewModel activeGameObject;
         private RenderViewModelBase renderer;
 
-        public ObservableCollection<GameObjectTemplateViewModel> GameObjects { get; }
+        public WrappedObservableList<GameObjectTemplate, GameObjectTemplateViewModel> GameObjects { get; }
 
         public GameObjectTemplateViewModel ActiveGameObject
         {
@@ -43,7 +44,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
         public GameTemplateViewModel(GameTemplate model)
         {
             Model = model;
-            GameObjects = new ObservableCollection<GameObjectTemplateViewModel>(model.GameObjects.Select(x => new GameObjectTemplateViewModel(x)));
+            GameObjects = new WrappedObservableList<GameObjectTemplate, GameObjectTemplateViewModel>(model.GameObjects, model => new GameObjectTemplateViewModel(model));
             activeGameObject = GameObjects.First();
 
             renderer = new GameObjectEditorViewModel(ActiveGameObject);

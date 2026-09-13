@@ -25,7 +25,15 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
         public ShapeViewModelBase Shape
         {
             get => GetShapeViewModel();
-            set => SetModelProperty(GetShapeViewModel(), value, v => Model.Collider = v?.Model, nameof(Shape));
+            set
+            {
+                if (value is null)
+                {
+                    // this gets hit when changing active game object template view model - todo figure out why
+                    return;
+                }
+                SetModelProperty(GetShapeViewModel(), value, v => Model.Collider = v?.Model, nameof(Shape));
+            }
         }
 
         public ObservableCollection<ShapeViewModelBase> AvailableShapes { get; }

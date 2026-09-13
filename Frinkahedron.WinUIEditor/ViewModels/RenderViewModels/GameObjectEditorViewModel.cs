@@ -3,6 +3,7 @@ using Frinkahedron.Core.Colliders;
 using Frinkahedron.Core.Physics;
 using Frinkahedron.Core.Template;
 using Frinkahedron.VeldridImplementation;
+using Frinkahedron.WinUIEditor.Services;
 using Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels;
 using Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels.Shapes;
 using System;
@@ -89,7 +90,6 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 
         private Scene? scene;
         private GameState? gameState;
-        private IAssetManager? assetManager;
         private GraphicsResources? graphicsResources;
         private Vector2 size;
         private OrbitalCameraMouseBehaviour camBehaviour;
@@ -118,7 +118,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 
         public override void Draw(GraphicsDevice graphicsDevice, Swapchain swapchain)
         {
-            if (scene is null || graphicsResources is null || assetManager is null)
+            if (scene is null || graphicsResources is null)
             {
                 return;
             }
@@ -145,19 +145,18 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 
             SetCurrentObject(Model.Model.ToGameObject(new TransformTemplate(), [camBehaviour], -1));
 
-            assetManager = await Task.Run(() => FromFolderAssetManager.LoadAssets(graphicsDevice.ResourceFactory, graphicsDevice, "C:\\Users\\Andy\\source\\repos\\Frinkahedron\\Frinkahedron.TestApp\\Assets")); // TODO Fix
-            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, (int)initialSize.X, (int)initialSize.Y, assetManager, swapchain);
+            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, (int)initialSize.X, (int)initialSize.Y, await GraphicsService.Current.GetAssetManager(), swapchain);
         }
 
         public override void SizeChanged(GraphicsDevice graphicsDevice, Vector2 newSize, Swapchain swapchain)
         {
-            if (scene is null || graphicsResources is null || assetManager is null)
+            if (scene is null || graphicsResources is null)
             {
                 return;
             }
             scene.Camera.SetAspectRatio(newSize.X / newSize.Y);
             graphicsResources.Dispose();
-            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, (int)newSize.X, (int)newSize.Y, assetManager, swapchain);
+            graphicsResources = GraphicsResources.CreateResources(graphicsDevice, (int)newSize.X, (int)newSize.Y, GraphicsService.Current.GetAssetManager().GetAwaiter().GetResult(), swapchain);
         }
 
         public override void Update(Action<Input> updateInput)

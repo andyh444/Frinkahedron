@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Frinkahedron.VeldridImplementation;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Frinkahedron.WinUIEditor.Services
     internal sealed class GraphicsService
     {
         private static GraphicsService? service;
+        private Task<IAssetManager> assetManagerTask;
 
         public GraphicsDevice GraphicsDevice { get; }
 
@@ -24,9 +26,12 @@ namespace Frinkahedron.WinUIEditor.Services
                 PreferStandardClipSpaceYDirection = true,
             };
             GraphicsDevice = GraphicsDevice.CreateD3D11(options);
+            assetManagerTask = Task.Run<IAssetManager>(() => FromFolderAssetManager.LoadAssets(GraphicsDevice.ResourceFactory, GraphicsDevice, "C:\\Users\\Andy\\source\\repos\\Frinkahedron\\Frinkahedron.TestApp\\Assets")); // TODO Fix
         }
 
         public static GraphicsService Current => service ??= new GraphicsService(); // todo replace with service provider
+
+        public async Task<IAssetManager> GetAssetManager() => await assetManagerTask;
 
         public Swapchain CreateSwapchain(SwapChainPanel panel)
         {

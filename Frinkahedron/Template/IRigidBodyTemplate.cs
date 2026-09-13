@@ -27,6 +27,10 @@ namespace Frinkahedron.Core.Template
 
         public IRigidBody ToRigidBody(IShape shape)
         {
+            if (shape is null)
+            {
+                return null;
+            }
             float mass = Density * shape.CalculateVolume();
             return new DynamicBody
             {
