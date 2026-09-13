@@ -65,12 +65,22 @@ public sealed partial class VeldridView : UserControl
         swapchain.Resize((uint)renderPanel.ActualSize.X, (uint)renderPanel.ActualSize.Y);
     }
 
+    private async void VeldridView_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+    {
+        var renderViewModel = GetRenderViewModel();
+        var gd = GraphicsService.Current.GraphicsDevice;
+        swapchain = GraphicsService.Current.CreateSwapchain(renderPanel);
+        await renderViewModel.Initialise(gd, ActualSize, swapchain);
+    }
+
     private async void renderPanel_Loaded(object sender, RoutedEventArgs e)
     {
         var renderViewModel = GetRenderViewModel();
         var gd = GraphicsService.Current.GraphicsDevice;
         swapchain = GraphicsService.Current.CreateSwapchain(renderPanel);
         await renderViewModel.Initialise(gd, ActualSize, swapchain);
+
+        DataContextChanged += VeldridView_DataContextChanged;
     }
 
     private void Draw()

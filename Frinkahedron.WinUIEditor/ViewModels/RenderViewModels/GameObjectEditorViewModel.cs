@@ -179,12 +179,12 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
             {
                 lock (updateLock)
                 {
+                    // TODO: Fix dynamic objects from falling under gravity here
                     scene = new Scene(new Vector3(), Vector3.UnitZ, size.X / size.Y, []) { TicksPerUpdate = 1 };
                     scene.SceneLights.PointLights.Add(new PointLight(new Vector3(), new Vector3(1), 100f));
                     scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, -75), new Vector3(1, 0, 0), 200f));
                     scene.SceneLights.PointLights.Add(new PointLight(new Vector3(0, 0, 75), new Vector3(0, 1, 0), 300f));
                     scene.SceneLights.DirectionalLight = new DirectionalLight(Vector3.Normalize(new Vector3(-0.5f, -1f, -0.5f)), new Vector3(1));
-
                     scene.CollisionsEnabled = false;
                     scene.AddObject(obj);
 

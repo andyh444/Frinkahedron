@@ -12,7 +12,11 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 {
     internal sealed class GameObjectTemplateViewModel : ViewModelBase
     {
+        private static int count;
+
         public event Action? ObjectChanged;
+
+        public string Name { get; }
 
         public GameObjectTemplate Model { get; }
 
@@ -21,7 +25,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
         public ShapeViewModelBase Shape
         {
             get => GetShapeViewModel();
-            set => SetModelProperty(GetShapeViewModel(), value, v => Model.Collider = v.Model, nameof(Shape));
+            set => SetModelProperty(GetShapeViewModel(), value, v => Model.Collider = v?.Model, nameof(Shape));
         }
 
         public ObservableCollection<ShapeViewModelBase> AvailableShapes { get; }
@@ -40,6 +44,8 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
             RenderableTemplate.EnabledIndices.CollectionChanged += (o, e) => FireObjectChanged();
             RenderableTemplate.PropertyChanged += (o, e) => FireObjectChanged();
             RenderableTemplate.TransformTemplate.PropertyChanged += (o, e) => FireObjectChanged();
+
+            Name = $"Object {count++}"; // todo replace with actual name
         }
 
         private void FireObjectChanged()

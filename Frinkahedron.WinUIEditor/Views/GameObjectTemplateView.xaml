@@ -31,6 +31,7 @@
 
     <Grid RowDefinitions="Auto,Auto,Auto">
         <local:RenderableTemplateView Grid.Row="0" DataContext="{Binding RenderableTemplate}"/>
+        
         <ComboBox Grid.Row="1" ItemsSource="{Binding AvailableShapes}" SelectedItem="{Binding Shape, Mode=TwoWay}">
             <ComboBox.ItemTemplate>
                 <DataTemplate x:DataType="gtvm:ShapeViewModelBase">
@@ -38,6 +39,7 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
+        
         <ContentControl Grid.Row="2" Content="{Binding Shape, Mode=TwoWay}" ContentTemplateSelector="{StaticResource ShapeTemplateSelector}" />
     </Grid>
 </UserControl>

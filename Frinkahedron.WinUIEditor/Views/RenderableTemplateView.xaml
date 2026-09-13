@@ -13,7 +13,11 @@
 
     <Grid RowDefinitions="Auto,Auto,Auto">
         <ComboBox Grid.Row="0" />
-        <ListView Grid.Row="1" ItemsSource="{Binding EnabledIndices}">
+        <ListView
+            Grid.Row="1"
+            ItemsSource="{Binding EnabledIndices}"
+            MaxHeight="300"
+            ScrollViewer.VerticalScrollBarVisibility="Auto">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="gtvm:EnabledIndexViewModel">
                     <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked, Mode=TwoWay}"/>
