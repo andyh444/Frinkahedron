@@ -37,10 +37,11 @@ namespace Frinkahedron.Core
                 pitch = Math.Clamp(pitch, minPitch, maxPitch);
             }
             var scrollDelta = gameState.Input.GetMouseScrollDelta();
-            
-            distance -= 10 * distance * scrollDelta * gameState.DeltaTime;
-            distance = Math.Clamp(distance, 1, 500);
-
+            if (scrollDelta != 0)
+            {
+                distance -= 5 * distance * scrollDelta * gameState.DeltaTime;
+                distance = Math.Clamp(distance, 1, 500);
+            }
             if (gameState.Scene.Camera.ProjectionType is ProjectionType.Orthographic
                 && gameState.Scene.Camera.Projection is OrthographicProjection op)
             {

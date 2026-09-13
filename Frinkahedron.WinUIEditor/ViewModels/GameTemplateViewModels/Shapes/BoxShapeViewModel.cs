@@ -63,14 +63,14 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels.Shapes
         {
             var position = GetPosition(editableObject);
 
-            float radius = 3f;
+            float radius = GetRadius(gameState.Scene.Camera, position.Centre, 0.01f);
             if (mouseOver)
             {
-                radius = 5f;
+                radius = GetRadius(gameState.Scene.Camera, position.Centre, 0.015f);
             }
             if (mouseDragged)
             {
-                radius = 7f;
+                radius = GetRadius(gameState.Scene.Camera, position.Centre, 0.02f);
             }
             var transform = Matrix4x4.CreateScale(radius) * position.ToMatrix();
 
@@ -82,10 +82,10 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels.Shapes
 
         public bool IsMouseOver(GameObject editableObject, GameState gameState)
         {
-            Sphere sph = new Sphere(3f);
+            var position = GetPosition(editableObject);
+            Sphere sph = new Sphere(GetRadius(gameState.Scene.Camera, position.Centre, 0.01f));
 
             (var rayPos, var rayDir) = gameState.Scene.Camera.GetRay(gameState.Input.GetMouseNdcPosition());
-            var position = GetPosition(editableObject);
             return sph.RayIntersection(position, rayPos, rayDir, out _, out _);
         }
 
@@ -96,7 +96,6 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels.Shapes
             var line = new Line3(editableObject.Position.Centre, dir);
             var closest = line.ClosestPointTo(new Line3(rayPos, rayDir));
 
-            // TODO This currently causes the screen to flicker because it creates a new scene each time
             Vector3 translation = (1f / POSITION_SCALE) * (closest - line.Origin);
 
             // TODO: This but better
@@ -112,6 +111,29 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels.Shapes
             {
                 viewModel.DimZ = translation.Z;
             }
+        }
+
+        private float GetRadius(Camera camera, Vector3 position, float screenFraction)
+        {
+            if (camera.ProjectionType == ProjectionType.Orthographic)
+            {
+                throw new NotImplementedException();
+            }
+            // Camera-space position
+            Vector4 viewPosition = Vector4.Transform(
+                new Vector4(position, 1.0f),
+                camera.ViewMatrix);
+
+            float distance = -viewPosition.Z;
+
+            // World-space radius required to occupy the desired
+            // fraction of the screen height.
+            float requiredRadius =
+                distance *
+                MathF.Tan((camera.Projection as PerspectiveProjection).FoV * 0.5f) *
+                screenFraction;
+
+            return requiredRadius / 0.5f;
         }
     }
 }
