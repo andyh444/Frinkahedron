@@ -20,8 +20,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
     {
         private class DimensionsGizmoBehaviour : Behaviour
         {
-            private bool mouseOver;
-            private bool mouseDragged;
+            private Dictionary<IGizmo, (bool mouseOver, bool mouseDragged)> mouseStates = new Dictionary<IGizmo, (bool mouseOver, bool mouseDragged)>();
 
             public GameObjectTemplateViewModel? ViewModel { get; set; }
 
@@ -30,8 +29,6 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
             public override void Update(GameObject self, GameState gameState)
             {
                 base.Update(self, gameState);
-                mouseOver = false;
-
                 if (EditableObject is null || ViewModel is null)
                 {
                     return;
@@ -42,30 +39,34 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
                     return;
                 }
 
-                var gizmo = ViewModel.Shape.GetGizmos().First();
-                mouseOver = gizmo.IsMouseOver(EditableObject, gameState);
-
-                if (gameState.Input.IsMouseButtonDown(MouseButton.Left))
+                foreach (var gizmo in ViewModel.Shape.GetGizmos())
                 {
-                    if (mouseOver)
+                    (bool mouseOver, bool mouseDragged) = mouseStates.GetValueOrDefault(gizmo, (false, false));
+                    mouseOver = gizmo.IsMouseOver(EditableObject, gameState);
+
+                    if (gameState.Input.IsMouseButtonDown(MouseButton.Left))
                     {
-                        mouseDragged = true;
+                        if (mouseOver)
+                        {
+                            mouseDragged = true;
+                        }
                     }
-                }
-                else if (mouseDragged)
-                {
-                    mouseDragged = false;
-                }
+                    else if (mouseDragged)
+                    {
+                        mouseDragged = false;
+                    }
 
-                if (mouseDragged)
-                {
-                    gizmo.OnDragged(EditableObject, gameState);
+                    if (mouseDragged)
+                    {
+                        gizmo.OnDragged(EditableObject, gameState);
+                    }
+                    mouseStates[gizmo] = (mouseOver, mouseDragged);
                 }
             }
 
-            public override void Draw(GameObject self, IRenderContext renderer)
+            public override void Draw(GameObject self, GameState gameState, IRenderContext renderer)
             {
-                base.Draw(self, renderer);
+                base.Draw(self, gameState, renderer);
 
                 if (EditableObject is null || ViewModel is null)
                 {
@@ -79,7 +80,8 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
 
                 foreach (var gizmo in ViewModel.Shape.GetGizmos())
                 {
-                    gizmo.Draw(mouseOver, mouseDragged, EditableObject, renderer);
+                    (bool mouseOver, bool mouseDragged) = mouseStates.GetValueOrDefault(gizmo, (false, false));
+                    gizmo.Draw(mouseOver, mouseDragged, EditableObject, gameState, renderer);
                 }
             }
         }
@@ -125,7 +127,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
                 graphicsResources.CommandList.Begin();
 
                 VeldridRenderContext context = new VeldridRenderContext();
-                scene.Draw(context);
+                scene.Draw(gameState, context);
                 foreach (var renderPass in graphicsResources.RenderPasses)
                 {
                     renderPass.RenderScene(graphicsDevice, graphicsResources.CommandList, graphicsResources, scene, context.DrawInstructions);

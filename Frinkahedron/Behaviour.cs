@@ -11,7 +11,7 @@ namespace Frinkahedron.Core
         {
         }
 
-        public virtual void Draw(GameObject self, IRenderContext renderer)
+        public virtual void Draw(GameObject self, GameState gameState, IRenderContext renderer)
         {
         }
     }

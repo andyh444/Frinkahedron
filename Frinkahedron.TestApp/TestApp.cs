@@ -111,7 +111,7 @@ namespace Frinkahedron.TestApp
                     else
                     {
                         _scene.Update(gameState);
-                        Draw();
+                        Draw(gameState);
 
                         sw.Stop();
                         gameState.DeltaTime = MathF.Min((float)sw.Elapsed.TotalSeconds, 0.1f);
@@ -162,10 +162,10 @@ namespace Frinkahedron.TestApp
             input.SetMousePosition(snapshot.MousePosition, new Vector2(_window.Width, _window.Height));
         }
 
-        private void Draw()
+        private void Draw(GameState gameState)
         {
             VeldridRenderContext context = new VeldridRenderContext();
-            _scene.Draw(context);
+            _scene.Draw(gameState, context);
 
             _graphicsResources.CommandList.Begin();
             foreach (var renderPass in _graphicsResources.RenderPasses)

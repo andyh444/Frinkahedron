@@ -26,6 +26,6 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 
         void OnDragged(GameObject editableObject, GameState gameState);
 
-        void Draw(bool mouseOver, bool mouseDragged, GameObject editableObject, IRenderContext renderer);
+        void Draw(bool mouseOver, bool mouseDragged, GameObject editableObject, GameState gameState, IRenderContext renderer);
     }
 }

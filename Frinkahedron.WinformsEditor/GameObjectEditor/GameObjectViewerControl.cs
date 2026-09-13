@@ -127,7 +127,7 @@ namespace Frinkahedron.WinformsEditor.GameObjectEditor
             gameState.DeltaTime = (float)interval.TotalSeconds;
             scene.Update(gameState);
             VeldridRenderContext context = new VeldridRenderContext();
-            scene.Draw(context);
+            scene.Draw(gameState, context);
 
             graphicsResources.CommandList.Begin();
             foreach (var renderPass in graphicsResources.RenderPasses)

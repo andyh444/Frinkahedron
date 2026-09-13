@@ -119,7 +119,7 @@ namespace Frinkahedron.WinformsEditor.LevelEditor
                 gameState.Input.Clear();
             }
             VeldridRenderContext context = new VeldridRenderContext();
-            scene.Draw(context);
+            scene.Draw(gameState, context);
 
             // TODO: Remove
             context.DrawPrimitiveWireframe(Primitive.Box, System.Numerics.Matrix4x4.Identity);

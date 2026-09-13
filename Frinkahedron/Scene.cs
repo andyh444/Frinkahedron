@@ -158,11 +158,11 @@ namespace Frinkahedron.Core
             }
         }
 
-        public void Draw(IRenderContext renderer)
+        public void Draw(GameState gameState, IRenderContext renderer)
         {
             foreach (var obj in Objects)
             {
-                obj.Draw(renderer);
+                obj.Draw(gameState, renderer);
             }
         }
     }

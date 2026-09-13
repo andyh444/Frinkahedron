@@ -100,7 +100,7 @@ namespace Frinkahedron
 
         public Vector3 GetRight()
         {
-            return Vector3.Cross(LookDirection, Vector3.UnitY);
+            return Vector3.Normalize(Vector3.Cross(LookDirection, Vector3.UnitY));
         }
 
         public Vector3 GetUp() => Vector3.Cross(GetRight(), LookDirection);

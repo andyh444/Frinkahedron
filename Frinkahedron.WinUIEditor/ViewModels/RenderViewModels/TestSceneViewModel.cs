@@ -72,7 +72,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.RenderViewModels
             state.GraphicsResources.CommandList.Begin();
 
             VeldridRenderContext context = new VeldridRenderContext();
-            state.Scene.Draw(context);
+            state.Scene.Draw(state.GameState, context);
             foreach (var renderPass in state.GraphicsResources.RenderPasses)
             {
                 renderPass.RenderScene(graphicsDevice, state.GraphicsResources.CommandList, state.GraphicsResources, state.Scene, context.DrawInstructions);

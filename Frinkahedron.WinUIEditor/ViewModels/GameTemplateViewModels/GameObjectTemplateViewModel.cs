@@ -37,6 +37,7 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
             {
                 shape.PropertyChanged += (o, e) => FireObjectChanged();
             }
+            RenderableTemplate.EnabledIndices.CollectionChanged += (o, e) => FireObjectChanged();
             RenderableTemplate.PropertyChanged += (o, e) => FireObjectChanged();
             RenderableTemplate.TransformTemplate.PropertyChanged += (o, e) => FireObjectChanged();
         }

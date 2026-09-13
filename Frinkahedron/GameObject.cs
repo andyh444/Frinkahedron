@@ -22,13 +22,13 @@ namespace Frinkahedron.Core
             RigidBody?.IntegratePosition(gameState.DeltaTime, Position);
         }
 
-        public void Draw(IRenderContext renderer)
+        public void Draw(GameState gameState, IRenderContext renderer)
         {
             Renderable?.Render(renderer, Position.ToMatrix());
 #if DEBUG
             Collider?.Draw(renderer, Position.ToMatrix());
 #endif
-            Behaviour?.Draw(this, renderer);
+            Behaviour?.Draw(this, gameState, renderer);
         }
     }
 }
