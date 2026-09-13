@@ -11,11 +11,32 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 {
     internal sealed class GameTemplateViewModel : ViewModelBase
     {
+        private GameObjectTemplateViewModel activeGameObject;
+        private RenderViewModelBase renderer;
+
         public ObservableCollection<GameObjectTemplateViewModel> GameObjects { get; }
 
-        public GameObjectTemplateViewModel ActiveGameObject { get; }
+        public GameObjectTemplateViewModel ActiveGameObject
+        {
+            get => activeGameObject;
+            set
+            {
+                activeGameObject = value;
+                OnPropertyChanged(nameof(ActiveGameObject));
 
-        public RenderViewModelBase Renderer { get; }
+                Renderer = new GameObjectEditorViewModel(ActiveGameObject);
+            }
+        }
+
+        public RenderViewModelBase Renderer
+        {
+            get => renderer;
+            set
+            {
+                renderer = value;
+                OnPropertyChanged(nameof(Renderer));
+            }
+        }
 
         public GameTemplate Model { get; }
 
@@ -23,9 +44,9 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
         {
             Model = model;
             GameObjects = new ObservableCollection<GameObjectTemplateViewModel>(model.GameObjects.Select(x => new GameObjectTemplateViewModel(x)));
-            ActiveGameObject = GameObjects.First();
+            activeGameObject = GameObjects.First();
 
-            Renderer = new GameObjectEditorViewModel(ActiveGameObject);
+            renderer = new GameObjectEditorViewModel(ActiveGameObject);
         }
     }
 }
