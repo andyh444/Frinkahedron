@@ -13,15 +13,19 @@
     >
 
     <Grid ColumnDefinitions="1*,1*,2*">
-        <ListView
-            ItemsSource="{Binding GameObjects}"
-            SelectedItem="{Binding ActiveGameObject, Mode=TwoWay}">
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="gtvm:GameObjectTemplateViewModel">
-                    <TextBlock Text="{Binding Name}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <Grid Grid.Column="0" RowDefinitions="1*,Auto">
+            <ListView
+                ItemsSource="{Binding GameObjects}"
+                SelectedItem="{Binding ActiveGameObject, Mode=TwoWay}">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="gtvm:GameObjectTemplateViewModel">
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Button Grid.Row="1" Command="{Binding AddObjectCommand}" Content="Add Object" />
+        </Grid>
         
         <local:GameObjectTemplateView
             Grid.Column="1"

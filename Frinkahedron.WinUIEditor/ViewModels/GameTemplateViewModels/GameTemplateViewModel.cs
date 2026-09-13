@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Frinkahedron.WinUIEditor.Utilities;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 {
@@ -41,6 +42,8 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 
         public GameTemplate Model { get; }
 
+        public RelayCommand AddObjectCommand { get; }
+
         public GameTemplateViewModel(GameTemplate model)
         {
             Model = model;
@@ -48,6 +51,8 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
             activeGameObject = GameObjects.First();
 
             renderer = new GameObjectEditorViewModel(ActiveGameObject);
+
+            AddObjectCommand = new RelayCommand(() => GameObjects.Add(new GameObjectTemplate())); // todo this isn't updating in the UI - the CollectionChanged event isn't subscribed to
         }
     }
 }
