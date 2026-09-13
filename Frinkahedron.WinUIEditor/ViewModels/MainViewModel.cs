@@ -13,17 +13,14 @@ namespace Frinkahedron.WinUIEditor.ViewModels
 {
     internal class MainViewModel : ViewModelBase
     {
-        public GameObjectTemplateViewModel GameObjectTemplate { get; }
-
-        public RenderViewModelBase Renderer { get; }
+        public GameTemplateViewModel GameTemplate { get; }
 
         public MainViewModel()
         {
-            GameObjectTemplate = new GameObjectTemplateViewModel(GetTemplate());
-            Renderer = new GameObjectEditorViewModel(GameObjectTemplate);
+            GameTemplate = new GameTemplateViewModel(GetTemplate());
         }
 
-        private GameObjectTemplate GetTemplate()
+        private GameTemplate GetTemplate()
         {
             if (File.Exists($@"C:\tmp\tempgame.json"))
             {
@@ -33,11 +30,11 @@ namespace Frinkahedron.WinUIEditor.ViewModels
                 options.Converters.Add(new Vector3Converter());
                 var template = JsonSerializer.Deserialize<GameTemplate>(fs, options);
 
-                return template?.GameObjects.FirstOrDefault() ?? new GameObjectTemplate();
+                return template ?? new GameTemplate();
             }
             else
             {
-                return new GameObjectTemplate();
+                return new GameTemplate();
             }
         }
     }

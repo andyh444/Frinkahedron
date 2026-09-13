@@ -32,16 +32,11 @@ namespace Frinkahedron.WinUIEditor
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        
         public MainWindow()
         {
             InitializeComponent();
             MainViewModel viewModel = new MainViewModel();
-
-            templateView.DataContext = viewModel.GameObjectTemplate;
-            veldridPanel.SetViewModel(viewModel.Renderer);
+            gameTemplateView.DataContext = viewModel.GameTemplate;
         }
-
-        
     }
 }

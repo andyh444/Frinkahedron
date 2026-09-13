@@ -15,15 +15,5 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid ColumnDefinitions="1*,2*">
-        <views:GameObjectTemplateView
-            x:Name="templateView"
-            Grid.Column="0" />
-
-        <views:VeldridView
-            x:Name="veldridPanel"
-            Grid.Column="1"
-            IsTabStop="True"
-            TabIndex="0" />
-    </Grid>
+    <views:GameTemplateView x:Name="gameTemplateView" />
 </Window>

@@ -16,6 +16,7 @@
   <ItemGroup>
     <None Remove="Controls\VeldridPanel.xaml" />
     <None Remove="Views\GameObjectTemplateView.xaml" />
+    <None Remove="Views\GameTemplateView.xaml" />
     <None Remove="Views\RenderableTemplateView.xaml" />
     <None Remove="Views\Shapes\BoxShapeView.xaml" />
     <None Remove="Views\TransformTemplateView.xaml" />
@@ -37,6 +38,12 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Frinkahedron.Veldrid\Frinkahedron.VeldridImplementation.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Page Update="Views\GameTemplateView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   
   <ItemGroup>
