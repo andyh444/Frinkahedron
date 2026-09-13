@@ -25,15 +25,15 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Security.Cryptography.Certificates;
 
-namespace Frinkahedron.WinUIEditor.Controls;
+namespace Frinkahedron.WinUIEditor.Views;
 
-public sealed partial class VeldridPanel : UserControl
+public sealed partial class VeldridView : UserControl
 {
     private Swapchain? swapchain;
     private RenderViewModelBase? renderViewModel;
     private UserControlInputListener inputListener;
 
-    public VeldridPanel()
+    public VeldridView()
     {
         InitializeComponent();
         var graphicsDevice = GraphicsService.Current.GraphicsDevice;

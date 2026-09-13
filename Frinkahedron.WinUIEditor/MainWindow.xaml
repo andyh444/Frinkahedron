@@ -21,7 +21,7 @@
             x:Name="templateView"
             Grid.Column="0" />
 
-        <controls:VeldridPanel
+        <views:VeldridView
             x:Name="veldridPanel"
             Grid.Column="1"
             IsTabStop="True"

@@ -52,7 +52,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Page Update="Controls\VeldridPanel.xaml">
+    <Page Update="Views\VeldridView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Views\Shapes\SphereShapeView.xaml">
