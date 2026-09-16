@@ -11,7 +11,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 {
-    internal sealed class GameTemplateViewModel : ViewModelBase
+    internal sealed partial class GameTemplateViewModel : ViewModelBase
     {
         private GameObjectTemplateViewModel activeGameObject;
         private RenderViewModelBase renderer;
@@ -42,8 +42,6 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
 
         public GameTemplate Model { get; }
 
-        public RelayCommand AddObjectCommand { get; }
-
         public GameTemplateViewModel(GameTemplate model)
         {
             Model = model;
@@ -51,8 +49,12 @@ namespace Frinkahedron.WinUIEditor.ViewModels.GameTemplateViewModels
             activeGameObject = GameObjects.First();
 
             renderer = new GameObjectEditorViewModel(ActiveGameObject);
+        }
 
-            AddObjectCommand = new RelayCommand(() => GameObjects.Add(new GameObjectTemplate())); // todo this isn't updating in the UI - the CollectionChanged event isn't subscribed to
+        [RelayCommand]
+        private void AddObject()
+        {
+            GameObjects.Add(new GameObjectTemplate());
         }
     }
 }
